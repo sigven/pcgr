@@ -76,8 +76,14 @@ include_germline_findings <- 'OFF'
 if (pcg_report$content$germline_classified$eval == TRUE) {
   include_germline_findings <- 'ON'
 }
-if (pcg_report$content$msi$eval == FALSE) {
+if (pcg_report$content$msi$eval == FALSE ||
+    isTRUE(pcg_report$content$msi$missing_data)) {
   msi_prediction <- 'OFF'
+}
+msi_external_caller <- 'OFF'
+if (isTRUE(pcg_report$content$msi$external$eval)) {
+  msi_external_caller <-
+    as.character(pcg_report$content$msi$external$result$MSI_CALLER)
 }
 if (pcg_report$content$mutational_signatures$eval == FALSE) {
   signatures_estimation <- 'OFF'
@@ -246,6 +252,7 @@ cat(glue::glue("* Sequencing assay type: __{assay_type}__"), "\n")
 cat(glue::glue("* Coding target size: __{target_size}Mb__"), "\n")
 cat(glue::glue("* Show noncoding variants: __{conf$other$show_noncoding}__"), "\n")
 cat(glue::glue("* MSI prediction: __{msi_prediction}__"), "\n")
+cat(glue::glue("* External MSI result: __{msi_external_caller}__"), "\n")
 cat(glue::glue("* Include germline findings: __{include_germline_findings}__"), "\n")
 cat(glue::glue("* Variant Effect Predictor (VEP) settings"), "\n")
 cat(glue::glue("  * Transcript set: __{transcript_set_gencode}__"), "\n")

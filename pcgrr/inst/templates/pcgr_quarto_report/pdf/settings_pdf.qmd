@@ -77,7 +77,11 @@ if (isTRUE(pcg_report$content$snv_indel$eval)) {
     item("Coding target size", paste0(
       val(conf$assay_properties$effective_target_size_mb), " Mb")),
     item("Show noncoding variants", as.logical(conf$other$show_noncoding)),
-    item("MSI prediction", on_off(pcg_report$content$msi$eval)),
+    item("MSI prediction", on_off(isTRUE(pcg_report$content$msi$eval) &&
+                                    !isTRUE(pcg_report$content$msi$missing_data))),
+    item("External MSI result",
+         if (isTRUE(pcg_report$content$msi$external$eval))
+           as.character(pcg_report$content$msi$external$result$MSI_CALLER) else "OFF"),
     item("Include germline findings",
          on_off(pcg_report$content$germline_classified$eval)),
     "- Variant Effect Predictor (VEP) settings",

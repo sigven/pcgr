@@ -1,0 +1,75 @@
+```{r msi_external_prep}
+#| echo: false
+#| output: asis
+
+msi_ext <- pcgrr::msi_external_display(
+  pcg_report$content$msi,
+  classifier_ref = if (msi_tabs) paste0("the tab \"", msi_tab_clf, "\"") else "below")
+
+cat("The MSI status below was determined by an external MSI caller (__",
+    msi_ext$caller, "__), and provided as input to PCGR. ", sep = "")
+if (msi_ext$zero_loci) {
+  cat("\n\n::: {.callout-warning}\n**No microsatellite loci evaluated**\n\n",
+      "The MSI caller reported no evaluated microsatellite loci - the MSI status cannot be determined.",
+      "\n:::\n\n", sep = "")
+}
+
+ext_status_theme <- "dark"
+if (msi_ext$status == "Indeterminate") {
+  ext_status_theme <-
+    bslib::value_box_theme(bg = pcgrr::color_palette$warning, fg = "#000000")
+}
+```
+
+```{r msi_external_boxes}
+#| echo: false
+
+bslib::layout_columns(
+  col_widths = c(4, 4, 4),
+  height = "110px",
+  bslib::value_box(
+    title = "MSI status",
+    value = msi_ext$status,
+    showcase = NULL,
+    theme = ext_status_theme
+  ),
+  bslib::value_box(
+    title = msi_ext$score_title,
+    value = msi_ext$score_value,
+    showcase = NULL,
+    theme = "dark"
+  ),
+  bslib::value_box(
+    title = if (is.na(msi_ext$loci_value)) "MSI caller" else "Unstable loci / evaluated loci",
+    value = if (is.na(msi_ext$loci_value)) msi_ext$caller else msi_ext$loci_value,
+    showcase = NULL,
+    theme = "dark"
+  )
+)
+```
+
+```{r msi_external_notes}
+#| echo: false
+#| output: asis
+
+cat("\n\n", msi_ext$basis_note, "\n\n", sep = "")
+
+if (!is.na(msi_ext$concordance)) {
+  if (msi_ext$concordance == "concordant") {
+    cat("::: {.callout-note}\n**Concordance with PCGR MSI classifier**\n\n",
+        "The result is concordant with the prediction of the PCGR MSI classifier (",
+        msi_ext$classifier_detail, "). See ", msi_ext$classifier_ref, " for details.",
+        "\n:::\n\n", sep = "")
+  } else if (msi_ext$concordance == "discordant") {
+    cat("::: {.callout-warning}\n**Discordance with PCGR MSI classifier**\n\n",
+        msi_ext$discordance_note,
+        "\n:::\n\n", sep = "")
+  } else if (msi_ext$concordance == "not_evaluable") {
+    cat("::: {.callout-note}\n**PCGR MSI classifier**\n\n",
+        "The MSI status from the external caller is indeterminate, and cannot be compared with the prediction of the PCGR MSI classifier (",
+        msi_ext$classifier_detail, "). See ", msi_ext$classifier_ref, " for details. The classifier prediction is used for the assessment of MSI-High biomarker evidence.",
+        "\n:::\n\n", sep = "")
+  }
+}
+cat("<br>\n\n")
+```

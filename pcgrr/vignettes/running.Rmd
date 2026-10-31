@@ -246,6 +246,15 @@ PCGR will cross-reference the detected fusions against curated cancer gene datab
 
 See the [input section](input.html#rna-fusions) for details on the required file format.
 
+### External MSI result
+
+If MSI has been assessed with a dedicated MSI caller, the result can be provided via:
+
+* `--input_msi <FILE>` - the summary result file of the MSI caller
+* `--input_msi_caller <CALLER>` - `msisensor-pro` or `generic` (default)
+
+This can be used instead of, or together with, the MSI classifier of PCGR (`--estimate_msi`). In the latter case, the report shows both results, with the external result taking precedence. An external MSI result can be used for any type of assay, including tumor-only and targeted panel data. See the [input section](input.html#msi-result-from-an-external-caller) for details on the supported formats.
+
 ### Configuration of output files
 
 If you only want the Excel/TSV output (with all variant classifications and auxiliary analyses (e.g. MSI classifications, TMB estimates, mutational signatures predictions) of PCGR, you may turn off the HTML output by using the `--no_html` option. This will speed up the analysis, and could be a useful option if you foresee that the sample input datasets are too large for the HTML report generation to work properly.
@@ -263,6 +272,7 @@ usage:
   [--input_cna <INPUT_CNA>]
   [--input_rna_fusion <INPUT_RNA_FUSION>]
   [--input_rna_expression <INPUT_RNA_EXPRESSION>]
+  [--input_msi <INPUT_MSI>]
   [--vep_dir <VEP_DIR>]
   --refdata_dir <REFDATA_DIR>
   --output_dir <OUTPUT_DIR>
@@ -291,6 +301,9 @@ Input file options:
                         File with RNA fusion transcripts detected in tumor (tab-separated values)
   --input_rna_expression INPUT_RNA_EXP
                         File with bulk RNA expression counts (TPM) of transcripts in tumor (tab-separated values)
+  --input_msi INPUT_MSI
+                        Summary result file from an external MSI caller (MSIsensor-pro, or generic format) - see
+                        --input_msi_caller
 
 SNV/InDel analysis options:
   --vep_dir VEP_DIR     Directory of VEP cache, e.g. $HOME/.vep (required when --input_vcf is provided)
@@ -431,6 +444,9 @@ Tumor mutational burden (TMB) and MSI options:
                         Minimum allelic fraction (tumor) for TMB calculation (default: None)
   --tmb_ad_min TMB_AD_MIN
                         Minimum allelic depth (tumor) for TMB calculation (default: None)
+  --input_msi_caller {generic,msisensor-pro}
+                        Caller that produced the file provided with --input_msi (default: generic, i.e. tab-
+                        separated file with MSI_STATUS and MSI_CALLER columns)
   --estimate_msi        Predict microsatellite instability status from somatic mutation patterns,
                         default: False
 
@@ -582,6 +598,7 @@ This command will run the Conda-based PCGR workflow and produce the following fi
 | 11 | __\<sample_id\>.pcgr.grch37.tmb.tsv__ | Tab-separated values file with information on tumor mutational burden (TMB) estimates |
 | 12 | __\<sample_id\>.pcgr.grch37.maf__ | Annotated SNVs/InDels, converted to the Mutation Annotation Format (MAF) |
 | 13 | __\<sample_id\>.pcgr.grch37.msigs.tsv.gz__ | Tab-separated values file with information on the contribution of mutational signatures in the tumor sample |
-| 14 | __\<sample_id\>.pcgr.grch37.snv_indel_ann.tsv.gz__ | Tab-separated values file with key SNV/InDel variant annotations, including oncogenicity and clinical actionability assessment |
+| 14 | __\<sample_id\>.pcgr.grch37.msi_external.tsv__ | Tab-separated values file with the normalised MSI result from an external MSI caller (when `--input_msi` is provided) |
+| 15 | __\<sample_id\>.pcgr.grch37.snv_indel_ann.tsv.gz__ | Tab-separated values file with key SNV/InDel variant annotations, including oncogenicity and clinical actionability assessment |
 
 

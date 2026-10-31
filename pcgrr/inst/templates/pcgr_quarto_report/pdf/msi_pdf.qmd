@@ -1,11 +1,69 @@
 ## MSI status {#pcgr-msi}
 
-Microsatellite instability (MSI) is the result of impaired DNA mismatch repair and constitutes a cellular phenotype of clinical significance in many cancer types, most prominently colorectal, stomach, endometrial, and ovarian cancers [@Cortes-Ciriano2017-vl]. PCGR uses a statistical MSI classifier that only considers features of the somatic mutation profile (e.g. *fraction of indels*, *load of indels*, *mutations in MMR genes*) to separate *MSI-H* (MSI-high) from *MSS* (microsatellite stable) tumors. The classifier was trained on **N = 575** exome-sequenced TCGA tumor samples with known MSI status, with a positive predictive value of 97.9% and a negative predictive value of 99.3% on an independent test set (**N = 245** samples).
+Microsatellite instability (MSI) is the result of impaired DNA mismatch repair and constitutes a cellular phenotype of clinical significance in many cancer types, most prominently colorectal, stomach, endometrial, and ovarian cancers [@Cortes-Ciriano2017-vl].
+
+```{r msi_pdf_external}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(pcg_report$content$msi$external$eval)
+
+msi_ext_pdf <- pcgrr::msi_external_display(
+  pcg_report$content$msi, classifier_ref = NULL)
+cat("### MSI status from external MSI caller\n\n")
+cat("The MSI status below was determined by an external MSI caller (**",
+    msi_ext_pdf$caller, "**), and provided as input to PCGR.\n\n", sep = "")
+
+if (msi_ext_pdf$zero_loci) {
+  cat(pcgrr:::pdf_note(
+    "The MSI caller reported no evaluated microsatellite loci - the MSI status cannot be determined.",
+    title = "No microsatellite loci evaluated", kind = "warning"))
+}
+
+col_status_ext <- if (msi_ext_pdf$status == "Indeterminate")
+  pcgrr::color_palette$warning else if (msi_ext_pdf$status == "MSI-H")
+  pcgrr::color_palette$oncogenicity$values[1] else NULL
+cat(pcgrr:::pdf_kpi_row(list(
+  list(title = "MSI status", value = msi_ext_pdf$status, color = col_status_ext),
+  list(title = msi_ext_pdf$score_title, value = msi_ext_pdf$score_value),
+  list(title = if (is.na(msi_ext_pdf$loci_value)) "MSI caller" else
+         "Unstable loci / evaluated loci",
+       value = if (is.na(msi_ext_pdf$loci_value)) msi_ext_pdf$caller else
+         msi_ext_pdf$loci_value))))
+
+cat("\n\n", msi_ext_pdf$basis_note, "\n\n", sep = "")
+if (!is.na(msi_ext_pdf$concordance)) {
+  if (msi_ext_pdf$concordance == "concordant") {
+    cat(pcgrr:::pdf_note(paste0(
+      "The result is concordant with the prediction of the PCGR MSI classifier (",
+      msi_ext_pdf$classifier_detail, ")."),
+      title = "Concordance with PCGR MSI classifier"))
+  } else if (msi_ext_pdf$concordance == "discordant") {
+    cat(pcgrr:::pdf_note(msi_ext_pdf$discordance_note,
+      title = "Discordance with PCGR MSI classifier", kind = "warning"))
+  } else if (msi_ext_pdf$concordance == "not_evaluable") {
+    cat(pcgrr:::pdf_note(paste0(
+      "The MSI status from the external caller is indeterminate, and cannot ",
+      "be compared with the prediction of the PCGR MSI classifier (",
+      msi_ext_pdf$classifier_detail, "). The classifier prediction ",
+      "is used for the assessment of MSI-High biomarker evidence."),
+      title = "PCGR MSI classifier"))
+  }
+}
+```
+
+```{r msi_pdf_classifier_intro}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && isFALSE(pcg_report$content$msi$external$eval)
+
+cat("### MSI classifier prediction\n\n")
+cat("PCGR uses a statistical MSI classifier that only considers features of the somatic mutation profile (e.g. *fraction of indels*, *load of indels*, *mutations in MMR genes*) to separate *MSI-H* (MSI-high) from *MSS* (microsatellite stable) tumors. The classifier was trained on **N = 575** exome-sequenced TCGA tumor samples with known MSI status, with a positive predictive value of 97.9% and a negative predictive value of 99.3% on an independent test set (**N = 245** samples).\n\n", sep = "")
+```
 
 ```{r msi_pdf_missing}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(pcg_report$content$msi$missing_data)
+#| eval: !expr isTRUE(pcg_report$content$msi$missing_data) && isFALSE(pcg_report$content$msi$external$eval)
 cat(pcgrr:::pdf_note(kind = "empty", 
   "Insufficient data for MSI prediction in this tumor sample.",
   title = "Not determined"))
@@ -43,6 +101,19 @@ mmr_somatic_pdf <- if (all(c("SYMBOL", "CODING_STATUS") %in%
                     .data$SYMBOL %in% core_mmr_genes_pdf)
 } else snv_display_pdf[0, , drop = FALSE]
 
+## ranked by oncogenicity (highest score first), as in the HTML report
+if (NROW(mmr_somatic_pdf) > 0) {
+  rank_num <- function(col) {
+    if (col %in% colnames(mmr_somatic_pdf))
+      -dplyr::coalesce(
+        suppressWarnings(as.numeric(mmr_somatic_pdf[[col]])), -Inf)
+    else rep(0, NROW(mmr_somatic_pdf))
+  }
+  mmr_somatic_pdf <- mmr_somatic_pdf[order(
+    rank_num("ONCOGENICITY_SCORE"), rank_num("TISSUE_ASSOC_RANK"),
+    rank_num("GLOBAL_ASSOC_RANK")), , drop = FALSE]
+}
+
 ## pathogenic/likely pathogenic germline variants in the core MMR genes
 germline_eval_pdf <- isTRUE(pcg_report$content$germline_classified$eval)
 mmr_germline_pdf <- data.frame()
@@ -64,7 +135,7 @@ msi_plot_caption_pdf <- paste0(
 ```{r msi_pdf_warning}
 #| echo: false
 #| output: asis
-#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && (low_mut_pdf || uncertain_pdf)
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && (low_mut_pdf || uncertain_pdf) && isFALSE(pcg_report$content$msi$external$eval)
 
 warning_lines <- c()
 if (low_mut_pdf) {
@@ -91,7 +162,7 @@ cat(pcgrr:::pdf_note(
 ```{r msi_pdf_kpis}
 #| echo: false
 #| output: asis
-#| eval: !expr isFALSE(pcg_report$content$msi$missing_data)
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && isFALSE(pcg_report$content$msi$external$eval)
 
 col_status <- if (uncertain_pdf) pcgrr::color_palette$warning else if
   (is_msi_h_pdf) pcgrr::color_palette$oncogenicity$values[1] else NULL
@@ -107,7 +178,7 @@ cat(pcgrr:::pdf_kpi_row(list(
 
 ```{r msi_pdf_indel_plot}
 #| echo: false
-#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && NROW(msi_content_pdf$tcga_dataset) > 0
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && NROW(msi_content_pdf$tcga_dataset) > 0 && isFALSE(pcg_report$content$msi$external$eval)
 #| fig-width: 7
 #| fig-height: 2.8
 #| fig-cap: !expr msi_plot_caption_pdf
@@ -183,8 +254,14 @@ cat(pcgrr:::pdf_note(kind = "empty",
 #| eval: !expr isFALSE(is.null(pcg_report$content$msi$callset))
 
 cat("### Biomarker evidence for MSI-High\n\n")
-cat("The tumor was classified as MSI-High (P(MSI-H) = ",
-    round(pcg_report$content$msi$prediction$msi_stats$prob_msi_h, 3), "). ",
+msi_basis_pdf <- if (isTRUE(pcg_report$content$msi$external$eval)) {
+  paste0(" by the external MSI caller (",
+         pcgrr::msi_external_display(pcg_report$content$msi)$caller, "). ")
+} else {
+  paste0(" (P(MSI-H) = ",
+         round(pcg_report$content$msi$prediction$msi_stats$prob_msi_h, 3), "). ")
+}
+cat("The tumor was classified as MSI-High", msi_basis_pdf,
     "Therapeutic implications of MSI-High were retrieved from ",
     pcgrr:::bm_db_label(pcg_report), " ", pcgrr:::bm_db_citation(pcg_report),
     ", and are classified according to the strength of evidence for the ",

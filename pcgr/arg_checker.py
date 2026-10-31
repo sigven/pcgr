@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pcgr import pcgr_vars, utils
+from pcgr import pcgr_vars, utils, msi
 from pcgr.utils import getlogger, error_message, warn_message, check_file_exists, check_tabix_file
 import os
 
@@ -186,6 +186,10 @@ def verify_args(arg_dict, logger = None):
     verify_required_args(arg_dict, logger)
 
     # Optional arguments
+
+    if arg_dict.get('input_msi_caller') is not None and arg_dict.get('input_msi') is None:
+        err_msg = f"Option '--input_msi_caller' ({arg_dict['input_msi_caller']}) requires an MSI result file ('--input_msi')"
+        error_message(err_msg, logger)
 
     if arg_dict['expression_sim'] and arg_dict['input_rna_exp'] is None:
         warn_msg = f"RNA expression similarity analysis can only be performed if --input_rna_exp is set (--input_rna_exp = {arg_dict['input_rna_exp']})."
@@ -534,6 +538,7 @@ def define_output_files(arg_dict, cpsr = False):
         output_data['maf'] = f"{output_prefix}.maf"
         output_data['tmb'] = f"{output_prefix}.tmb.tsv"
         output_data['cna_summary'] = f"{output_prefix}.cna_summary.tsv"
+        output_data['msi_external'] = f"{output_prefix}.msi_external.tsv"
     else:
         output_data['classification'] = f"{output_prefix}.classification.tsv.gz"
     
@@ -546,7 +551,8 @@ def define_output_files(arg_dict, cpsr = False):
     
     if not cpsr:
         for otype in ['cna_gene', 'cna_segment','expression', 'expression_outliers', 'snv_indel_ann',
-                      'expression_similarity', 'maf', 'tmb', 'cna_summary', 'msigs', 'rna_fusion']:
+                      'expression_similarity', 'maf', 'tmb', 'cna_summary', 'msigs', 'rna_fusion',
+                      'msi_external']:
             # if annotated output cna segments exist and overwrite not set
             if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
                 err_msg = "Output files (e.g. " + str(output_data[otype]) + \
@@ -574,6 +580,8 @@ def verify_input_files(arg_dict):
     input_germline_dir = 'NA'
     input_germline_yaml_dir = 'NA'
     input_rna_expression_dir = 'NA'
+    input_msi_dir = 'NA'
+    input_msi_basename = 'NA'
     pon_vcf_dir = 'NA'
     pon_vcf_basename = 'NA'
     input_vcf_basename = 'NA'
@@ -646,6 +654,16 @@ def verify_input_files(arg_dict):
         input_cna_basename = os.path.basename(str(arg_dict["input_cna"]))
         input_cna_dir = os.path.dirname(os.path.abspath(arg_dict["input_cna"]))
 
+    # check external MSI result - the file extension is not restricted (output files from
+    # some workflows have none), the content is validated (cheaply) here to fail early
+    if arg_dict.get("input_msi") is not None:
+        check_file_exists(os.path.abspath(arg_dict["input_msi"]), strict = True, logger = logger)
+        msi.read_external_msi(
+            os.path.abspath(arg_dict["input_msi"]),
+            caller = arg_dict.get("input_msi_caller") or 'generic', logger = logger, quiet = True)
+        input_msi_basename = os.path.basename(str(arg_dict["input_msi"]))
+        input_msi_dir = os.path.dirname(os.path.abspath(arg_dict["input_msi"]))
+
     # check if input rna fusion variants exist
     if arg_dict["input_rna_fusion"] is not None:
         check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]), strict = True, logger = logger)
@@ -710,6 +728,8 @@ def verify_input_files(arg_dict):
       "cna_dir": input_cna_dir,
       "rna_fusion_dir": input_rna_fusion_dir,
       "rna_expression_dir": input_rna_expression_dir,
+      "msi_dir": input_msi_dir,
+      "msi_basename": input_msi_basename,
       "germline_dir": input_germline_dir,
       "germline_basename": input_germline_basename,
       "germline_yaml_dir": input_germline_yaml_dir,

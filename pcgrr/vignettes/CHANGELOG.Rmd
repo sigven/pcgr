@@ -62,6 +62,11 @@ pdiakumis <- user("pdiakumis")
 
 ### Added / improved
 
+- **External MSI result**
+  - MSI results from external MSI callers can now be provided with `--input_msi` (and `--input_msi_caller`), in the native summary format of MSIsensor-pro or in a simple generic format ([issue 309](https://github.com/sigven/pcgr/issues/309))
+  - The external result is shown in the MSI section of the report (HTML and PDF), alone or together with the PCGR MSI classifier (`--estimate_msi`) with an indication of concordance, and is used for the assessment of MSI-High biomarker evidence. It can be used with any assay type (including tumor-only and targeted panel data)
+  - New output file (`msi_external.tsv`) and Excel sheet (`MSI_EXTERNAL`)
+
 - **HTML report tables and figures**
   - Germline findings table now uses [reactable](https://glin.github.io/reactable/) (in place of DT), with a compact main row (gene, alteration, consequence, genotype, classification, ACMG criteria, inheritance) and expandable row details
     - ACMG criteria are shown as color-coded pills (pathogenic/benign evidence), with a hover tooltip describing each criterion and its contribution to the CPSR pathogenicity score

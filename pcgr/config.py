@@ -154,6 +154,12 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
         if arg_dict['input_cpsr'] is not None:
             conf_options['germline']['show'] = 1
             
+        ## external MSI result (e.g. from MSIsensor-pro)
+        conf_options['msi_external'] = {
+            'run': int(arg_dict.get('input_msi') is not None),
+            'caller': arg_dict.get('input_msi_caller') or 'generic'
+        }
+
         conf_options['expression'] = {}
         conf_options['expression']['run'] = int(arg_dict['input_rna_exp'] is not None)
         conf_options['expression']['similarity_analysis'] = int(arg_dict['expression_sim'])
@@ -230,7 +236,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
                       'fname_expression_tsv', 'fname_expression_outliers_tsv', 
                       'fname_rna_fusion_tsv', 'fname_maf_tsv', 
                       'fname_germline_tsv', 'fname_germline_yaml', 
-                      'fname_expression_similarity_tsv', 'fname_tmb_tsv']:
+                      'fname_expression_similarity_tsv', 'fname_tmb_tsv', 'fname_msi_tsv']:
             conf_options['molecular_data'][fname] = "None"
     
     

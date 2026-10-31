@@ -154,6 +154,37 @@ normal/artefactual events, PCGR makes no attempt to further filter fusion events
 <li>If multiple input entries share the same gene pair (e.g. <em>GENE_A--GENE_B</em>) but differ only in their exact breakpoint coordinates, each will appear as a separate entry in the PCGR report. This can make the fusion section appear repetitive. PCGR does not attempt to collapse these, as there is no principled way to select a canonical breakpoint without the full caller context. We therefore recommend that users deduplicate fusion calls to one entry per gene pair — retaining the call with the highest read support or confidence score — before submitting to PCGR.</li></ul>
 </div>
 
+### MSI result from an external caller
+
+If microsatellite instability (MSI) has been assessed with a dedicated MSI caller, the result can be provided as an alternative (or addition) to the MSI classifier in PCGR (`--estimate_msi`):
+
+* `--input_msi <FILE>`: the summary result file of the MSI caller for the tumor sample
+* `--input_msi_caller <CALLER>`: the caller that produced the file (`msisensor-pro` or `generic`; default: `generic`)
+
+The file name and extension are not used - the content of the file is checked. The following formats are supported:
+
+* __MSIsensor-pro__ (`--input_msi_caller msisensor-pro`): the main summary file (not the `_all`, `_unstable` or `_dis` files) written by the `msisensor-pro pro` (tumor-only) or `msisensor-pro msi` (tumor-normal) command. It has a header line (`Total_Number_of_Sites`, `Number_of_Unstable_Sites`, `%`) and a single data row. MSIsensor-pro does not report an MSI status. The status is therefore derived by PCGR from the percentage of unstable sites: _MSI-H_ if the percentage is 20 or above, otherwise _MSS_ (and _Indeterminate_ if no sites were evaluated). The report indicates that the status was derived.
+* __Generic format__ (`--input_msi_caller generic`): for any other MSI caller, a tab-separated file with a header line and a single data row (one sample), with the following columns:
+
+| Column | Required | Description |
+|--------|----------|-------------|
+| `MSI_STATUS` | yes | `MSI-H`, `MSS` or `Indeterminate` (common synonyms, such as `Unstable` and `Stable`, are accepted) |
+| `MSI_CALLER` | yes | Name of the MSI caller |
+| `CALLER_VERSION` | no | Version of the MSI caller |
+| `MSI_SCORE` | no | Numeric score, as reported by the caller |
+| `MSI_SCORE_TYPE` | no | Description of the score, e.g. `percent unstable sites` |
+| `N_LOCI_EVALUATED` | no | Number of microsatellite loci evaluated |
+| `N_LOCI_UNSTABLE` | no | Number of unstable microsatellite loci |
+| `THRESHOLD_USED` | no | Threshold applied by the caller for MSI-H |
+
+An example (columns shown as a table; the file itself is tab-separated):
+
+| MSI_STATUS | MSI_CALLER | CALLER_VERSION | MSI_SCORE | MSI_SCORE_TYPE | N_LOCI_EVALUATED | N_LOCI_UNSTABLE | THRESHOLD_USED |
+|------------|------------|----------------|-----------|----------------|------------------|-----------------|----------------|
+| MSI-H | MANTIS | 1.0.5 | 0.52 | step-wise difference | | | 0.4 |
+
+For the external result, the MSI status given by the caller is used as is. If both `--input_msi` and `--estimate_msi` are used, the report shows the two results together and indicates if they are discordant, with the external result taking precedence for the assessment of MSI-High biomarker evidence. In contrast to `--estimate_msi`, an external MSI result can be used with any type of sequencing assay (including tumor-only and targeted panel data), and does not require a VCF file.
+
 ### Gene expression
 
 The user can submit a file with bulk gene/transcript expression data to PCGR, indicating the relative expression levels of genes in the query sample. PCGR may conduct an expression outlier analysis (compared against other cohorts of samples), and also perform an RNA expression similarity analysis, i.e. correlation of expression profile with other tumor samples.

@@ -288,8 +288,8 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
       "TMB-high (", round(est$TMB_ESTIMATE[1], 1), " mut/Mb)") else "TMB-high")
     pill_targets <- c(pill_targets, "pcgr-tmb")
   }
-  ## MSI-high only for high-confidence predictions
-  if (isTRUE(content$msi$eval) && !isTRUE(content$msi$missing_data) &&
+  ## MSI-high - external MSI call, or high-confidence classifier prediction
+  if (isTRUE(content$msi$eval) &&
       msi_status_is_high(content$msi, high_confidence_only = TRUE)) {
     pills <- c(pills, "MSI-high")
     pill_targets <- c(pill_targets, "pcgr-msi")

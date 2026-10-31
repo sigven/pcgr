@@ -47,7 +47,11 @@ get_settings_sheet <- function(report = NULL) {
       data.frame(SECTION = "SNV/InDel", PARAMETER = "Include germline findings",
                  VALUE = if (isTRUE(report$content$germline_classified$eval)) "ON" else "OFF"),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "MSI prediction",
-                 VALUE = if (isTRUE(report$content$msi$eval)) "ON" else "OFF"),
+                 VALUE = if (isTRUE(report$content$msi$eval) &&
+                             !isTRUE(report$content$msi$missing_data)) "ON" else "OFF"),
+      data.frame(SECTION = "SNV/InDel", PARAMETER = "External MSI result",
+                 VALUE = if (isTRUE(report$content$msi$external$eval))
+                   as.character(report$content$msi$external$result$MSI_CALLER) else "OFF"),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "Mutational burden estimation",
                  VALUE = if (isTRUE(report$content$tmb$eval)) "ON" else "OFF"),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "TMB algorithm",
@@ -470,6 +474,11 @@ get_excel_sheets <- function(report = NULL) {
         }
       }
     }
+  }
+
+  ## MSI - result from external MSI caller
+  if (isTRUE(report$content$msi$external$eval)) {
+    excel_sheets[['MSI_EXTERNAL']] <- report$content$msi$external$result
   }
 
   ## Immune contexture

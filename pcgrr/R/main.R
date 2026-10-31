@@ -172,19 +172,6 @@ generate_report <-
             pcg_report_msi,
             a_elem = "msi")
 
-        ## If MSI-H (high confidence), map biomarker evidence (CIViC, OncoKB)
-        ## for the biomarker - not shown for uncertain MSI-H predictions
-        if (msi_status_is_high(pcg_report_msi, high_confidence_only = TRUE)) {
-          rep[["content"]][["msi"]][["callset"]] <-
-            generate_report_data_complex_biomarker(
-              biomarker = "MSI-H",
-              ref_data = ref_data,
-              settings = settings)
-        } else if (msi_status_is_high(pcg_report_msi)) {
-          log4r_info(paste0(
-            "MSI-H prediction is uncertain (0.1 < P(MSI-H) < 0.9) - ",
-            "skipping biomarker evidence for MSI-H"))
-        }
       }
 
       ## Generate report contents for analysis of
@@ -218,6 +205,56 @@ generate_report <-
     }else if (!is.null(callset_snv)) {
       rep[["content"]][["snv_indel"]][["zero"]] <- TRUE
       rep[["metadata"]][["config"]][["other"]][["list_noncoding"]] <- FALSE
+    }
+
+    ## Load MSI result from an external MSI caller (e.g. MSIsensor-pro) if
+    ## available - this takes precedence over the PCGR MSI classifier
+    if (!is.null(settings$molecular_data$fname_msi_tsv) &&
+        settings$molecular_data$fname_msi_tsv != "None" &&
+        file.exists(settings$molecular_data$fname_msi_tsv)) {
+      rep[["content"]][["msi"]][["external"]] <-
+        generate_report_data_msi_external(settings = settings)
+      if (isTRUE(rep[["content"]][["msi"]][["external"]][["eval"]])) {
+        ## the MSI section is shown also when no classifier prediction exists
+        ## (missing_data refers to the classifier prediction only)
+        if (!isTRUE(rep[["content"]][["msi"]][["eval"]])) {
+          rep[["content"]][["msi"]][["missing_data"]] <- TRUE
+        }
+        rep[["content"]][["msi"]][["eval"]] <- TRUE
+      }
+    }
+
+    ## Map biomarker evidence (CIViC, OncoKB) for MSI-H if
+    ##  1) the classifier predicts MSI-H with high confidence, and no external
+    ##     MSI call is provided (or the external call is indeterminate)
+    ##  2) the external MSI call is MSI-H (irrespective of the classifier
+    ##     prediction/confidence, which is shown for comparison)
+    ## No evidence is shown for uncertain MSI-H predictions of the classifier
+    ## alone, or if the external MSI call is MSS (flagged as discordant if the
+    ## classifier predicts MSI-H)
+    if (isTRUE(rep[["content"]][["msi"]][["eval"]])) {
+      if (msi_status_is_high(
+        rep[["content"]][["msi"]], high_confidence_only = TRUE)) {
+        rep[["content"]][["msi"]][["callset"]] <-
+          generate_report_data_complex_biomarker(
+            biomarker = "MSI-H",
+            ref_data = ref_data,
+            settings = settings)
+      } else if (isTRUE(msi_concordance(rep[["content"]][["msi"]]) == "discordant") &&
+                 identical(rep[["content"]][["msi"]][["external"]][["result"]][["MSI_STATUS"]], "MSS") &&
+                 isTRUE(stringr::str_detect(
+                   as.character(rep[["content"]][["msi"]][["prediction"]][["msi_stats"]][["predicted_class"]]),
+                   "^MSI"))) {
+        log4r_warn(paste0(
+          "External MSI caller reports MSS, but the PCGR MSI classifier predicts MSI-H - ",
+          "skipping biomarker evidence for MSI-H"))
+      } else if (!isTRUE(rep[["content"]][["msi"]][["external"]][["result"]][["MSI_STATUS"]] %in%
+                         c("MSI-H", "MSS")) &&
+                 msi_status_is_high(rep[["content"]][["msi"]])) {
+        log4r_info(paste0(
+          "MSI-H prediction is uncertain (0.1 < P(MSI-H) < 0.9) - ",
+          "skipping biomarker evidence for MSI-H"))
+      }
     }
 
     ## Load somatic CNA data if available
@@ -1314,6 +1351,7 @@ write_report_excel <- function(report = NULL) {
                 'TMB',
                 'TMB_BIOMARKER',
                 'MSI',
+                'MSI_EXTERNAL',
                 'MSI_BIOMARKER',
                 'MUTATIONAL_SIGNATURE',
                 'KATAEGIS_EVENTS',
