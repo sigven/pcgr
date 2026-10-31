@@ -252,6 +252,7 @@ If MSI has been assessed with a dedicated MSI caller, the result can be provided
 
 * `--input_msi <FILE>` - the summary result file of the MSI caller
 * `--input_msi_caller <CALLER>` - `msisensor-pro` or `generic` (default)
+* `--input_msi_threshold <PERCENT>` - threshold on the MSI score for MSI-H (percentage of unstable sites), for callers that report a score but no MSI status (`msisensor-pro`; default: 20)
 
 This can be used instead of, or together with, the MSI classifier of PCGR (`--estimate_msi`). In the latter case, the report shows both results, with the external result taking precedence. An external MSI result can be used for any type of assay, including tumor-only and targeted panel data. See the [input section](input.html#msi-result-from-an-external-caller) for details on the supported formats.
 
@@ -447,6 +448,10 @@ Tumor mutational burden (TMB) and MSI options:
   --input_msi_caller {generic,msisensor-pro}
                         Caller that produced the file provided with --input_msi (default: generic, i.e. tab-
                         separated file with MSI_STATUS and MSI_CALLER columns)
+  --input_msi_threshold INPUT_MSI_THRESHOLD
+                        Threshold on the MSI score for MSI-H (percentage of unstable sites), for MSI
+                        callers that report a score but no MSI status (--input_msi_caller msisensor-pro;
+                        default: 20)
   --estimate_msi        Predict microsatellite instability status from somatic mutation patterns,
                         default: False
 
@@ -598,7 +603,7 @@ This command will run the Conda-based PCGR workflow and produce the following fi
 | 11 | __\<sample_id\>.pcgr.grch37.tmb.tsv__ | Tab-separated values file with information on tumor mutational burden (TMB) estimates |
 | 12 | __\<sample_id\>.pcgr.grch37.maf__ | Annotated SNVs/InDels, converted to the Mutation Annotation Format (MAF) |
 | 13 | __\<sample_id\>.pcgr.grch37.msigs.tsv.gz__ | Tab-separated values file with information on the contribution of mutational signatures in the tumor sample |
-| 14 | __\<sample_id\>.pcgr.grch37.msi_external.tsv__ | Tab-separated values file with the normalised MSI result from an external MSI caller (when `--input_msi` is provided) |
+| 14 | __\<sample_id\>.pcgr.grch37.msi.tsv__ | Tab-separated values file with the normalised MSI result from an external MSI caller (when `--input_msi` is provided) |
 | 15 | __\<sample_id\>.pcgr.grch37.snv_indel_ann.tsv.gz__ | Tab-separated values file with key SNV/InDel variant annotations, including oncogenicity and clinical actionability assessment |
 
 

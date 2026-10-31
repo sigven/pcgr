@@ -485,8 +485,8 @@ msi_status_is_high <- function(msi_content = NULL,
 #' Reads the (single-row) tab-separated file with the MSI result of an
 #' external caller (e.g. MSIsensor-pro), as written by the PCGR Python
 #' workflow (columns SAMPLE_ID, MSI_STATUS, MSI_STATUS_BASIS, MSI_CALLER,
-#' CALLER_VERSION, MSI_SCORE, MSI_SCORE_TYPE, N_LOCI_EVALUATED,
-#' N_LOCI_UNSTABLE, THRESHOLD_USED).
+#' CALLER_VERSION, MSI_SCORE, MSI_SCORE_TYPE, MSI_SCORE_THRESHOLD_USED,
+#' N_LOCI_EVALUATED, N_LOCI_UNSTABLE).
 #'
 #' @param fname name of the file with the normalised external MSI result
 #' @return data frame with one row
@@ -507,7 +507,7 @@ load_external_msi <- function(fname = NULL) {
       "External MSI result (", fname, ") must have one data row and the columns: ",
       paste(required_cols, collapse = ", ")))
   }
-  for (num_col in c("MSI_SCORE", "THRESHOLD_USED")) {
+  for (num_col in c("MSI_SCORE", "MSI_SCORE_THRESHOLD_USED")) {
     msi_result[[num_col]] <- suppressWarnings(as.numeric(msi_result[[num_col]]))
   }
   for (int_col in c("N_LOCI_EVALUATED", "N_LOCI_UNSTABLE")) {
@@ -520,11 +520,14 @@ load_external_msi <- function(fname = NULL) {
 #'
 #' @param settings PCGR run/configuration settings (the normalised external
 #' MSI result is given by \code{settings$molecular_data$fname_msi_tsv})
-#' @return list with elements 'eval' and 'result' (one-row data frame)
+#' @return list with elements 'eval', 'result' (one-row data frame) and
+#' 'threshold_user_defined' (logical: the threshold on the MSI score used for
+#' deriving the MSI status was set by the user, \code{--input_msi_threshold})
 #'
 #' @export
 generate_report_data_msi_external <- function(settings = NULL) {
-  external <- list(eval = FALSE, result = data.frame())
+  external <- list(
+    eval = FALSE, result = data.frame(), threshold_user_defined = FALSE)
   fname <- settings$molecular_data$fname_msi_tsv
   if (is.null(fname) || identical(fname, "None") || !file.exists(fname)) {
     return(external)
@@ -532,6 +535,8 @@ generate_report_data_msi_external <- function(settings = NULL) {
   log4r_info("------")
   log4r_info("Loading MSI result from external caller")
   external[["result"]] <- load_external_msi(fname)
+  external[["threshold_user_defined"]] <-
+    isTRUE(as.logical(settings$conf$msi_external$threshold_user_defined))
   external[["eval"]] <- TRUE
   log4r_info(paste0(
     "External MSI result (", external$result$MSI_CALLER, "): ",
@@ -573,7 +578,8 @@ msi_concordance <- function(msi_content = NULL) {
 #' @param classifier_ref where the details of the PCGR MSI classifier
 #' prediction can be found in the report (e.g. 'below', or 'the tab "PCGR MSI
 #' classifier"'), used in the notes on concordance. If NULL, no reference is made.
-#' @return list with elements: 'status', 'caller', 'score_title', 'score_value',
+#' @return list with elements: 'status', 'caller', 'caller_label' (caller, with
+#' the threshold on the score if the status is derived), 'score_title', 'score_value',
 #' 'loci_value' (NA if not available), 'basis_note' (how the status was
 #' obtained), 'zero_loci' (logical), 'concordance' (see
 #' \code{msi_concordance}), 'discordance_note' (NA unless discordant) and
@@ -606,6 +612,7 @@ msi_external_display <- function(msi_content = NULL, classifier_ref = "below") {
       res$N_LOCI_UNSTABLE, " / ", res$N_LOCI_EVALUATED)
   }
 
+  caller_label <- caller
   basis_note <- paste0(
     "The MSI status was reported by the MSI caller (", caller, ").")
   if (identical(res$MSI_STATUS_BASIS, "derived")) {
@@ -617,14 +624,21 @@ msi_external_display <- function(msi_content = NULL, classifier_ref = "below") {
       basis_note <- paste0(
         "The MSI caller (", caller, ") does not report an MSI status - ",
         "the status was derived by PCGR from the score")
-      if (!is.na(res$THRESHOLD_USED)) {
-        threshold_text <- as.character(res$THRESHOLD_USED)
+      if (!is.na(res$MSI_SCORE_THRESHOLD_USED)) {
+        threshold_text <- as.character(res$MSI_SCORE_THRESHOLD_USED)
         if (!is.na(res$MSI_SCORE_TYPE) &&
             stringr::str_detect(res$MSI_SCORE_TYPE, "percent")) {
           threshold_text <- paste0(threshold_text, "%")
         }
+        threshold_source <- ifelse(
+          isTRUE(msi_content[["external"]][["threshold_user_defined"]]),
+          "user-defined", "default")
         basis_note <- paste0(
-          basis_note, " (MSI-H if the score is at least ", threshold_text, ")")
+          basis_note, " (MSI-H if the score is at least ", threshold_text,
+          "; ", threshold_source, " threshold)")
+        caller_label <- paste0(
+          caller, " (MSI-H if score >= ", threshold_text, ", ",
+          threshold_source, " threshold)")
       }
       basis_note <- paste0(basis_note, ".")
     }
@@ -675,6 +689,7 @@ msi_external_display <- function(msi_content = NULL, classifier_ref = "below") {
   list(
     status = res$MSI_STATUS,
     caller = caller,
+    caller_label = caller_label,
     score_title = score_title,
     score_value = score_value,
     loci_value = loci_value,

@@ -177,8 +177,10 @@ def cli():
                                         "set minimum required allelic depth (tumor, i.e. number of reads supporting alternate allele) for TMB calculation: default: %(default)s"))
     optional_tmb_msi.add_argument("--input_msi_caller", dest="input_msi_caller", default=None, choices=msi.MSI_CALLERS,
                                   help = "Caller that produced the file provided with --input_msi (default: generic, i.e. tab-separated file with MSI_STATUS and MSI_CALLER columns)")
+    optional_tmb_msi.add_argument("--input_msi_threshold", dest="input_msi_threshold", type=float, default=None,
+                                  help = "Threshold on the MSI score for MSI-H (percentage of unstable sites), for MSI callers that report a score but no MSI status (--input_msi_caller msisensor-pro; default: 20)")
     optional_tmb_msi.add_argument("--estimate_msi", action="store_true", 
-                                  help = "Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
+                                  help = "Internal MSI classification based on patterns of somatic mutations/indels, default: %(default)s")
 
     optional_signatures.add_argument("--estimate_signatures", action="store_true", 
                                      help = "Estimate relative contributions of reference mutational signatures in query sample (re-fitting), default: %(default)s")
@@ -979,7 +981,8 @@ def run_pcgr(input_data, output_data, conf_options):
         logger = getlogger("pcgr-external-msi")
         logger.info('PCGR - EXTERNAL MSI SECTION: Import of MSI result from external caller')
         msi_result = msi.read_external_msi(
-            input_msi, caller = conf_options['msi_external']['caller'], logger = logger)
+            input_msi, caller = conf_options['msi_external']['caller'], logger = logger,
+            msih_threshold = conf_options['msi_external']['threshold'])
         msi.write_external_msi(msi_result, yaml_data['sample_id'], output_data['msi_external'])
         logger.info('Finished pcgr-external-msi')
         print('----')

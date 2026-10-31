@@ -157,7 +157,10 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
         ## external MSI result (e.g. from MSIsensor-pro)
         conf_options['msi_external'] = {
             'run': int(arg_dict.get('input_msi') is not None),
-            'caller': arg_dict.get('input_msi_caller') or 'generic'
+            'caller': arg_dict.get('input_msi_caller') or 'generic',
+            ## user-defined threshold on the MSI score (None: default threshold of the caller)
+            'threshold': arg_dict.get('input_msi_threshold'),
+            'threshold_user_defined': int(arg_dict.get('input_msi_threshold') is not None)
         }
 
         conf_options['expression'] = {}

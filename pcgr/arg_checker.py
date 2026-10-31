@@ -191,6 +191,15 @@ def verify_args(arg_dict, logger = None):
         err_msg = f"Option '--input_msi_caller' ({arg_dict['input_msi_caller']}) requires an MSI result file ('--input_msi')"
         error_message(err_msg, logger)
 
+    if arg_dict.get('input_msi_threshold') is not None:
+        if arg_dict.get('input_msi') is None:
+            err_msg = "Option '--input_msi_threshold' requires an MSI result file ('--input_msi')"
+            error_message(err_msg, logger)
+        threshold_error = msi.check_msi_threshold(
+            arg_dict.get('input_msi_caller') or 'generic', arg_dict['input_msi_threshold'])
+        if threshold_error is not None:
+            error_message(threshold_error, logger)
+
     if arg_dict['expression_sim'] and arg_dict['input_rna_exp'] is None:
         warn_msg = f"RNA expression similarity analysis can only be performed if --input_rna_exp is set (--input_rna_exp = {arg_dict['input_rna_exp']})."
         warn_message(warn_msg, logger)
@@ -538,7 +547,7 @@ def define_output_files(arg_dict, cpsr = False):
         output_data['maf'] = f"{output_prefix}.maf"
         output_data['tmb'] = f"{output_prefix}.tmb.tsv"
         output_data['cna_summary'] = f"{output_prefix}.cna_summary.tsv"
-        output_data['msi_external'] = f"{output_prefix}.msi_external.tsv"
+        output_data['msi_external'] = f"{output_prefix}.msi.tsv"
     else:
         output_data['classification'] = f"{output_prefix}.classification.tsv.gz"
     
@@ -660,7 +669,8 @@ def verify_input_files(arg_dict):
         check_file_exists(os.path.abspath(arg_dict["input_msi"]), strict = True, logger = logger)
         msi.read_external_msi(
             os.path.abspath(arg_dict["input_msi"]),
-            caller = arg_dict.get("input_msi_caller") or 'generic', logger = logger, quiet = True)
+            caller = arg_dict.get("input_msi_caller") or 'generic', logger = logger, quiet = True,
+            msih_threshold = arg_dict.get("input_msi_threshold"))
         input_msi_basename = os.path.basename(str(arg_dict["input_msi"]))
         input_msi_dir = os.path.dirname(os.path.abspath(arg_dict["input_msi"]))
 

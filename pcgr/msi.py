@@ -12,7 +12,7 @@ common representation (one row, see NORMALISED_COLUMNS):
                     written by both the 'pro' (tumor-only) and 'msi' (tumor-normal)
                     commands). The tool reports no MSI status, so the status is
                     derived from the percentage of unstable sites (see
-                    MSISENSOR_PRO_MSIH_CUTOFF)
+                    MSI_CALLER_DEFAULT_THRESHOLDS; the threshold can be set by the user)
 
 Callers differ in what they report: MSIsensor-pro gives counts of evaluated and
 unstable sites but no status, the status of other callers is given directly, and
@@ -36,10 +36,15 @@ MSI_STATUS_H = 'MSI-H'
 MSI_STATUS_MSS = 'MSS'
 MSI_STATUS_INDETERMINATE = 'Indeterminate'
 
-## Percentage of unstable sites at or above which an MSIsensor-pro result is called MSI-H.
-## MSIsensor-pro itself does not report a status (nor define a cutoff) - this is the
-## cutoff used in practice by users of the tool (e.g. tumor-only mode on panel data).
-MSISENSOR_PRO_MSIH_CUTOFF = 20.0
+## Default threshold on the MSI score for callers that report a score but no MSI status
+## (the status is then derived by PCGR). For MSIsensor-pro: percentage of unstable sites at
+## or above which a result is called MSI-H. MSIsensor-pro itself does not report a status
+## (nor define a cutoff) - this is the cutoff used in practice by users of the tool. Practice
+## varies (assay, tumor-only versus tumor-normal), hence the threshold can be set by the user
+## (--input_msi_threshold). Callers that report their own status (e.g. MANTIS, generic format)
+## have no entry here - their status is used as is.
+MSI_CALLER_DEFAULT_THRESHOLDS = {'msisensor-pro': 20.0}
+MSISENSOR_PRO_MSIH_CUTOFF = MSI_CALLER_DEFAULT_THRESHOLDS['msisensor-pro']
 
 MSISENSOR_PRO_SUMMARY_HEADER = ['Total_Number_of_Sites', 'Number_of_Unstable_Sites', '%']
 
@@ -51,9 +56,9 @@ NORMALISED_COLUMNS = [
     'CALLER_VERSION',
     'MSI_SCORE',
     'MSI_SCORE_TYPE',
+    'MSI_SCORE_THRESHOLD_USED',  ## threshold on the score for MSI-H (by the caller, or by PCGR if status is derived)
     'N_LOCI_EVALUATED',
     'N_LOCI_UNSTABLE',
-    'THRESHOLD_USED',
 ]
 
 ## accepted spellings of the MSI status (compared after upper-casing and mapping '_'/' ' to '-')
@@ -146,9 +151,10 @@ def parse_msi_generic(fname: str, logger: Optional[logging.Logger] = None) -> di
       CALLER_VERSION    optional
       MSI_SCORE         optional - numeric score as reported by the caller
       MSI_SCORE_TYPE    optional - description of the score, e.g. 'percent unstable sites'
+      MSI_SCORE_THRESHOLD_USED
+                        optional - threshold on the score applied by the caller for MSI-H
       N_LOCI_EVALUATED  optional - number of microsatellite loci evaluated
       N_LOCI_UNSTABLE   optional - number of unstable loci
-      THRESHOLD_USED    optional - threshold applied by the caller for MSI-H
 
     Additional columns are ignored. Missing optional values may be left empty
     or set to '.' / 'NA'.
@@ -190,9 +196,10 @@ def parse_msi_generic(fname: str, logger: Optional[logging.Logger] = None) -> di
         'CALLER_VERSION': _optional_text(row.get('CALLER_VERSION')),
         'MSI_SCORE': _to_float(row.get('MSI_SCORE'), 'MSI_SCORE'),
         'MSI_SCORE_TYPE': _optional_text(row.get('MSI_SCORE_TYPE')),
+        'MSI_SCORE_THRESHOLD_USED': _to_float(
+            row.get('MSI_SCORE_THRESHOLD_USED'), 'MSI_SCORE_THRESHOLD_USED'),
         'N_LOCI_EVALUATED': _to_count(row.get('N_LOCI_EVALUATED'), 'N_LOCI_EVALUATED'),
         'N_LOCI_UNSTABLE': _to_count(row.get('N_LOCI_UNSTABLE'), 'N_LOCI_UNSTABLE'),
-        'THRESHOLD_USED': _to_float(row.get('THRESHOLD_USED'), 'THRESHOLD_USED'),
     }
     if result['N_LOCI_EVALUATED'] is not None and result['N_LOCI_UNSTABLE'] is not None \
             and result['N_LOCI_UNSTABLE'] > result['N_LOCI_EVALUATED']:
@@ -204,7 +211,7 @@ def parse_msi_generic(fname: str, logger: Optional[logging.Logger] = None) -> di
 
 def parse_msisensor_pro(
         fname: str,
-        msih_cutoff: float = MSISENSOR_PRO_MSIH_CUTOFF,
+        msih_threshold: float = MSISENSOR_PRO_MSIH_CUTOFF,
         logger: Optional[logging.Logger] = None) -> dict:
     """
     Read the native summary file of MSIsensor-pro (header: Total_Number_of_Sites,
@@ -212,7 +219,7 @@ def parse_msisensor_pro(
     and no MSI status. The status is derived from the fraction of unstable sites:
 
       - no evaluated sites               -> Indeterminate
-      - unstable sites >= cutoff (%)     -> MSI-H
+      - unstable sites >= threshold (%)  -> MSI-H
       - otherwise                        -> MSS
 
     The score is the percentage of unstable sites as reported by the tool. With the
@@ -256,9 +263,9 @@ def parse_msisensor_pro(
         'CALLER_VERSION': None,
         'MSI_SCORE': None,
         'MSI_SCORE_TYPE': 'percent unstable sites',
+        'MSI_SCORE_THRESHOLD_USED': float(msih_threshold),
         'N_LOCI_EVALUATED': n_sites,
         'N_LOCI_UNSTABLE': n_unstable,
-        'THRESHOLD_USED': float(msih_cutoff),
     }
     if n_sites == 0:
         if logger is not None:
@@ -271,8 +278,8 @@ def parse_msisensor_pro(
             logger.warning(
                 f"MSIsensor-pro summary: reported percentage ({pct_reported}) differs from "
                 f"{n_unstable}/{n_sites} unstable sites - using the reported percentage as score")
-    ## compare using integer counts (not the rounded percentage) to avoid rounding artefacts at the cutoff
-    result['MSI_STATUS'] = MSI_STATUS_H if n_unstable * 100 >= msih_cutoff * n_sites else MSI_STATUS_MSS
+    ## compare using integer counts (not the rounded percentage) to avoid rounding artefacts at the threshold
+    result['MSI_STATUS'] = MSI_STATUS_H if n_unstable * 100 >= msih_threshold * n_sites else MSI_STATUS_MSS
     return result
 
 
@@ -280,7 +287,8 @@ def read_external_msi(
         fname: str,
         caller: str = 'generic',
         logger: Optional[logging.Logger] = None,
-        quiet: bool = False) -> dict:
+        quiet: bool = False,
+        msih_threshold: Optional[float] = None) -> dict:
     """
     Read and validate an external MSI result file from the given caller
     ('generic' or 'msisensor-pro'). Terminates with an error message (as for other
@@ -288,14 +296,22 @@ def read_external_msi(
     normalised fields (see NORMALISED_COLUMNS, except SAMPLE_ID). With quiet = True,
     only errors are reported (used for early validation of the input file; the result
     is logged when the file is read again in the MSI section of the workflow).
+
+    msih_threshold: user-defined threshold on the MSI score for MSI-H, only for callers
+    that report a score but no status (see MSI_CALLER_DEFAULT_THRESHOLDS; default if None).
     """
     if logger is None:
         logger = logging.getLogger("pcgr-msi")
     if caller not in MSI_CALLERS:
         error_message(f"Unsupported MSI caller ('{caller}') - must be one of: {', '.join(MSI_CALLERS)}", logger)
+    threshold_error = check_msi_threshold(caller, msih_threshold)
+    if threshold_error is not None:
+        error_message(threshold_error, logger)
     try:
         if caller == 'msisensor-pro':
-            result = parse_msisensor_pro(fname, logger=None if quiet else logger)
+            result = parse_msisensor_pro(
+                fname, msih_threshold=MSI_CALLER_DEFAULT_THRESHOLDS[caller] if msih_threshold is None else msih_threshold,
+                logger=None if quiet else logger)
         else:
             result = parse_msi_generic(fname, logger=None if quiet else logger)
     except MsiInputError as e:
@@ -311,7 +327,33 @@ def read_external_msi(
     basis = 'derived by PCGR' if result['MSI_STATUS_BASIS'] == 'derived' else 'reported by caller'
     logger.info(
         f"External MSI result ({result['MSI_CALLER']}): {result['MSI_STATUS']} ({basis}){score_info}{n_info}")
+    if result['MSI_STATUS_BASIS'] == 'derived' and result['MSI_SCORE_THRESHOLD_USED'] is not None:
+        source = 'default' if msih_threshold is None else 'user-defined'
+        logger.info(
+            f"MSI status derived with a {source} threshold on the MSI score: "
+            f"MSI-H if score >= {result['MSI_SCORE_THRESHOLD_USED']:g} ({result['MSI_SCORE_TYPE']})")
     return result
+
+
+def check_msi_threshold(caller: str, msih_threshold: Optional[float]) -> Optional[str]:
+    """
+    Check a user-defined threshold on the MSI score (--input_msi_threshold). Returns an
+    error message if the threshold cannot be used with the caller, or is out of range
+    (percentage of unstable sites: > 0 and <= 100), otherwise None.
+    """
+    if msih_threshold is None:
+        return None
+    if caller not in MSI_CALLER_DEFAULT_THRESHOLDS:
+        return (
+            f"Option '--input_msi_threshold' cannot be used with the '{caller}' MSI caller - it applies "
+            f"only to callers that report a score but no MSI status "
+            f"({', '.join(MSI_CALLER_DEFAULT_THRESHOLDS)}). For other callers, the MSI status "
+            f"reported by the caller is used")
+    if not 0 < msih_threshold <= 100:
+        return (
+            f"Option '--input_msi_threshold' ({msih_threshold:g}) must be a percentage of unstable "
+            f"sites: larger than 0 and not larger than 100")
+    return None
 
 
 def write_external_msi(result: dict, sample_id: str, fname: str) -> None:
@@ -330,8 +372,10 @@ if __name__ == "__main__":
     parser.add_argument("msi_file", help="MSI summary file")
     parser.add_argument("--caller", choices=MSI_CALLERS, default="generic")
     parser.add_argument("--sample_id", default="SAMPLE")
+    parser.add_argument("--threshold", type=float, default=None,
+                        help="threshold on the MSI score for MSI-H (MSIsensor-pro: percent unstable sites; default 20)")
     args = parser.parse_args()
-    res = read_external_msi(args.msi_file, args.caller)
+    res = read_external_msi(args.msi_file, args.caller, msih_threshold=args.threshold)
     res['SAMPLE_ID'] = args.sample_id
     for col in NORMALISED_COLUMNS:
         print(f"{col}\t{res.get(col) if res.get(col) is not None else '.'}")

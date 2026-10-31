@@ -14,7 +14,8 @@ prediction can be found in the report (e.g. 'below', or 'the tab "PCGR MSI
 classifier"'), used in the notes on concordance. If NULL, no reference is made.}
 }
 \value{
-list with elements: 'status', 'caller', 'score_title', 'score_value',
+list with elements: 'status', 'caller', 'caller_label' (caller, with
+the threshold on the score if the status is derived), 'score_title', 'score_value',
 'loci_value' (NA if not available), 'basis_note' (how the status was
 obtained), 'zero_loci' (logical), 'concordance' (see
 \code{msi_concordance}), 'discordance_note' (NA unless discordant) and

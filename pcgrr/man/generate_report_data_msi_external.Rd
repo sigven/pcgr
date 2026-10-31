@@ -11,7 +11,9 @@ generate_report_data_msi_external(settings = NULL)
 MSI result is given by \code{settings$molecular_data$fname_msi_tsv})}
 }
 \value{
-list with elements 'eval' and 'result' (one-row data frame)
+list with elements 'eval', 'result' (one-row data frame) and
+'threshold_user_defined' (logical: the threshold on the MSI score used for
+deriving the MSI status was set by the user, \code{--input_msi_threshold})
 }
 \description{
 Function that generates report data for an external MSI result

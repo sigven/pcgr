@@ -1351,7 +1351,7 @@ write_report_excel <- function(report = NULL) {
                 'TMB',
                 'TMB_BIOMARKER',
                 'MSI',
-                'MSI_EXTERNAL',
+                'MSI_INTERNAL',
                 'MSI_BIOMARKER',
                 'MUTATIONAL_SIGNATURE',
                 'KATAEGIS_EVENTS',

@@ -46,12 +46,12 @@ get_settings_sheet <- function(report = NULL) {
                  VALUE = as.character(conf$other$show_noncoding)),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "Include germline findings",
                  VALUE = if (isTRUE(report$content$germline_classified$eval)) "ON" else "OFF"),
-      data.frame(SECTION = "SNV/InDel", PARAMETER = "MSI prediction",
+      data.frame(SECTION = "SNV/InDel", PARAMETER = "MSI classifier (internal)",
                  VALUE = if (isTRUE(report$content$msi$eval) &&
                              !isTRUE(report$content$msi$missing_data)) "ON" else "OFF"),
-      data.frame(SECTION = "SNV/InDel", PARAMETER = "External MSI result",
+      data.frame(SECTION = "SNV/InDel", PARAMETER = "MSI caller (external)",
                  VALUE = if (isTRUE(report$content$msi$external$eval))
-                   as.character(report$content$msi$external$result$MSI_CALLER) else "OFF"),
+                   msi_external_display(report$content$msi)$caller_label else "OFF"),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "Mutational burden estimation",
                  VALUE = if (isTRUE(report$content$tmb$eval)) "ON" else "OFF"),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "TMB algorithm",
@@ -469,16 +469,16 @@ get_excel_sheets <- function(report = NULL) {
           colnames(report$content$msi$prediction$msi_stats) <-
             toupper(colnames(report$content$msi$prediction$msi_stats))
 
-          excel_sheets[['MSI']] <-
+          excel_sheets[['MSI_INTERNAL']] <-
             report$content$msi$prediction$msi_stats
         }
       }
     }
   }
 
-  ## MSI - result from external MSI caller
+  ## MSI - result from external MSI caller (takes precedence, hence 'MSI')
   if (isTRUE(report$content$msi$external$eval)) {
-    excel_sheets[['MSI_EXTERNAL']] <- report$content$msi$external$result
+    excel_sheets[['MSI']] <- report$content$msi$external$result
   }
 
   ## Immune contexture

@@ -173,7 +173,8 @@ init_report <- function(yaml_fname = NULL,
         report[["content"]][[a_elem]][["missing_data"]] <- FALSE
         report[["content"]][[a_elem]][["prediction"]] <- list()
         report[["content"]][[a_elem]][["external"]] <-
-          list(eval = FALSE, result = data.frame())
+          list(eval = FALSE, result = data.frame(),
+               threshold_user_defined = FALSE)
       }
       if (a_elem == "tumor_only") {
         report[["content"]][[a_elem]] <-
@@ -291,7 +292,8 @@ init_msi_content <- function() {
   rep[["missing_data"]] <- FALSE
   rep[["low_mutation_warning"]] <- FALSE
   rep[["prediction"]] <- list()
-  rep[["external"]] <- list(eval = FALSE, result = data.frame())
+  rep[["external"]] <- list(
+    eval = FALSE, result = data.frame(), threshold_user_defined = FALSE)
 
   return(rep)
 

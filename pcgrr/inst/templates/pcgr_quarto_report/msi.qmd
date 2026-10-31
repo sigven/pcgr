@@ -11,8 +11,8 @@ msi_ext_eval <- isTRUE(pcg_report$content$msi$external$eval)
 msi_clf_eval <- isTRUE(pcg_report$content$msi$eval) &&
   isFALSE(pcg_report$content$msi$missing_data)
 msi_tabs <- msi_ext_eval && msi_clf_eval
-msi_tab_ext <- "External MSI caller"
-msi_tab_clf <- "PCGR MSI classifier"
+msi_tab_ext <- "External caller"
+msi_tab_clf <- "PCGR classifier"
 ```
 
 ```{r msi_open_tabset}

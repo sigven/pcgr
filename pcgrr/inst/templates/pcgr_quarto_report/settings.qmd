@@ -83,7 +83,7 @@ if (pcg_report$content$msi$eval == FALSE ||
 msi_external_caller <- 'OFF'
 if (isTRUE(pcg_report$content$msi$external$eval)) {
   msi_external_caller <-
-    as.character(pcg_report$content$msi$external$result$MSI_CALLER)
+    pcgrr::msi_external_display(pcg_report$content$msi)$caller_label
 }
 if (pcg_report$content$mutational_signatures$eval == FALSE) {
   signatures_estimation <- 'OFF'
@@ -251,8 +251,8 @@ cat(glue::glue("* Sequencing assay mode: __{assay_mode}__"), "\n")
 cat(glue::glue("* Sequencing assay type: __{assay_type}__"), "\n")
 cat(glue::glue("* Coding target size: __{target_size}Mb__"), "\n")
 cat(glue::glue("* Show noncoding variants: __{conf$other$show_noncoding}__"), "\n")
-cat(glue::glue("* MSI prediction: __{msi_prediction}__"), "\n")
-cat(glue::glue("* External MSI result: __{msi_external_caller}__"), "\n")
+cat(glue::glue("* MSI classifier (internal): __{msi_prediction}__"), "\n")
+cat(glue::glue("* MSI caller (external): __{msi_external_caller}__"), "\n")
 cat(glue::glue("* Include germline findings: __{include_germline_findings}__"), "\n")
 cat(glue::glue("* Variant Effect Predictor (VEP) settings"), "\n")
 cat(glue::glue("  * Transcript set: __{transcript_set_gencode}__"), "\n")
