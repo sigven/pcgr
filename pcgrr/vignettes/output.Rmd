@@ -41,7 +41,7 @@ by the user. The following sections may be included in the report:
 	  - A germline loss-of-function variant (as classified by CPSR, if provided as input)
 
 4. __MSI status__
-  * Indicates predicted microsatellite stability from the somatic mutation profile and supporting evidence (details of the underlying MSI statistical classifier can be found [here](http://rpubs.com/sigven/msi_classification_v3))
+  * Indicates predicted microsatellite stability from the somatic mutation profile and supporting evidence (details of the underlying MSI statistical classifier can be found [here](https://sigven-pcgr-msi-classifier.share.connect.posit.cloud/))
   * The MSI classifier was trained on TCGA exome samples.
   * If an MSI result from an external MSI caller is provided (`--input_msi`), this is regarded as the primary result. In the HTML report, the external result and the classifier prediction (if available) are shown in separate tabs (_External caller_ and _PCGR classifier_), with a note on concordance in the first tab. In the PDF report, only the external result is shown in detail, with a note on concordance with the classifier prediction
 

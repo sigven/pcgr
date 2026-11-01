@@ -65,7 +65,7 @@ pdiakumis <- user("pdiakumis")
 - **External MSI result**
   - MSI results from external MSI callers can now be provided with `--input_msi` (and `--input_msi_caller`), in the native summary format of MSIsensor-pro or in a simple generic format. For MSIsensor-pro (score, but no MSI status), the threshold on the percentage of unstable sites for MSI-H is 20 by default, and can be set with `--input_msi_threshold` ([issue 309](https://github.com/sigven/pcgr/issues/309))
   - The external result is shown in the MSI section of the report (HTML and PDF), alone or together with the PCGR MSI classifier (`--estimate_msi`) with an indication of concordance, and is used for the assessment of MSI-High biomarker evidence. It can be used with any assay type (including tumor-only and targeted panel data)
-  - New output file (`msi.tsv`) and Excel sheet (`MSI`) for the external MSI result. The Excel sheet with the MSI classifier statistics is now named `MSI_INTERNAL` (previously `MSI`)
+  - New output file (`msi.tsv`) and Excel sheet (`MSI`) for the external MSI result. The Excel sheet with PCGR's statistical MSI classifier output is now named `MSI_INTERNAL` (previously `MSI`)
 
 - **HTML report tables and figures**
   - Germline findings table now uses [reactable](https://glin.github.io/reactable/) (in place of DT), with a compact main row (gene, alteration, consequence, genotype, classification, ACMG criteria, inheritance) and expandable row details
@@ -471,7 +471,7 @@ both for PCGR and CPSR
   - Users need to download an assembly-specific VEP cache separately from the Ensembl VEP website, and provide its path to the new required argument `--vep_dir` in the `pcgr` command
 - Re-engineered data bundle generation pipeline
 - Improved data bundle documentation
-  - An HTML report with an overview of the contents of the data bundle is shipped with the reference data itself, also available [here (grch38)](https://rpubs.com/sigven/pcgr_refdata).
+  - An HTML report with an overview of the contents of the data bundle is shipped with the reference data itself.
 - Singularity/Apptainer support
 - Moved more of the code base to initial Python workflow steps (biomarker matching, CNA segment annotation, RNA expression analysis, oncogenicity classification)
 - Variants are now classified with respect to both oncogenicity and actionability, and the previous global tier classification (tier 1-5) is thus deprecated

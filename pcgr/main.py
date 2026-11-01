@@ -79,7 +79,7 @@ def cli():
     optional_input.add_argument("--input_rna_expression", dest = "input_rna_exp", 
                                 help = "File with bulk RNA expression counts (TPM) of transcripts in tumor (tab-separated values)")
     optional_input.add_argument("--input_msi", dest = "input_msi", 
-                                help = "Summary result file from an external MSI caller (MSIsensor-pro, or generic format) - see --input_msi_caller")
+                                help = "Summary result file from an external MSI caller (tab-separated; see --input_msi_caller and the documentation for the expected format)")
 
     optional_subject.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN", 
                                   help = "Sex of the subject (default: %(default)s)")

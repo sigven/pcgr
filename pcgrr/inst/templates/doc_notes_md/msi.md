@@ -9,7 +9,7 @@ MSI status (i.e. assayed from mononucleotide markers), and obtained a
 [positive predictive value]({wikipedia_url}Positive_and_negative_predictive_values#Positive_predictive_value) 
 of 97.9% and a [negative predictive value]({wikipedia_url}Positive_and_negative_predictive_values#Negative_predictive_value) 
 of 99.3% on an independent test set of __N = 245__ samples. Details of the MSI 
-classification approach can be found <a href="https://rpubs.com/sigven/msi_classifier_2025" 
+classification approach can be found <a href="https://sigven-pcgr-msi-classifier.share.connect.posit.cloud/" 
 target="_blank">here</a>.
 
 Note that, given the nature of the training dataset, the MSI classifier can only 
