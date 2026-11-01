@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9015</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9016</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -108,6 +108,26 @@ GRCh37)</li>
 <h3 id="added-improved">Added / improved<a class="anchor" aria-label="anchor" href="#added-improved"></a>
 </h3>
 <ul>
+<li>
+<strong>External MSI result</strong>
+<ul>
+<li>MSI results from external MSI callers can now be provided with
+<code>--input_msi</code> (and <code>--input_msi_caller</code>), in the
+native summary format of MSIsensor-pro or in a simple generic format.
+For MSIsensor-pro (score, but no MSI status), the threshold on the
+percentage of unstable sites for MSI-H is 20 by default, and can be set
+with <code>--input_msi_threshold</code> (<a href="https://github.com/sigven/pcgr/issues/309" class="external-link">issue 309</a>)</li>
+<li>The external result is shown in the MSI section of the report (HTML
+and PDF), alone or together with the PCGR MSI classifier
+(<code>--estimate_msi</code>) with an indication of concordance, and is
+used for the assessment of MSI-High biomarker evidence. It can be used
+with any assay type (including tumor-only and targeted panel data)</li>
+<li>New output file (<code>msi.tsv</code>) and Excel sheet
+(<code>MSI</code>) for the external MSI result. The Excel sheet with
+PCGR’s statistical MSI classifier output is now named
+<code>MSI_INTERNAL</code> (previously <code>MSI</code>)</li>
+</ul>
+</li>
 <li>
 <strong>HTML report tables and figures</strong>
 <ul>
@@ -592,8 +612,8 @@ training/holdout set (Brier score ~0.011)</li>
 probability and confidence tier alongside the classification label
 (e.g. “0.97 — High confidence”)</li>
 <li>
-<strong>Excel workbook</strong> — the <code>MSI</code> sheet
-includes <code>PROB_MSI_H</code> and <code>CONFIDENCE_TIER</code>
+<strong>Excel workbook</strong> — the <code>MSI_INTERNAL</code>
+sheet includes <code>PROB_MSI_H</code> and <code>CONFIDENCE_TIER</code>
 columns</li>
 </ul>
 </li>
@@ -994,7 +1014,7 @@ argument <code>--vep_dir</code> in the <code>pcgr</code> command</li>
 <li>Improved data bundle documentation
 <ul>
 <li>An HTML report with an overview of the contents of the data bundle
-is shipped with the reference data itself, also available <a href="https://rpubs.com/sigven/pcgr_refdata" class="external-link">here (grch38)</a>.</li>
+is shipped with the reference data itself.</li>
 </ul>
 </li>
 <li>Singularity/Apptainer support</li>

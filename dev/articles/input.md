@@ -249,6 +249,109 @@ clinical impact.
   pair — retaining the call with the highest read support or confidence
   score — before submitting to PCGR.
 
+### MSI result from an external caller
+
+If microsatellite instability (MSI) has been assessed with a dedicated
+MSI caller, the result can be provided as an alternative (or addition)
+to the MSI classifier in PCGR (`--estimate_msi`):
+
+- `--input_msi <FILE>`: the summary result file of the MSI caller for
+  the tumor sample
+- `--input_msi_caller <CALLER>`: the caller that produced the file
+  (`msisensor-pro` or `generic`; default: `generic`)
+- `--input_msi_threshold <PERCENT>`: threshold on the MSI score for
+  *MSI-H*, only for callers that report a score but no MSI status
+  (currently `msisensor-pro`; default: `20`)
+
+The file name and extension are not used - the content of the file is
+checked. In contrast to `--estimate_msi`, an external MSI result can be
+used with any type of sequencing assay (including tumor-only and
+targeted panel data), and does not require a VCF file. Two formats are
+supported: the **generic format** (any MSI caller) and the summary file
+of **MSIsensor-pro**.
+
+#### Generic format
+
+The generic format is a **tab-separated** file with a header line and
+**exactly one data row** (one sample). Only two columns are required, so
+the smallest valid file is:
+
+| MSI_STATUS | MSI_CALLER |
+|------------|------------|
+| MSI-H      | MyCaller   |
+
+Optional columns provide further information that is shown in the report
+and in the output files:
+
+| Column | Required | Description |
+|----|----|----|
+| `MSI_STATUS` | yes | MSI status of the tumor sample, see accepted values below |
+| `MSI_CALLER` | yes | Name of the MSI caller |
+| `CALLER_VERSION` | no | Version of the MSI caller |
+| `MSI_SCORE` | no | Numeric score, as reported by the caller |
+| `MSI_SCORE_TYPE` | no | Description of the score, e.g. `percent unstable sites` |
+| `MSI_SCORE_THRESHOLD_USED` | no | Threshold on the score applied by the caller for MSI-H |
+| `N_LOCI_EVALUATED` | no | Number of microsatellite loci evaluated |
+| `N_LOCI_UNSTABLE` | no | Number of unstable microsatellite loci |
+
+A file with all columns could look like this (columns shown as a table;
+the file itself is tab-separated):
+
+| MSI_STATUS | MSI_CALLER | CALLER_VERSION | MSI_SCORE | MSI_SCORE_TYPE | MSI_SCORE_THRESHOLD_USED | N_LOCI_EVALUATED | N_LOCI_UNSTABLE |
+|----|----|----|----|----|----|----|----|
+| MSI-H | MANTIS | 1.0.5 | 0.52 | step-wise difference | 0.4 |  |  |
+
+Further rules:
+
+- Accepted values for `MSI_STATUS` (not case-sensitive) are listed
+  below. Other values give an error.
+- The score, threshold and loci columns are for information only: they
+  are reported as given, and never change the `MSI_STATUS`.
+- Missing values of optional columns can be left empty or set to `.` or
+  `NA`.
+- Additional columns are ignored.
+
+| Value in file | Interpreted as |
+|----|----|
+| `MSI-H`, `MSIH`, `MSI-High`, `MSI`, `Unstable` | *MSI-H* |
+| `MSS`, `Stable`, `MSI-L`, `MSIL`, `MSI-Low` | *MSS* (note that *MSI-L* is regarded as microsatellite stable) |
+| `Indeterminate`, `Undetermined`, `Equivocal`, `Inconclusive`, `Unknown` | *Indeterminate* |
+
+#### MSIsensor-pro
+
+Use `--input_msi_caller msisensor-pro` for the main summary file (not
+the `_all`, `_unstable` or `_dis` files) written by the
+`msisensor-pro pro` (tumor-only) or `msisensor-pro msi` (tumor-normal)
+command. It has a header line (`Total_Number_of_Sites`,
+`Number_of_Unstable_Sites`, `%`) and a single data row. MSIsensor-pro
+does not report an MSI status. The status is therefore derived by PCGR
+from the percentage of unstable sites: *MSI-H* if the percentage is at
+or above the threshold (default 20, see below), otherwise *MSS* (and
+*Indeterminate* if no sites were evaluated). The report indicates that
+the status was derived, and which threshold was used.
+
+#### Threshold for MSI-H
+
+For the generic format, the MSI status given by the caller is used as
+is. The threshold on the score is only applied for a caller that reports
+a score but no status (MSIsensor-pro), where PCGR derives the status
+from the score. Practice for the threshold varies (e.g. with the
+sequencing assay, tumor-only versus tumor-normal analysis, and how
+conservative the call should be). PCGR therefore uses a default (20%
+unstable sites for MSIsensor-pro), which can be changed with
+`--input_msi_threshold`. The threshold is shown in the report and in the
+output files, and it determines whether MSI-High biomarker evidence is
+shown. The option cannot be used with callers that report their own
+status; for a different decision rule, convert the result to the generic
+format with the status of your choice.
+
+#### Combining with the MSI classifier
+
+If both `--input_msi` and `--estimate_msi` are used, the report shows
+the two results side by side (tabs *External caller* and *PCGR
+classifier*) and indicates if they are discordant. The external result
+takes precedence for the assessment of MSI-High biomarker evidence.
+
 ### Gene expression
 
 The user can submit a file with bulk gene/transcript expression data to

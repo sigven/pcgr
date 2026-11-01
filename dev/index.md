@@ -37,8 +37,8 @@ Snapshots of sections in the [quarto](https://quarto.org)-based HTML
 report by PCGR, followed by pages from the accompanying PDF report
 (artificial colorectal tumor sample, with more findings than usual):
 
-  
-  
+\
+\
 
 ![Variant classification - oncogenicity](img/pcgr_oncogenicity.png)
 
@@ -64,8 +64,8 @@ samples](img/pcgr_expression_similarity.png)
 ![PDF report - key findings, clinical actionability, composite
 biomarkers](img/pcgr_pdf_report.png)
 
-  
-  
+\
+\
 
 ------------------------------------------------------------------------
 

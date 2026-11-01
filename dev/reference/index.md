@@ -223,6 +223,8 @@
   : Function that generates data frame with potential kataegis events
 - [`generate_report_data_msi()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_msi.md)
   : Function that generates MSI prediction data for PCGR report
+- [`generate_report_data_msi_external()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_msi_external.md)
+  : Function that generates report data for an external MSI result
 - [`generate_report_data_rainfall()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_rainfall.md)
   : Function that generates data for rainfall plot (mutation density
   along genome, considering SNVs only)
@@ -336,6 +338,8 @@
   : Load expression outlier results
 - [`load_expression_similarity()`](https://sigven.github.io/pcgr/dev/reference/load_expression_similarity.md)
   : Load expression similarity results
+- [`load_external_msi()`](https://sigven.github.io/pcgr/dev/reference/load_external_msi.md)
+  : Function that loads the normalised result of an external MSI caller
 - [`load_reference_data()`](https://sigven.github.io/pcgr/dev/reference/load_reference_data.md)
   : Function that parses and loads reference data from files in the
   assembly-specific PCGR bundle directory
@@ -375,8 +379,13 @@
   : CPG_MOI (mode of inheritance) code(s) with their full names, for
   display in the row details of the germline findings table (e.g.
   'AD/AR' -\> 'AD/AR (autosomal dominant / autosomal recessive)')
+- [`msi_concordance()`](https://sigven.github.io/pcgr/dev/reference/msi_concordance.md)
+  : Function that compares the external MSI result with the PCGR MSI
+  classifier
 - [`msi_doc_note()`](https://sigven.github.io/pcgr/dev/reference/msi_doc_note.md)
   : Get documentation string for MSI status prediction
+- [`msi_external_display()`](https://sigven.github.io/pcgr/dev/reference/msi_external_display.md)
+  : Function that prepares display strings for an external MSI result
 - [`msi_indel_fraction_plot()`](https://sigven.github.io/pcgr/dev/reference/msi_indel_fraction_plot.md)
   : Function that plots the indel fraction for a given sample and
   contrasts this with the distribution for MSI-H/MSS samples from TCGA

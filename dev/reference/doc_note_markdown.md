@@ -18,5 +18,5 @@ doc_note_markdown(x)
 ## Value
 
 documentation note with links () and **/ *as markdown, and line breaks
-(  
+(\
 ) removed***

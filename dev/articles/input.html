@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9015</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9016</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -380,6 +380,231 @@ before submitting to PCGR.
 </li>
 </ul>
 </div>
+</div>
+</div>
+<div class="section level3">
+<h3 id="msi-result-from-an-external-caller">MSI result from an external caller<a class="anchor" aria-label="anchor" href="#msi-result-from-an-external-caller"></a>
+</h3>
+<p>If microsatellite instability (MSI) has been assessed with a
+dedicated MSI caller, the result can be provided as an alternative (or
+addition) to the MSI classifier in PCGR
+(<code>--estimate_msi</code>):</p>
+<ul>
+<li>
+<code>--input_msi &lt;FILE&gt;</code>: the summary result file of
+the MSI caller for the tumor sample</li>
+<li>
+<code>--input_msi_caller &lt;CALLER&gt;</code>: the caller that
+produced the file (<code>msisensor-pro</code> or <code>generic</code>;
+default: <code>generic</code>)</li>
+<li>
+<code>--input_msi_threshold &lt;PERCENT&gt;</code>: threshold on the
+MSI score for <em>MSI-H</em>, only for callers that report a score but
+no MSI status (currently <code>msisensor-pro</code>; default:
+<code>20</code>)</li>
+</ul>
+<p>The file name and extension are not used - the content of the file is
+checked. In contrast to <code>--estimate_msi</code>, an external MSI
+result can be used with any type of sequencing assay (including
+tumor-only and targeted panel data), and does not require a VCF file.
+Two formats are supported: the <strong>generic format</strong> (any MSI
+caller) and the summary file of <strong>MSIsensor-pro</strong>.</p>
+<div class="section level4">
+<h4 id="generic-format">Generic format<a class="anchor" aria-label="anchor" href="#generic-format"></a>
+</h4>
+<p>The generic format is a <strong>tab-separated</strong> file with a
+header line and <strong>exactly one data row</strong> (one sample). Only
+two columns are required, so the smallest valid file is:</p>
+<table class="table">
+<thead><tr class="header">
+<th>MSI_STATUS</th>
+<th>MSI_CALLER</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>MSI-H</td>
+<td>MyCaller</td>
+</tr></tbody>
+</table>
+<p>Optional columns provide further information that is shown in the
+report and in the output files:</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="32%">
+<col width="41%">
+</colgroup>
+<thead><tr class="header">
+<th>Column</th>
+<th>Required</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>MSI_STATUS</code></td>
+<td>yes</td>
+<td>MSI status of the tumor sample, see accepted values below</td>
+</tr>
+<tr class="even">
+<td><code>MSI_CALLER</code></td>
+<td>yes</td>
+<td>Name of the MSI caller</td>
+</tr>
+<tr class="odd">
+<td><code>CALLER_VERSION</code></td>
+<td>no</td>
+<td>Version of the MSI caller</td>
+</tr>
+<tr class="even">
+<td><code>MSI_SCORE</code></td>
+<td>no</td>
+<td>Numeric score, as reported by the caller</td>
+</tr>
+<tr class="odd">
+<td><code>MSI_SCORE_TYPE</code></td>
+<td>no</td>
+<td>Description of the score,
+e.g. <code>percent unstable sites</code>
+</td>
+</tr>
+<tr class="even">
+<td><code>MSI_SCORE_THRESHOLD_USED</code></td>
+<td>no</td>
+<td>Threshold on the score applied by the caller for MSI-H</td>
+</tr>
+<tr class="odd">
+<td><code>N_LOCI_EVALUATED</code></td>
+<td>no</td>
+<td>Number of microsatellite loci evaluated</td>
+</tr>
+<tr class="even">
+<td><code>N_LOCI_UNSTABLE</code></td>
+<td>no</td>
+<td>Number of unstable microsatellite loci</td>
+</tr>
+</tbody>
+</table>
+<p>A file with all columns could look like this (columns shown as a
+table; the file itself is tab-separated):</p>
+<table class="table">
+<colgroup>
+<col width="9%">
+<col width="9%">
+<col width="12%">
+<col width="8%">
+<col width="12%">
+<col width="20%">
+<col width="14%">
+<col width="13%">
+</colgroup>
+<thead><tr class="header">
+<th>MSI_STATUS</th>
+<th>MSI_CALLER</th>
+<th>CALLER_VERSION</th>
+<th>MSI_SCORE</th>
+<th>MSI_SCORE_TYPE</th>
+<th>MSI_SCORE_THRESHOLD_USED</th>
+<th>N_LOCI_EVALUATED</th>
+<th>N_LOCI_UNSTABLE</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>MSI-H</td>
+<td>MANTIS</td>
+<td>1.0.5</td>
+<td>0.52</td>
+<td>step-wise difference</td>
+<td>0.4</td>
+<td></td>
+<td></td>
+</tr></tbody>
+</table>
+<p>Further rules:</p>
+<ul>
+<li>Accepted values for <code>MSI_STATUS</code> (not case-sensitive) are
+listed below. Other values give an error.</li>
+<li>The score, threshold and loci columns are for information only: they
+are reported as given, and never change the
+<code>MSI_STATUS</code>.</li>
+<li>Missing values of optional columns can be left empty or set to
+<code>.</code> or <code>NA</code>.</li>
+<li>Additional columns are ignored.</li>
+</ul>
+<table class="table">
+<colgroup>
+<col width="48%">
+<col width="51%">
+</colgroup>
+<thead><tr class="header">
+<th>Value in file</th>
+<th>Interpreted as</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>
+<code>MSI-H</code>, <code>MSIH</code>, <code>MSI-High</code>,
+<code>MSI</code>, <code>Unstable</code>
+</td>
+<td><em>MSI-H</em></td>
+</tr>
+<tr class="even">
+<td>
+<code>MSS</code>, <code>Stable</code>, <code>MSI-L</code>,
+<code>MSIL</code>, <code>MSI-Low</code>
+</td>
+<td>
+<em>MSS</em> (note that <em>MSI-L</em> is regarded as microsatellite
+stable)</td>
+</tr>
+<tr class="odd">
+<td>
+<code>Indeterminate</code>, <code>Undetermined</code>,
+<code>Equivocal</code>, <code>Inconclusive</code>,
+<code>Unknown</code>
+</td>
+<td><em>Indeterminate</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level4">
+<h4 id="msisensor-pro">MSIsensor-pro<a class="anchor" aria-label="anchor" href="#msisensor-pro"></a>
+</h4>
+<p>Use <code>--input_msi_caller msisensor-pro</code> for the main
+summary file (not the <code>_all</code>, <code>_unstable</code> or
+<code>_dis</code> files) written by the <code>msisensor-pro pro</code>
+(tumor-only) or <code>msisensor-pro msi</code> (tumor-normal) command.
+It has a header line (<code>Total_Number_of_Sites</code>,
+<code>Number_of_Unstable_Sites</code>, <code>%</code>) and a single data
+row. MSIsensor-pro does not report an MSI status. The status is
+therefore derived by PCGR from the percentage of unstable sites:
+<em>MSI-H</em> if the percentage is at or above the threshold (default
+20, see below), otherwise <em>MSS</em> (and <em>Indeterminate</em> if no
+sites were evaluated). The report indicates that the status was derived,
+and which threshold was used.</p>
+</div>
+<div class="section level4">
+<h4 id="threshold-for-msi-h">Threshold for MSI-H<a class="anchor" aria-label="anchor" href="#threshold-for-msi-h"></a>
+</h4>
+<p>For the generic format, the MSI status given by the caller is used as
+is. The threshold on the score is only applied for a caller that reports
+a score but no status (MSIsensor-pro), where PCGR derives the status
+from the score. Practice for the threshold varies (e.g. with the
+sequencing assay, tumor-only versus tumor-normal analysis, and how
+conservative the call should be). PCGR therefore uses a default (20%
+unstable sites for MSIsensor-pro), which can be changed with
+<code>--input_msi_threshold</code>. The threshold is shown in the report
+and in the output files, and it determines whether MSI-High biomarker
+evidence is shown. The option cannot be used with callers that report
+their own status; for a different decision rule, convert the result to
+the generic format with the status of your choice.</p>
+</div>
+<div class="section level4">
+<h4 id="combining-with-the-msi-classifier">Combining with the MSI classifier<a class="anchor" aria-label="anchor" href="#combining-with-the-msi-classifier"></a>
+</h4>
+<p>If both <code>--input_msi</code> and <code>--estimate_msi</code> are
+used, the report shows the two results side by side (tabs <em>External
+caller</em> and <em>PCGR classifier</em>) and indicates if they are
+discordant. The external result takes precedence for the assessment of
+MSI-High biomarker evidence.</p>
 </div>
 </div>
 <div class="section level3">

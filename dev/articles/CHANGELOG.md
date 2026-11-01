@@ -15,6 +15,22 @@
 
 ### Added / improved
 
+- **External MSI result**
+  - MSI results from external MSI callers can now be provided with
+    `--input_msi` (and `--input_msi_caller`), in the native summary
+    format of MSIsensor-pro or in a simple generic format. For
+    MSIsensor-pro (score, but no MSI status), the threshold on the
+    percentage of unstable sites for MSI-H is 20 by default, and can be
+    set with `--input_msi_threshold` ([issue
+    309](https://github.com/sigven/pcgr/issues/309))
+  - The external result is shown in the MSI section of the report (HTML
+    and PDF), alone or together with the PCGR MSI classifier
+    (`--estimate_msi`) with an indication of concordance, and is used
+    for the assessment of MSI-High biomarker evidence. It can be used
+    with any assay type (including tumor-only and targeted panel data)
+  - New output file (`msi.tsv`) and Excel sheet (`MSI`) for the external
+    MSI result. The Excel sheet with PCGR’s statistical MSI classifier
+    output is now named `MSI_INTERNAL` (previously `MSI`)
 - **HTML report tables and figures**
   - Germline findings table now uses
     [reactable](https://glin.github.io/reactable/) (in place of DT),
@@ -376,8 +392,8 @@
     - **HTML report** — the MSI value box shows the predicted
       probability and confidence tier alongside the classification label
       (e.g. “0.97 — High confidence”)
-    - **Excel workbook** — the `MSI` sheet includes `PROB_MSI_H` and
-      `CONFIDENCE_TIER` columns
+    - **Excel workbook** — the `MSI_INTERNAL` sheet includes
+      `PROB_MSI_H` and `CONFIDENCE_TIER` columns
 
 ### Changed
 
@@ -747,8 +763,7 @@
 - Re-engineered data bundle generation pipeline
 - Improved data bundle documentation
   - An HTML report with an overview of the contents of the data bundle
-    is shipped with the reference data itself, also available [here
-    (grch38)](https://rpubs.com/sigven/pcgr_refdata).
+    is shipped with the reference data itself.
 - Singularity/Apptainer support
 - Moved more of the code base to initial Python workflow steps
   (biomarker matching, CNA segment annotation, RNA expression analysis,

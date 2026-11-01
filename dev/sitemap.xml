@@ -112,6 +112,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_fusion.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_kataegis.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_msi.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_msi_external.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_rainfall.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_signatures.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_tmb.html</loc></url>
@@ -161,6 +162,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_expression_csq.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_expression_outliers.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_expression_similarity.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/load_external_msi.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_reference_data.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_rna_fusions.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_somatic_cna.html</loc></url>
@@ -178,7 +180,9 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/mitdb_site_count.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/mkdir.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/moi_display_text.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/msi_concordance.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_doc_note.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/msi_external_display.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_indel_fraction_plot.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_indel_load_plot.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_status_is_high.html</loc></url>

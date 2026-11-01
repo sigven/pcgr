@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9015</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9016</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -176,8 +176,15 @@ provided as input)</li>
 <ul>
 <li>Indicates predicted microsatellite stability from the somatic
 mutation profile and supporting evidence (details of the underlying MSI
-statistical classifier can be found <a href="http://rpubs.com/sigven/msi_classification_v3" class="external-link">here</a>)</li>
+statistical classifier can be found <a href="https://sigven-pcgr-msi-classifier.share.connect.posit.cloud/" class="external-link">here</a>)</li>
 <li>The MSI classifier was trained on TCGA exome samples.</li>
+<li>If an MSI result from an external MSI caller is provided
+(<code>--input_msi</code>), this is regarded as the primary result. In
+the HTML report, the external result and the classifier prediction (if
+available) are shown in separate tabs (<em>External caller</em> and
+<em>PCGR classifier</em>), with a note on concordance in the first tab.
+In the PDF report, only the external result is shown in detail, with a
+note on concordance with the classifier prediction</li>
 </ul>
 <ol start="5" style="list-style-type: decimal">
 <li>
@@ -1843,6 +1850,87 @@ calculation</td>
 </table>
 </div>
 <div class="section level3">
+<h3 id="msi-result-from-external-caller-tsv">MSI result from external caller (TSV)<a class="anchor" aria-label="anchor" href="#msi-result-from-external-caller-tsv"></a>
+</h3>
+<p>If an MSI result from an external MSI caller is provided
+(<code>--input_msi</code>), a normalised copy of the result is written
+to a tab-separated values (TSV) file, with the following naming
+convention:</p>
+<ul>
+<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.msi.tsv</code></li>
+</ul>
+<p>The file has one data row, and the following columns (missing values
+are denoted <code>.</code>):</p>
+<table class="table">
+<colgroup>
+<col width="43%">
+<col width="56%">
+</colgroup>
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>1. <code>SAMPLE_ID</code>
+</td>
+<td>Sample identifier</td>
+</tr>
+<tr class="even">
+<td>2. <code>MSI_STATUS</code>
+</td>
+<td>MSI status: <code>MSI-H</code>, <code>MSS</code> or
+<code>Indeterminate</code>
+</td>
+</tr>
+<tr class="odd">
+<td>3. <code>MSI_STATUS_BASIS</code>
+</td>
+<td>How the MSI status was obtained: <code>caller</code> (reported by
+the MSI caller) or <code>derived</code> (derived by PCGR from the
+score)</td>
+</tr>
+<tr class="even">
+<td>4. <code>MSI_CALLER</code>
+</td>
+<td>Name of the MSI caller</td>
+</tr>
+<tr class="odd">
+<td>5. <code>CALLER_VERSION</code>
+</td>
+<td>Version of the MSI caller</td>
+</tr>
+<tr class="even">
+<td>6. <code>MSI_SCORE</code>
+</td>
+<td>Score, as reported by the MSI caller</td>
+</tr>
+<tr class="odd">
+<td>7. <code>MSI_SCORE_TYPE</code>
+</td>
+<td>Description of the score</td>
+</tr>
+<tr class="even">
+<td>8. <code>MSI_SCORE_THRESHOLD_USED</code>
+</td>
+<td>Threshold on the score applied for MSI-H (by the caller, or by PCGR
+if the status was derived: default or set with
+<code>--input_msi_threshold</code>)</td>
+</tr>
+<tr class="odd">
+<td>9. <code>N_LOCI_EVALUATED</code>
+</td>
+<td>Number of microsatellite loci evaluated</td>
+</tr>
+<tr class="even">
+<td>10. <code>N_LOCI_UNSTABLE</code>
+</td>
+<td>Number of unstable microsatellite loci</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
 <h3 id="mutational-signature-contributions-tsv">Mutational signature contributions (TSV)<a class="anchor" aria-label="anchor" href="#mutational-signature-contributions-tsv"></a>
 </h3>
 <p>We provide a tab-separated values (TSV) file with information about
@@ -2798,7 +2886,7 @@ subtype)</td>
 <ul>
 <li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.xlsx</code></li>
 </ul>
-<p>It contains up to 19 sheets, each populated conditionally on the type
+<p>It contains up to 20 sheets, each populated conditionally on the type
 of input data provided and the analysis performed. Sheets with no data
 are omitted entirely. Any sheet exceeding 30,000 rows is truncated to
 the first 30,000 rows (a warning is emitted in that case; the full data
@@ -2936,10 +3024,17 @@ the same <code>TIER</code> encoding and sorting as
 <tr class="even">
 <td><code>MSI</code></td>
 <td>
+<code>--input_msi</code> provided</td>
+<td>MSI result from an external MSI caller (same content as the
+<code>.msi.tsv</code> file)</td>
+</tr>
+<tr class="odd">
+<td><code>MSI_INTERNAL</code></td>
+<td>
 <code>--input_vcf</code> provided and MSI estimation enabled</td>
 <td>MSI classifier statistics and predicted stability status</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>MUTATIONAL_SIGNATURE</code></td>
 <td>
 <code>--input_vcf</code> provided and signature estimation
@@ -2947,13 +3042,13 @@ enabled</td>
 <td>Mutational signature contributions (same content as the
 <code>.msigs.tsv.gz</code> file)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>KATAEGIS_EVENTS</code></td>
 <td>
 <code>--input_vcf</code> provided and kataegis events detected</td>
 <td>Kataegis loci identified from the somatic mutation profile</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>RNA_EXPRESSION_OUTLIERS</code></td>
 <td>
 <code>--input_rna_expression</code> provided and outlier detection
@@ -2963,7 +3058,7 @@ A subset of display-only columns (<code>GENENAME</code>,
 <code>CANCERGENE_EVIDENCE</code>, <code>TARGETED_INHIBITORS_ALL</code>,
 <code>ENSEMBL_GENE_ID</code>) are removed to reduce width</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>RNA_IMMUNE_CONTEXTURE</code></td>
 <td>
 <code>--input_rna_expression</code> provided</td>

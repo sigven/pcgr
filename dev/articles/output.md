@@ -60,8 +60,15 @@ report:
 - Indicates predicted microsatellite stability from the somatic mutation
   profile and supporting evidence (details of the underlying MSI
   statistical classifier can be found
-  [here](http://rpubs.com/sigven/msi_classification_v3))
+  [here](https://sigven-pcgr-msi-classifier.share.connect.posit.cloud/))
 - The MSI classifier was trained on TCGA exome samples.
+- If an MSI result from an external MSI caller is provided
+  (`--input_msi`), this is regarded as the primary result. In the HTML
+  report, the external result and the classifier prediction (if
+  available) are shown in separate tabs (*External caller* and *PCGR
+  classifier*), with a note on concordance in the first tab. In the PDF
+  report, only the external result is shown in detail, with a note on
+  concordance with the classifier prediction
 
 5.  **Tumor mutational burden (TMB)**
     - given a coding target region size specified by the user (ideally
@@ -465,6 +472,30 @@ The format of the TSV file is the following:
 | 9\. `TMB_ESTIMATE` | TMB estimate |
 | 10\. `TMB_UNIT` | TMB unit (i.e. mutations/Mb) |
 
+### MSI result from external caller (TSV)
+
+If an MSI result from an external MSI caller is provided
+(`--input_msi`), a normalised copy of the result is written to a
+tab-separated values (TSV) file, with the following naming convention:
+
+- `<sample_id>.pcgr.<genome_assembly>.msi.tsv`
+
+The file has one data row, and the following columns (missing values are
+denoted `.`):
+
+| Variable | Description |
+|----|----|
+| 1\. `SAMPLE_ID` | Sample identifier |
+| 2\. `MSI_STATUS` | MSI status: `MSI-H`, `MSS` or `Indeterminate` |
+| 3\. `MSI_STATUS_BASIS` | How the MSI status was obtained: `caller` (reported by the MSI caller) or `derived` (derived by PCGR from the score) |
+| 4\. `MSI_CALLER` | Name of the MSI caller |
+| 5\. `CALLER_VERSION` | Version of the MSI caller |
+| 6\. `MSI_SCORE` | Score, as reported by the MSI caller |
+| 7\. `MSI_SCORE_TYPE` | Description of the score |
+| 8\. `MSI_SCORE_THRESHOLD_USED` | Threshold on the score applied for MSI-H (by the caller, or by PCGR if the status was derived: default or set with `--input_msi_threshold`) |
+| 9\. `N_LOCI_EVALUATED` | Number of microsatellite loci evaluated |
+| 10\. `N_LOCI_UNSTABLE` | Number of unstable microsatellite loci |
+
 ### Mutational signature contributions (TSV)
 
 We provide a tab-separated values (TSV) file with information about
@@ -727,7 +758,7 @@ The Excel workbook has the following naming convention:
 
 - `<sample_id>.pcgr.<genome_assembly>.xlsx`
 
-It contains up to 19 sheets, each populated conditionally on the type of
+It contains up to 20 sheets, each populated conditionally on the type of
 input data provided and the analysis performed. Sheets with no data are
 omitted entirely. Any sheet exceeding 30,000 rows is truncated to the
 first 30,000 rows (a warning is emitted in that case; the full data is
@@ -752,7 +783,8 @@ manageable.
 | `RNA_FUSION` | `--input_rna_fusion` provided | RNA fusion annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to fusions with a non-missing `ACTIONABILITY_TIER` |
 | `RNA_FUSION_BIOMARKER` | `--input_rna_fusion` provided and biomarker hits exist | One row per biomarker evidence item matched to an RNA fusion, using the same `TIER` encoding and sorting as `SOMATIC_SNV_INDEL_BIOMARKER` |
 | `TMB` | `--input_vcf` provided | Tumor mutational burden estimates (same content as the `.tmb.tsv` file) |
-| `MSI` | `--input_vcf` provided and MSI estimation enabled | MSI classifier statistics and predicted stability status |
+| `MSI` | `--input_msi` provided | MSI result from an external MSI caller (same content as the `.msi.tsv` file) |
+| `MSI_INTERNAL` | `--input_vcf` provided and MSI estimation enabled | MSI classifier statistics and predicted stability status |
 | `MUTATIONAL_SIGNATURE` | `--input_vcf` provided and signature estimation enabled | Mutational signature contributions (same content as the `.msigs.tsv.gz` file) |
 | `KATAEGIS_EVENTS` | `--input_vcf` provided and kataegis events detected | Kataegis loci identified from the somatic mutation profile |
 | `RNA_EXPRESSION_OUTLIERS` | `--input_rna_expression` provided and outlier detection enabled | Expression outlier genes/transcripts compared to reference cohorts. A subset of display-only columns (`GENENAME`, `CANCERGENE_EVIDENCE`, `TARGETED_INHIBITORS_ALL`, `ENSEMBL_GENE_ID`) are removed to reduce width |
