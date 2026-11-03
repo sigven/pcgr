@@ -31,7 +31,8 @@ A-level evidence, for tier 2: only evidence items with B-level evidence).
 If FALSE, all evidence items associated with each variant, not only
 the tier-defining evidence items, will be considered for display in the report.}
 
-\item{variant_category}{cna, snv_indel, fusion, msi, or tmb}
+\item{variant_category}{cna, snv_indel, fusion, msi, or tmb
+(msi and tmb for predictive biomarkers only)}
 }
 \description{
 Function that gathers data tables on actionable variants
