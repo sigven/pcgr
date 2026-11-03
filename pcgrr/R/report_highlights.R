@@ -66,7 +66,9 @@ fmt_list_hl <- function(x, max_show = 5) {
 #' e.g. 'prognostic_poor', 'prognostic_better', 'diagnostic_positive' (tiers
 #' from the corresponding bm_evidence classification of each callset)
 #'
-#' @return data frame with LABEL, SYMBOL, ALTERATION and ACTIONABILITY_TIER
+#' @return data frame with LABEL, SYMBOL, ALTERATION and ACTIONABILITY_TIER;
+#' for evidence-based tiers also BM_PRIMARY_SITE (one row per primary site of
+#' the evidence items)
 #' @keywords internal
 tiered_alterations_hl <- function(report, tier = c(1, 2),
                                   clnsig = "therapeutic_sensitivity") {
@@ -92,9 +94,11 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
     if (!all(join_cols %in% colnames(cls)) ||
         !all(join_cols %in% colnames(v))) return(v[0, , drop = FALSE])
     dplyr::inner_join(
-      dplyr::select(v, -dplyr::any_of("ACTIONABILITY_TIER")),
+      dplyr::select(v, -dplyr::any_of(c("ACTIONABILITY_TIER",
+                                        "BM_PRIMARY_SITE"))),
       dplyr::distinct(dplyr::select(
-        cls, dplyr::all_of(c(join_cols, "ACTIONABILITY_TIER")))),
+        cls, dplyr::all_of(c(join_cols, "ACTIONABILITY_TIER")),
+        dplyr::any_of("BM_PRIMARY_SITE"))),
       by = join_cols, relationship = "many-to-many")
   }
   recs <- list()
@@ -106,6 +110,9 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
       TISSUE_ASSOC_RANK = snv$TISSUE_ASSOC_RANK,
       GLOBAL_ASSOC_RANK = snv$GLOBAL_ASSOC_RANK,
       ACTIONABILITY_TIER = suppressWarnings(as.integer(snv$ACTIONABILITY_TIER)))
+    if ("BM_PRIMARY_SITE" %in% colnames(snv)) {
+      recs$snv$BM_PRIMARY_SITE <- snv$BM_PRIMARY_SITE
+    }
   }
   cna <- variant_tiers("cna")
   if (isTRUE(content$cna$eval) && NROW(cna) > 0 &&
@@ -118,12 +125,22 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
         cna$VARIANT_CLASS %in% c("homdel", "hemdel", "hetdel") ~ "loss",
         .default = as.character(cna$VARIANT_CLASS)),
       ACTIONABILITY_TIER = suppressWarnings(as.integer(cna$ACTIONABILITY_TIER)))
+    if ("BM_PRIMARY_SITE" %in% colnames(cna)) {
+      recs$cna$BM_PRIMARY_SITE <- cna$BM_PRIMARY_SITE
+    }
   }
   fus <- variant_tiers("fusion")
   if (isTRUE(content$fusion$eval) && NROW(fus) > 0) {
     f <- fusion_tier_records(fus)
-    if (NROW(f) > 0) recs$fusion <- f[, c("SYMBOL", "ALTERATION",
-                                          "ACTIONABILITY_TIER")]
+    ## (one record per fusion row, in the same order)
+    if (NROW(f) > 0) {
+      if ("BM_PRIMARY_SITE" %in% colnames(fus)) {
+        f$BM_PRIMARY_SITE <- fus$BM_PRIMARY_SITE
+      }
+      recs$fusion <- f[, intersect(c("SYMBOL", "ALTERATION",
+                                     "ACTIONABILITY_TIER", "BM_PRIMARY_SITE"),
+                                   colnames(f))]
+    }
   }
   d <- dplyr::bind_rows(recs)
   if (NROW(d) == 0) {
@@ -157,7 +174,8 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
 #' potential clinical significance (AMP/ASCO/CAP Tier 1/2). These are
 #' followed by supporting findings, each included only when informative:
 #' prognostic and diagnostic biomarkers (Tier 1/2; also Tier 3 without a
-#' primary site, see progn_diagn_tiers()),
+#' primary site, see progn_diagn_tiers() - then listed with the primary sites
+#' of their evidence instead of the tier),
 #' oncogenic/likely oncogenic SNV/InDel variants, composite genomic
 #' biomarkers (TMB, MSI, external HRD status), copy number variants (amplified proto-oncogenes,
 #' deleted tumor suppressors, genome doubling, HRD score), mutational
@@ -214,28 +232,48 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
 
   ## prognostic and diagnostic biomarkers (AMP/ASCO/CAP Tier 1/2, and Tier 3
   ## when no primary site is set - see progn_diagn_tiers()) - one
-  ## finding per evidence type, listing alterations with their tier; only
-  ## included when any such evidence is found
+  ## finding per evidence type, listing alterations with their tier; when no
+  ## primary site is set, with the primary sites of the evidence instead
+  ## (more informative than the tier there); only included when any such
+  ## evidence is found
+  site <- conf$sample_properties$site
+  any_site <- is.null(site) || isTRUE(site == "Any")
+  ## types: description prefix per evidence type (clnsig)
   bm_items <- function(types) {
     items <- c()
-    for (desc in names(types)) {
+    for (clnsig in names(types)) {
       d <- tiered_alterations_hl(
-        report, tier = progn_diagn_tiers(report), clnsig = types[[desc]])
+        report, tier = progn_diagn_tiers(report), clnsig = clnsig)
       if (NROW(d) == 0) next
-      d <- d[!duplicated(d$LABEL), , drop = FALSE]
-      items <- c(items, paste0(desc, ": ", fmt_list_hl(
-        paste0(d$LABEL, " (Tier ", d$ACTIONABILITY_TIER, ")"), max_show)))
+      if (any_site && "BM_PRIMARY_SITE" %in% colnames(d)) {
+        ## (labels in order of first appearance - tier, then ranks)
+        sites <- lapply(split(d$BM_PRIMARY_SITE,
+                              factor(d$LABEL, levels = unique(d$LABEL))),
+                        function(s) sort(unique(s[!is.na(s) & s != ""])))
+        ctx <- vapply(sites, function(s) {
+          if (length(s) > 3) s <- c(utils::head(s, 3),
+                                    paste0("+", length(s) - 3, " more"))
+          if (length(s) == 0) "" else
+            paste0(" (", paste(md_escape_hl(s), collapse = ", "), ")")
+        }, character(1))
+        lbl <- paste0(names(sites), ctx)
+      } else {
+        d <- d[!duplicated(d$LABEL), , drop = FALSE]
+        lbl <- paste0(d$LABEL, " (Tier ", d$ACTIONABILITY_TIER, ")")
+      }
+      items <- c(items, paste0(types[[clnsig]], fmt_list_hl(lbl, max_show)))
     }
     items
   }
-  progn <- bm_items(c("poor outcome" = "prognostic_poor",
-                      "better outcome" = "prognostic_better"))
+  progn <- bm_items(c(prognostic_poor = "poor outcome: ",
+                      prognostic_better = "better outcome: "))
   if (length(progn) > 0) {
     supporting <- c(supporting, paste0(
       sec_link("**Prognostic biomarkers:**", "pcgr-diagn-progn"), " ",
       paste(progn, collapse = "; ")))
   }
-  diagn <- bm_items(c("supporting diagnosis" = "diagnostic_positive"))
+  ## (only evidence supporting a diagnosis is listed - no qualifier needed)
+  diagn <- bm_items(c(diagnostic_positive = ""))
   if (length(diagn) > 0) {
     supporting <- c(supporting, paste0(
       sec_link("**Diagnostic biomarkers:**", "pcgr-diagn-progn"), " ",
