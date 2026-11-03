@@ -2299,3 +2299,92 @@ load_rna_fusions <- function(
   return(results)
 
 }
+
+#' Function that loads the normalised result of an external assay/tool
+#'
+#' Reads a (single-row) tab-separated file with the result of an external
+#' assay/tool (e.g. MSI, HRD), as written by the PCGR Python workflow. All
+#' columns are read as character, and the given numeric/integer columns are
+#' converted. Missing values are given as '.', 'NA' or empty.
+#'
+#' @param fname name of the file with the normalised external result
+#' @param required_cols columns that must be present
+#' @param num_cols columns converted to numeric
+#' @param int_cols columns converted to integer
+#' @param label type of result, used in error messages (e.g. "MSI", "HRD")
+#' @return data frame with one row
+#'
+#' @export
+load_external_result <- function(fname = NULL,
+                                 required_cols = NULL,
+                                 num_cols = NULL,
+                                 int_cols = NULL,
+                                 label = "external") {
+  check_file_exists(fname)
+  result <- as.data.frame(readr::read_tsv(
+    file = fname,
+    col_types = readr::cols(.default = readr::col_character()),
+    na = c(".", "NA", ""),
+    progress = FALSE))
+
+  if (!all(required_cols %in% colnames(result)) ||
+      NROW(result) != 1) {
+    log4r_fatal(paste0(
+      "External ", label, " result (", fname,
+      ") must have one data row and the columns: ",
+      paste(required_cols, collapse = ", ")))
+  }
+  for (num_col in num_cols) {
+    result[[num_col]] <- suppressWarnings(as.numeric(result[[num_col]]))
+  }
+  for (int_col in int_cols) {
+    result[[int_col]] <- suppressWarnings(as.integer(result[[int_col]]))
+  }
+  return(result)
+}
+
+#' Function that initiates the report element of an external result
+#'
+#' @return list with elements 'eval' (FALSE), 'result' (empty data frame) and
+#' 'threshold_user_defined' (FALSE)
+#'
+#' @export
+init_external_result <- function() {
+  list(eval = FALSE, result = data.frame(), threshold_user_defined = FALSE)
+}
+
+#' Function that generates report data for the result of an external
+#' assay/tool (MSI or HRD)
+#'
+#' @param settings PCGR run/configuration settings (the normalised external
+#' result is given by \code{settings$molecular_data$fname_<type>_tsv})
+#' @param type type of result, 'msi' or 'hrd'
+#' @return list with elements 'eval', 'result' (one-row data frame) and
+#' 'threshold_user_defined' (logical: the threshold on the score used for
+#' deriving the status was set by the user, \code{--input_<type>_threshold})
+#'
+#' @export
+generate_report_data_external <- function(settings = NULL,
+                                          type = c("msi", "hrd")) {
+  type <- match.arg(type)
+  external <- init_external_result()
+  fname <- settings$molecular_data[[paste0("fname_", type, "_tsv")]]
+  if (is.null(fname) || identical(fname, "None") || !file.exists(fname)) {
+    return(external)
+  }
+  label <- toupper(type)
+  log4r_info("------")
+  log4r_info(paste0(
+    "Loading ", label, " result from external ",
+    if (type == "msi") "caller" else "assay/tool"))
+  external[["result"]] <-
+    if (type == "msi") load_external_msi(fname) else load_external_hrd(fname)
+  external[["threshold_user_defined"]] <- isTRUE(as.logical(
+    settings$conf[[paste0(type, "_external")]][["threshold_user_defined"]]))
+  external[["eval"]] <- TRUE
+  log4r_info(paste0(
+    "External ", label, " result (",
+    external$result[[paste0(label, "_CALLER")]], "): ",
+    external$result[[paste0(label, "_STATUS")]]))
+  return(external)
+}

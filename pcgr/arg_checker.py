@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pcgr import pcgr_vars, utils, msi
+from pcgr import pcgr_vars, utils, msi, hrd_external
 from pcgr.utils import getlogger, error_message, warn_message, check_file_exists, check_tabix_file
 import os
 
@@ -199,6 +199,10 @@ def verify_args(arg_dict, logger = None):
             arg_dict.get('input_msi_caller') or 'generic', arg_dict['input_msi_threshold'])
         if threshold_error is not None:
             error_message(threshold_error, logger)
+
+    if arg_dict.get('input_hrd_threshold') is not None and arg_dict.get('input_hrd') is None:
+        err_msg = "Option '--input_hrd_threshold' requires an HRD result file ('--input_hrd')"
+        error_message(err_msg, logger)
 
     if arg_dict['expression_sim'] and arg_dict['input_rna_exp'] is None:
         warn_msg = f"RNA expression similarity analysis can only be performed if --input_rna_exp is set (--input_rna_exp = {arg_dict['input_rna_exp']})."
@@ -548,6 +552,7 @@ def define_output_files(arg_dict, cpsr = False):
         output_data['tmb'] = f"{output_prefix}.tmb.tsv"
         output_data['cna_summary'] = f"{output_prefix}.cna_summary.tsv"
         output_data['msi_external'] = f"{output_prefix}.msi.tsv"
+        output_data['hrd_external'] = f"{output_prefix}.hrd.tsv"
     else:
         output_data['classification'] = f"{output_prefix}.classification.tsv.gz"
     
@@ -561,7 +566,7 @@ def define_output_files(arg_dict, cpsr = False):
     if not cpsr:
         for otype in ['cna_gene', 'cna_segment','expression', 'expression_outliers', 'snv_indel_ann',
                       'expression_similarity', 'maf', 'tmb', 'cna_summary', 'msigs', 'rna_fusion',
-                      'msi_external']:
+                      'msi_external', 'hrd_external']:
             # if annotated output cna segments exist and overwrite not set
             if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
                 err_msg = "Output files (e.g. " + str(output_data[otype]) + \
@@ -591,6 +596,8 @@ def verify_input_files(arg_dict):
     input_rna_expression_dir = 'NA'
     input_msi_dir = 'NA'
     input_msi_basename = 'NA'
+    input_hrd_dir = 'NA'
+    input_hrd_basename = 'NA'
     pon_vcf_dir = 'NA'
     pon_vcf_basename = 'NA'
     input_vcf_basename = 'NA'
@@ -674,6 +681,15 @@ def verify_input_files(arg_dict):
         input_msi_basename = os.path.basename(str(arg_dict["input_msi"]))
         input_msi_dir = os.path.dirname(os.path.abspath(arg_dict["input_msi"]))
 
+    # check external HRD result - as for MSI, the content is validated (cheaply) here to fail early
+    if arg_dict.get("input_hrd") is not None:
+        check_file_exists(os.path.abspath(arg_dict["input_hrd"]), strict = True, logger = logger)
+        hrd_external.read_external_hrd(
+            os.path.abspath(arg_dict["input_hrd"]),
+            threshold = arg_dict.get("input_hrd_threshold"), logger = logger, quiet = True)
+        input_hrd_basename = os.path.basename(str(arg_dict["input_hrd"]))
+        input_hrd_dir = os.path.dirname(os.path.abspath(arg_dict["input_hrd"]))
+
     # check if input rna fusion variants exist
     if arg_dict["input_rna_fusion"] is not None:
         check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]), strict = True, logger = logger)
@@ -740,6 +756,8 @@ def verify_input_files(arg_dict):
       "rna_expression_dir": input_rna_expression_dir,
       "msi_dir": input_msi_dir,
       "msi_basename": input_msi_basename,
+      "hrd_dir": input_hrd_dir,
+      "hrd_basename": input_hrd_basename,
       "germline_dir": input_germline_dir,
       "germline_basename": input_germline_basename,
       "germline_yaml_dir": input_germline_yaml_dir,

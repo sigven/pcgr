@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pcgr import pcgr_vars, arg_checker, utils, cna, hrd, msi
+from pcgr import pcgr_vars, arg_checker, utils, cna, hrd, hrd_external, msi
 from pcgr.utils import getlogger, check_subprocess, remove_file, random_id_generator, pd_to_csv, error_message
 from pcgr.config import populate_config_data, create_config, verify_oncotree_code, get_oncotree_lineage
 from pcgr.maf import update_maf, generate_oncokb_maf_input, add_var_id_to_vcf, append_oncokb_snv_annotations
@@ -25,7 +25,7 @@ def cli():
     program_description = (f"Personal Cancer Genome Reporter (PCGR) workflow for clinical translation of "
                            f"tumor omics data (SNVs/InDels, CNA, RNA expression, RNA fusions) - version: {pcgr_vars.PCGR_VERSION}")
     program_options = "\n\t[--input_vcf <INPUT_VCF>]\n\t[--input_cna <INPUT_CNA>]\n\t[--input_rna_fusion <INPUT_RNA_FUSION>]\n\t" + \
-        "[--input_rna_expression <INPUT_RNA_EXPRESSION>]\n\t[--input_msi <INPUT_MSI>]\n\t[--vep_dir <VEP_DIR>]\n\t--refdata_dir <REFDATA_DIR>\n\t" + \
+        "[--input_rna_expression <INPUT_RNA_EXPRESSION>]\n\t[--input_msi <INPUT_MSI>]\n\t[--input_hrd <INPUT_HRD>]\n\t[--vep_dir <VEP_DIR>]\n\t--refdata_dir <REFDATA_DIR>\n\t" + \
         "--output_dir <OUTPUT_DIR>\n\t--genome_assembly <GENOME_ASSEMBLY>\n\t--sample_id <SAMPLE_ID>"
 
     parser = argparse.ArgumentParser(description=program_description,
@@ -80,6 +80,8 @@ def cli():
                                 help = "File with bulk RNA expression counts (TPM) of transcripts in tumor (tab-separated values)")
     optional_input.add_argument("--input_msi", dest = "input_msi", 
                                 help = "Summary result file from an external MSI caller (tab-separated; see --input_msi_caller and the documentation for the expected format)")
+    optional_input.add_argument("--input_hrd", dest = "input_hrd",
+                                help = "Result file from an external HRD assay/tool (tab-separated, see the documentation for the expected format)")
 
     optional_subject.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN", 
                                   help = "Sex of the subject (default: %(default)s)")
@@ -175,7 +177,7 @@ def cli():
     optional_tmb_msi.add_argument("--tmb_ad_min", dest="tmb_ad_min", default=None, 
                                   help=("If VCF INFO tag for sequencing depth (tumor) and allelic fraction (tumor) are specified and found, \n"
                                         "set minimum required allelic depth (tumor, i.e. number of reads supporting alternate allele) for TMB calculation: default: %(default)s"))
-    optional_tmb_msi.add_argument("--input_msi_caller", dest="input_msi_caller", default=None, choices=msi.MSI_CALLERS,
+    optional_tmb_msi.add_argument("--input_msi_caller", dest="input_msi_caller", default=None, choices=pcgr_vars.MSI_CALLERS,
                                   help = "Caller that produced the file provided with --input_msi (default: generic, i.e. tab-separated file with MSI_STATUS and MSI_CALLER columns)")
     optional_tmb_msi.add_argument("--input_msi_threshold", dest="input_msi_threshold", type=float, default=None,
                                   help = "Threshold on the MSI score for MSI-H (percentage of unstable sites), for MSI callers that report a score but no MSI status (--input_msi_caller msisensor-pro; default: 20)")
@@ -218,6 +220,10 @@ def cli():
     optional_cna.add_argument("--estimate_hrd", action="store_true",
                               help = ("Estimate a genomic instability ('HRD') score (HRD-LOH + LST + TAI) from the allele-specific "
                                       "copy number segments (default: %(default)s)"))
+    optional_cna.add_argument("--input_hrd_threshold", dest="input_hrd_threshold", type=float, default=None,
+                              help = ("Threshold on the score of the external HRD result (HRD_SCORE in --input_hrd) for "
+                                      "HR-deficient (score >= threshold). Required if the file has no HRD_STATUS; if given, the "
+                                      "status is derived from the score (no default - thresholds are specific to the HRD assay/tool)"))
 
     optional_rna.add_argument("--fusion_min_split_reads", type=int, default=3, dest="fusion_min_split_reads", 
                               help = "Minimum number of split reads supporting a fusion event (default: %(default)s, minimum: 2)")
@@ -316,6 +322,7 @@ def run_pcgr(input_data, output_data, conf_options):
     input_rna_fusion = 'None'
     input_rna_expression = 'None'
     input_msi = 'None'
+    input_hrd = 'None'
     input_cpsr_calls = 'None'
     input_cpsr_yaml = 'None'
     pon_vcf = 'None'
@@ -331,6 +338,8 @@ def run_pcgr(input_data, output_data, conf_options):
         input_rna_expression = os.path.join(input_data['rna_expression_dir'], input_data['rna_expression_basename'])
     if input_data['msi_basename'] != 'NA':
         input_msi = os.path.join(input_data['msi_dir'], input_data['msi_basename'])
+    if input_data['hrd_basename'] != 'NA':
+        input_hrd = os.path.join(input_data['hrd_dir'], input_data['hrd_basename'])
     if input_data['germline_basename'] != 'NA':
         input_cpsr_calls = os.path.join(input_data['germline_dir'], input_data['germline_basename'])
     if input_data['germline_yaml_basename'] != 'NA':
@@ -405,6 +414,8 @@ def run_pcgr(input_data, output_data, conf_options):
         conf_options['molecular_data']['fname_rna_fusion_tsv'] = output_data['rna_fusion']
     if not input_msi == 'None':
         conf_options['molecular_data']['fname_msi_tsv'] = output_data['msi_external']
+    if not input_hrd == 'None':
+        conf_options['molecular_data']['fname_hrd_tsv'] = output_data['hrd_external']
     if not input_cpsr_yaml == 'None':
         conf_options['molecular_data']['fname_germline_yaml'] = input_cpsr_yaml
     if not input_rna_expression == 'None':
@@ -489,6 +500,7 @@ def run_pcgr(input_data, output_data, conf_options):
     logger.info(f'Molecular input data - somatic copy number alterations: {"OFF" if input_cna == "None" else "ON"}')
     logger.info(f'Molecular input data - tumor RNA fusion transcripts: {"OFF" if input_rna_fusion == "None" else "ON"}')
     logger.info(f'Molecular input data - external MSI result: {"OFF" if input_msi == "None" else "ON"}')
+    logger.info(f'Molecular input data - external HRD result: {"OFF" if input_hrd == "None" else "ON"}')
     logger.info(f'Molecular input data - tumor RNA expression: {"OFF" if input_rna_expression == "None" else "ON"}')
     logger.info(f'Molecular input data - germline SNVs/InDels (CPSR): {"OFF" if input_cpsr_calls == "None" else "ON"}')
     
@@ -985,6 +997,16 @@ def run_pcgr(input_data, output_data, conf_options):
             msih_threshold = conf_options['msi_external']['threshold'])
         msi.write_external_msi(msi_result, yaml_data['sample_id'], output_data['msi_external'])
         logger.info('Finished pcgr-external-msi')
+        print('----')
+
+    # PCGR|HRD - Read external HRD result and write normalised result
+    if not input_hrd == 'None':
+        logger = getlogger("pcgr-external-hrd")
+        logger.info('PCGR - EXTERNAL HRD SECTION: Import of HRD result from external assay/tool')
+        hrd_result = hrd_external.read_external_hrd(
+            input_hrd, threshold = conf_options['hrd_external']['threshold'], logger = logger)
+        hrd_external.write_external_hrd(hrd_result, yaml_data['sample_id'], output_data['hrd_external'])
+        logger.info('Finished pcgr-external-hrd')
         print('----')
 
     # PCGR|OncoKB - Annotate variants, CNAs, and fusions with OncoKB

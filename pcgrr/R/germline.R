@@ -240,24 +240,8 @@ dbsnp_germline_status <- function(sample_calls) {
 #'
 #' @export
 tcga_somatic_status <- function(sample_calls) {
-
-  invisible(
-    assertthat::assert_that(is.data.frame(sample_calls),
-                            msg = paste0("Argument 'sample_calls' must be of ",
-                                         "type data.frame"))
-  )
-  ## assign STATUS_TCGA_SOMATIC to calls with presence
-  ## in any of the TCGA cohorts (TCGA_PANCANCER_COUNT > 0)
-  if ("TCGA_PANCANCER_COUNT" %in% colnames(sample_calls)) {
-    sample_calls <- sample_calls |>
-      dplyr::mutate(
-        STATUS_TCGA =
-          dplyr::if_else(
-            !is.na(.data$TCGA_PANCANCER_COUNT),
-            TRUE, FALSE))
-  }
-  return(sample_calls)
-
+  ## presence in any of the TCGA cohorts (TCGA_PANCANCER_COUNT)
+  assign_presence_status(sample_calls, "TCGA_PANCANCER_COUNT", "STATUS_TCGA")
 }
 
 #' Function that assigns a logical (STATUS_COSMIC) reflecting whether
@@ -267,21 +251,28 @@ tcga_somatic_status <- function(sample_calls) {
 #'
 #' @export
 cosmic_somatic_status <- function(sample_calls) {
+  ## calls with an identifier in COSMIC
+  assign_presence_status(sample_calls, "COSMIC_ID", "STATUS_COSMIC")
+}
+
+#' Function that assigns a logical status column reflecting whether a variant
+#' has a (non-missing) value in a given annotation column
+#'
+#' @param sample_calls data frame with sample variant calls
+#' @param annotation_col annotation column (e.g. 'COSMIC_ID'); if not present,
+#' sample_calls is returned unchanged
+#' @param status_col name of the status column to assign
+#'
+#' @keywords internal
+assign_presence_status <- function(sample_calls, annotation_col, status_col) {
 
   invisible(
     assertthat::assert_that(is.data.frame(sample_calls),
                             msg = paste0("Argument 'sample_calls' must be of ",
                                          "type data.frame"))
   )
-
-  ## assign STATUS_COSMIC to all calls with an identifier in COSMIC
-  if ("COSMIC_ID" %in% colnames(sample_calls)) {
-    sample_calls <- sample_calls |>
-      dplyr::mutate(
-        STATUS_COSMIC =
-          dplyr::if_else(
-            !is.na(.data$COSMIC_ID),
-            TRUE, FALSE))
+  if (annotation_col %in% colnames(sample_calls)) {
+    sample_calls[[status_col]] <- !is.na(sample_calls[[annotation_col]])
   }
   return(sample_calls)
 

@@ -90,22 +90,9 @@ from typing import Optional
 
 import pandas as pd
 
+from pcgr import pcgr_vars
 from pcgr.utils import check_file_exists, error_message, get_cna_imputed_flag
 
-AUTOSOMES = [str(i) for i in range(1, 23)]
-
-HRD_LOH_SIZE_LIMIT_MB = 15.0
-LST_SEG_SIZE_LIMIT_MB = 10.0
-LST_GAP_LIMIT_MB = 3.0
-LST_MIN_ARM_SEGMENT_MB = 3.0
-
-MYRIAD_HRD_POSITIVE_THRESHOLD = 42
-
-## Minimum fraction of the autosomal genome that the copy number segments must
-## span for the HRD scar scores to be meaningful. Genome-wide profiles (WGS, WES
-## with genome-wide segmentation) span ~90% or more; profiles of targeted gene
-## panels span only a tiny fraction.
-HRD_MIN_AUTOSOMAL_COVERAGE = 0.5
 
 def read_cytoband_centromeres(cytoband_fname: str, logger: Optional[logging.Logger] = None) -> dict:
     """
@@ -191,7 +178,7 @@ def _prepare_segments(cna_df: pd.DataFrame, logger: logging.Logger, exclude_impu
     if exclude_imputed:
         seg = seg[~seg['Imputed']].copy()
     seg['Chromosome'] = seg['Chromosome'].astype(str).str.replace("^(C|c)hr", "", regex=True)
-    seg = seg[seg['Chromosome'].isin(AUTOSOMES)].copy()
+    seg = seg[seg['Chromosome'].isin(pcgr_vars.AUTOSOMES)].copy()
 
     seg['Start'] = seg['Start'].astype(int)
     seg['End'] = seg['End'].astype(int)
@@ -258,7 +245,7 @@ def calc_autosomal_segment_coverage(
     seg = _clip_segments_to_chromosomes(seg, chrom_arms)
 
     genome_length = sum(
-        chrom_arms[c]['length'] for c in AUTOSOMES if c in chrom_arms)
+        chrom_arms[c]['length'] for c in pcgr_vars.AUTOSOMES if c in chrom_arms)
     if genome_length <= 0:
         return 0.0
 
@@ -280,7 +267,7 @@ def calc_autosomal_segment_coverage(
 def check_segment_coverage(
         cna_df: pd.DataFrame,
         chrom_arms: dict,
-        min_coverage: float = HRD_MIN_AUTOSOMAL_COVERAGE,
+        min_coverage: float = pcgr_vars.HRD_MIN_AUTOSOMAL_COVERAGE,
         logger: Optional[logging.Logger] = None) -> float:
     """
     Check that the copy number segments span (at least 'min_coverage' of) the
@@ -302,7 +289,7 @@ def check_segment_coverage(
 
 def calc_hrd_loh(
         cna_df: pd.DataFrame,
-        size_limit_mb: float = HRD_LOH_SIZE_LIMIT_MB,
+        size_limit_mb: float = pcgr_vars.HRD_LOH_SIZE_LIMIT_MB,
         logger: Optional[logging.Logger] = None) -> int:
     """
     HRD-LOH (Abkevich et al. 2012): the number of LOH regions exceeding
@@ -407,9 +394,9 @@ def _count_lst_transitions(arm_seg: pd.DataFrame, seg_size_limit_bp: float, gap_
 def calc_lst(
         cna_df: pd.DataFrame,
         chrom_arms: dict,
-        seg_size_limit_mb: float = LST_SEG_SIZE_LIMIT_MB,
-        gap_limit_mb: float = LST_GAP_LIMIT_MB,
-        min_arm_segment_mb: float = LST_MIN_ARM_SEGMENT_MB,
+        seg_size_limit_mb: float = pcgr_vars.LST_SEG_SIZE_LIMIT_MB,
+        gap_limit_mb: float = pcgr_vars.LST_GAP_LIMIT_MB,
+        min_arm_segment_mb: float = pcgr_vars.LST_MIN_ARM_SEGMENT_MB,
         logger: Optional[logging.Logger] = None) -> int:
     """
     LST (Popova et al. 2012): the number of chromosomal breaks between
@@ -449,13 +436,11 @@ def calc_lst(
     return n_lst
 
 
-TAI_MIN_SEGMENT_MB = 1.0
-
 
 def calc_tai(
         cna_df: pd.DataFrame,
         chrom_arms: dict,
-        min_segment_mb: float = TAI_MIN_SEGMENT_MB,
+        min_segment_mb: float = pcgr_vars.TAI_MIN_SEGMENT_MB,
         logger: Optional[logging.Logger] = None) -> int:
     """
     Telomeric allelic imbalance (Birkbak et al. 2012): the number of regions with
@@ -533,9 +518,6 @@ def calc_tai(
     return n_tai
 
 
-FGA_BASELINE_TOTAL_CN = 2
-WGD_MIN_FRACTION = 0.5
-
 
 def _clip_segments_to_chromosomes(seg: pd.DataFrame, chrom_arms: Optional[dict]) -> pd.DataFrame:
     """Drop segments starting beyond, and clip segment ends to, the chromosome length."""
@@ -577,7 +559,7 @@ def calc_genome_doubling(
     if total_length <= 0:
         return None
     wgd_fraction = round(float(seg_length[seg['nMajor'] >= 2].sum() / total_length), 4)
-    return {'wgd_fraction': wgd_fraction, 'genome_doubled': bool(wgd_fraction >= WGD_MIN_FRACTION)}
+    return {'wgd_fraction': wgd_fraction, 'genome_doubled': bool(wgd_fraction >= pcgr_vars.WGD_MIN_FRACTION)}
 
 
 def calc_fraction_genome_altered(
@@ -619,7 +601,7 @@ def calc_fraction_genome_altered(
     if total_length <= 0:
         return None
 
-    altered = (seg['nMajor'] + seg['nMinor']) != FGA_BASELINE_TOTAL_CN
+    altered = (seg['nMajor'] + seg['nMinor']) != pcgr_vars.FGA_BASELINE_TOTAL_CN
     return round(float(seg_length[altered].sum() / total_length), 4)
 
 
@@ -643,7 +625,7 @@ def compute_genomic_instability_score(
             adjusted variant of the score (LST - 15.5*ploidy + HRD-LOH + TAI).
             This adjustment is present in scarHRD's source but is not the
             widely-cited/clinically-thresholded score (that is the plain,
-            unweighted sum - see MYRIAD_HRD_POSITIVE_THRESHOLD).
+            unweighted sum - see pcgr_vars.MYRIAD_HRD_POSITIVE_THRESHOLD).
         cytoband_fname: path to the cytoband file of the PCGR data bundle
             ('misc/tsv/cytoband/cytoband.tsv.gz'). If given, the cytoband 'acen'
             bands are used as centromeres for LST/TAI, which gives results
@@ -700,7 +682,7 @@ def compute_genomic_instability_score(
             f"allele-specific copy number treated as unknown state")
     logger.info(
         f"Genomic instability score: HRD-LOH={hrd_loh}, LST={lst}, TAI={tai}, "
-        f"sum={hrd_sum} (Myriad HRD-positive threshold: >= {MYRIAD_HRD_POSITIVE_THRESHOLD}, ovarian cancer only)")
+        f"sum={hrd_sum} (Myriad HRD-positive threshold: >= {pcgr_vars.MYRIAD_HRD_POSITIVE_THRESHOLD}, ovarian cancer only)")
     return result
 
 

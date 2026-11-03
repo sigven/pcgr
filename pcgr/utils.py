@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import contextlib
 import sys
 import subprocess
 import shutil
@@ -52,8 +53,11 @@ def pd_to_csv(df, fname, index = False, col_sep = "\t", compression = "gzip"):
     # Make a copy to avoid modifying the original dataframe
     df = df.copy()
 
-    # Opt-in to future pandas behavior to suppress FutureWarning on fillna
-    with pd.option_context('future.no_silent_downcasting', True):
+    # Opt-in to future pandas behavior to suppress FutureWarning on fillna (pandas 2.x;
+    # the default from pandas 3, where the option is deprecated)
+    no_downcasting = pd.option_context('future.no_silent_downcasting', True) \
+        if int(pd.__version__.split('.')[0]) < 3 else contextlib.nullcontext()
+    with no_downcasting:
         ## Replace NaN with '.' and handle empty strings for each column
         for col in df.columns:
             if df[col].dtype == 'object' or pd.api.types.is_string_dtype(df[col]):

@@ -1,0 +1,62 @@
+## HRD status
+
+Homologous recombination deficiency (HRD) is the result of impaired repair of DNA double-strand breaks by homologous recombination (e.g. through biallelic inactivation of _BRCA1_ or _BRCA2_), and leaves characteristic _scars_ and mutational patterns in the tumor genome. HRD is of clinical significance particularly in ovarian, breast, prostate and pancreatic cancers, where it is associated with sensitivity to PARP inhibitors and platinum-based chemotherapy.
+
+```{r hrd_layout}
+#| echo: false
+
+## Result from an external HRD assay/tool and the genomic scar score estimated
+## by PCGR are shown side by side (tabs) when both are available
+hrd_ext_eval <- isTRUE(pcg_report$content$hrd$external$eval)
+hrd_int_eval <- isTRUE(pcg_report$content$hrd$internal_eval)
+hrd_tabs <- hrd_ext_eval && hrd_int_eval
+hrd_tab_ext <- "External assay/tool"
+hrd_tab_int <- "PCGR genomic scar score"
+```
+
+```{r hrd_open_tabset}
+#| echo: false
+#| eval: !expr hrd_tabs
+#| output: asis
+
+cat("\n::: {.panel-tabset}\n\n")
+```
+
+```{r hrd_heading_external}
+#| echo: false
+#| eval: !expr hrd_ext_eval
+#| output: asis
+
+cat("\n### ", if (hrd_tabs) hrd_tab_ext else "HRD status from external assay/tool", "\n\n", sep = "")
+```
+
+```{r pcgr_hrd_external}
+#| child: 'pcgr_quarto_report/hrd/external.qmd'
+#| eval: !expr hrd_ext_eval
+
+```
+
+```{r hrd_heading_internal}
+#| echo: false
+#| eval: !expr hrd_int_eval
+#| output: asis
+
+cat("\n### ", if (hrd_tabs) hrd_tab_int else "Genomic scar (HRD) score", "\n\n", sep = "")
+```
+
+```{r pcgr_hrd_internal}
+#| child: 'pcgr_quarto_report/hrd/internal.qmd'
+#| eval: !expr hrd_int_eval
+
+```
+
+```{r hrd_close_tabset}
+#| echo: false
+#| eval: !expr hrd_tabs
+#| output: asis
+
+cat("\n:::\n\n")
+```
+
+<br>
+<br>

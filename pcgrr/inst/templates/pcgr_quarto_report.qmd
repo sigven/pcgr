@@ -109,6 +109,12 @@ if(is_tumor_only == TRUE){
 
 ```
 
+```{r pcgr_hrd}
+#| child: 'pcgr_quarto_report/hrd.qmd'
+#| eval: !expr isTRUE(pcg_report$content$hrd$eval)
+
+```
+
 ```{r pcgr_tmb}
 #| child: 'pcgr_quarto_report/mutational_burden.qmd'
 #| eval: !expr isTRUE(pcg_report$content$tmb$eval)

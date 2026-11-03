@@ -48,7 +48,7 @@ pdiakumis <- user("pdiakumis")
 
 ## v2.4.0
 
-- Date: **2026-10-XX**
+- Date: **2026-11-XX**
 - Data bundle update (`20261022`) and software updates
   - Ensembl VEP `v116.3` / GENCODE v50 (GRCh38; v19 for GRCh37)
   - ClinVar (2026-10)
@@ -66,6 +66,11 @@ pdiakumis <- user("pdiakumis")
   - MSI results from external MSI callers can now be provided with `--input_msi` (and `--input_msi_caller`), in the native summary format of MSIsensor-pro or in a simple generic format. For MSIsensor-pro (score, but no MSI status), the threshold on the percentage of unstable sites for MSI-H is 20 by default, and can be set with `--input_msi_threshold` ([issue 309](https://github.com/sigven/pcgr/issues/309))
   - The external result is shown in the MSI section of the report (HTML and PDF), alone or together with the PCGR MSI classifier (`--estimate_msi`) with an indication of concordance, and is used for the assessment of MSI-High biomarker evidence. It can be used with any assay type (including tumor-only and targeted panel data)
   - New output file (`msi.tsv`) and Excel sheet (`MSI`) for the external MSI result. The Excel sheet with PCGR's statistical MSI classifier output is now named `MSI_INTERNAL` (previously `MSI`)
+
+- **External HRD result**
+  - HRD results from external HRD assays/tools (e.g. genome-wide SNP panels, mutational signature-based classifiers) can now be provided with `--input_hrd`, in a simple tab-separated format. The kind of score is stated by the user in the file (`HRD_SCORE_TYPE`: `genomic_scar`, `mutational_signature`, `composite` or `other`), and is not inferred by PCGR. The HRD status (_HR-deficient_/_HR-proficient_/_Indeterminate_) is either given in the file, or derived from the score with a user-defined threshold (`--input_hrd_threshold`; no default, as thresholds are specific to the assay/tool) ([issue 310](https://github.com/sigven/pcgr/issues/310))
+  - New HRD section in the report (HTML; part of _Composite genomic biomarkers_ in the PDF), showing the external result alone or side by side with the genomic scar score of PCGR (`--estimate_hrd`), which is moved there from the CNA section. An external _HR-deficient_ status is shown as a label in the key findings. It can be used with any assay type (including tumor-only and targeted panel data)
+  - New output file (`hrd.tsv`) and Excel sheet (`HRD`) for the external HRD result
 
 - **HTML report tables and figures**
   - Germline findings table now uses [reactable](https://glin.github.io/reactable/) (in place of DT), with a compact main row (gene, alteration, consequence, genotype, classification, ACMG criteria, inheritance) and expandable row details

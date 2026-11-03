@@ -30,7 +30,7 @@ followed by supporting findings, each included only when informative:
 prognostic and diagnostic biomarkers (Tier 1/2; also Tier 3 without a
 primary site, see progn_diagn_tiers()),
 oncogenic/likely oncogenic SNV/InDel variants, composite genomic
-biomarkers (TMB, MSI), copy number variants (amplified proto-oncogenes,
+biomarkers (TMB, MSI, external HRD status), copy number variants (amplified proto-oncogenes,
 deleted tumor suppressors, genome doubling, HRD score), mutational
 signatures, kataegis, germline findings (CPSR), and transcriptome findings
 (RNA fusions, expression outliers).

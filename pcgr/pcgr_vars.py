@@ -17,6 +17,78 @@ RECOMMENDED_N_MUT_SIGNATURE = 200
 MINIMUM_N_MUT_SIGNATURE = 100
 MAX_SIGNATURE_PREVALENCE = 20
 
+## MSI - results from external MSI callers (--input_msi)
+MSI_CALLERS = ['generic', 'msisensor-pro']
+MSI_STATUS_H = 'MSI-H'
+MSI_STATUS_MSS = 'MSS'
+MSI_STATUS_INDETERMINATE = 'Indeterminate'
+## Default threshold on the MSI score for callers that report a score but no MSI status
+## (the status is then derived by PCGR). For MSIsensor-pro: percentage of unstable sites at
+## or above which a result is called MSI-H. MSIsensor-pro itself does not report a status
+## (nor define a cutoff) - this is the cutoff used in practice by users of the tool. Practice
+## varies (assay, tumor-only versus tumor-normal), hence the threshold can be set by the user
+## (--input_msi_threshold). Callers that report their own status (e.g. MANTIS, generic format)
+## have no entry here - their status is used as is.
+MSI_CALLER_DEFAULT_THRESHOLDS = {'msisensor-pro': 20.0}
+## Header of the native MSIsensor-pro summary file
+MSISENSOR_PRO_SUMMARY_HEADER = ['Total_Number_of_Sites', 'Number_of_Unstable_Sites', '%']
+## Columns of the normalised external MSI result (<output_prefix>.msi.tsv, read by pcgrr)
+MSI_EXTERNAL_COLUMNS = [
+    'SAMPLE_ID',
+    'MSI_STATUS',            ## MSI-H, MSS or Indeterminate
+    'MSI_STATUS_BASIS',      ## 'caller' (status reported by caller) or 'derived' (by PCGR from the score)
+    'MSI_CALLER',
+    'CALLER_VERSION',
+    'MSI_SCORE',
+    'MSI_SCORE_TYPE',
+    'MSI_SCORE_THRESHOLD_USED',  ## threshold on the score for MSI-H (by the caller, or by PCGR if status is derived)
+    'N_LOCI_EVALUATED',
+    'N_LOCI_UNSTABLE',
+]
+
+## HRD - genomic scar score estimated by PCGR (--estimate_hrd, scarHRD algorithm)
+HRD_LOH_SIZE_LIMIT_MB = 15.0
+LST_SEG_SIZE_LIMIT_MB = 10.0
+LST_GAP_LIMIT_MB = 3.0
+LST_MIN_ARM_SEGMENT_MB = 3.0
+TAI_MIN_SEGMENT_MB = 1.0
+MYRIAD_HRD_POSITIVE_THRESHOLD = 42
+## Minimum fraction of the autosomal genome that the copy number segments must
+## span for the HRD scar scores to be meaningful. Genome-wide profiles (WGS, WES
+## with genome-wide segmentation) span ~90% or more; profiles of targeted gene
+## panels span only a tiny fraction.
+HRD_MIN_AUTOSOMAL_COVERAGE = 0.5
+## Fraction of genome altered (baseline total copy number) and whole-genome doubling
+FGA_BASELINE_TOTAL_CN = 2
+WGD_MIN_FRACTION = 0.5
+
+## HRD - results from external HRD assays/tools (--input_hrd)
+HRD_STATUS_DEFICIENT = 'HR-deficient'
+HRD_STATUS_PROFICIENT = 'HR-proficient'
+HRD_STATUS_INDETERMINATE = 'Indeterminate'
+## Broad categories of HRD scores (HRD_SCORE_TYPE), with a description for display
+HRD_SCORE_TYPES = {
+    'genomic_scar': 'genomic scar score',
+    'mutational_signature': 'mutational signature-based classifier',
+    'composite': 'composite model (genomic scars and mutational signatures)',
+    'other': 'other',
+}
+## Columns of the normalised external HRD result (<output_prefix>.hrd.tsv, read by pcgrr)
+HRD_EXTERNAL_COLUMNS = [
+    'SAMPLE_ID',
+    'HRD_STATUS',                ## HR-deficient, HR-proficient or Indeterminate
+    'HRD_STATUS_BASIS',          ## 'caller' (status given in the file) or 'derived' (by PCGR from the score)
+    'HRD_CALLER',
+    'CALLER_VERSION',
+    'HRD_SCORE_TYPE',            ## one of HRD_SCORE_TYPES
+    'HRD_SCORE_DESCRIPTION',
+    'HRD_SCORE',
+    'HRD_SCORE_THRESHOLD_USED',  ## threshold on the score for HR-deficient (by the caller, or by PCGR if status is derived)
+    'HRD_LOH',
+    'HRD_LST',
+    'HRD_TAI',
+]
+
 ## GENCODE versions
 GENCODE_VERSION = {'grch38': 50,'grch37': 19}
 

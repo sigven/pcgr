@@ -159,7 +159,7 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
 #' prognostic and diagnostic biomarkers (Tier 1/2; also Tier 3 without a
 #' primary site, see progn_diagn_tiers()),
 #' oncogenic/likely oncogenic SNV/InDel variants, composite genomic
-#' biomarkers (TMB, MSI), copy number variants (amplified proto-oncogenes,
+#' biomarkers (TMB, MSI, external HRD status), copy number variants (amplified proto-oncogenes,
 #' deleted tumor suppressors, genome doubling, HRD score), mutational
 #' signatures, kataegis, germline findings (CPSR), and transcriptome findings
 #' (RNA fusions, expression outliers).
@@ -293,6 +293,12 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
       msi_status_is_high(content$msi, high_confidence_only = TRUE)) {
     pills <- c(pills, "MSI-high")
     pill_targets <- c(pill_targets, "pcgr-msi")
+  }
+  ## HR-deficient - external HRD result only (the genomic scar score of
+  ## PCGR is not thresholded, and is listed with the copy number features)
+  if (isTRUE(content$hrd$eval) && hrd_status_is_deficient(content$hrd)) {
+    pills <- c(pills, "HR-deficient")
+    pill_targets <- c(pill_targets, "pcgr-hrd")
   }
 
   ## copy number features

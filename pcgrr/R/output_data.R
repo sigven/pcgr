@@ -34,7 +34,10 @@ get_settings_sheet <- function(report = NULL) {
     data.frame(SECTION = "General", PARAMETER = "Actionability guidelines",
                VALUE = "AMP/ASCO/CAP"),
     data.frame(SECTION = "General", PARAMETER = "Oncogenicity guidelines",
-               VALUE = "ClinGen/CGC/VICC")
+               VALUE = "ClinGen/CGC/VICC"),
+    data.frame(SECTION = "General", PARAMETER = "HRD assay/tool (external)",
+               VALUE = if (isTRUE(report$content$hrd$external$eval))
+                 hrd_external_display(report$content$hrd)$caller_label else "OFF")
   )
 
   ## SNV/InDel settings — only when SNV/InDel data present
@@ -479,6 +482,12 @@ get_excel_sheets <- function(report = NULL) {
   ## MSI - result from external MSI caller (takes precedence, hence 'MSI')
   if (isTRUE(report$content$msi$external$eval)) {
     excel_sheets[['MSI']] <- report$content$msi$external$result
+  }
+
+  ## HRD - result from external HRD assay/tool (the genomic scar score
+  ## estimated by PCGR is part of the CNA_SUMMARY sheet)
+  if (isTRUE(report$content$hrd$external$eval)) {
+    excel_sheets[['HRD']] <- report$content$hrd$external$result
   }
 
   ## Immune contexture

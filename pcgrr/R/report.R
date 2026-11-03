@@ -99,6 +99,7 @@ init_report <- function(yaml_fname = NULL,
                      "mutational_signatures",
                      "tmb",
                      "msi",
+                     "hrd",
                      "germline_classified",
                      "rainfall",
                      "kataegis",
@@ -172,9 +173,10 @@ init_report <- function(yaml_fname = NULL,
       if (a_elem == "msi") {
         report[["content"]][[a_elem]][["missing_data"]] <- FALSE
         report[["content"]][[a_elem]][["prediction"]] <- list()
-        report[["content"]][[a_elem]][["external"]] <-
-          list(eval = FALSE, result = data.frame(),
-               threshold_user_defined = FALSE)
+        report[["content"]][[a_elem]][["external"]] <- init_external_result()
+      }
+      if (a_elem == "hrd") {
+        report[["content"]][[a_elem]] <- init_hrd_content()
       }
       if (a_elem == "tumor_only") {
         report[["content"]][[a_elem]] <-
@@ -292,8 +294,7 @@ init_msi_content <- function() {
   rep[["missing_data"]] <- FALSE
   rep[["low_mutation_warning"]] <- FALSE
   rep[["prediction"]] <- list()
-  rep[["external"]] <- list(
-    eval = FALSE, result = data.frame(), threshold_user_defined = FALSE)
+  rep[["external"]] <- init_external_result()
 
   return(rep)
 

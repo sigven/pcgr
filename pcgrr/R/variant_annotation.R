@@ -597,53 +597,10 @@ append_targeted_drug_annotations <- function(
     var_df,
     primary_site = "Breast",
     ref_data = NULL) {
-
-  if (any(grepl(paste0("^SYMBOL$"), names(var_df))) &
-      any(grepl(paste0("^VAR_ID$"), names(var_df))) &
-      !is.null(ref_data)) {
-    var_drug_df <- dplyr::select(
-      var_df, c("VAR_ID","SYMBOL")) |>
-      dplyr::filter(!is.na(.data$SYMBOL)) |>
-      dplyr::distinct()
-    if (nrow(var_drug_df) > 0) {
-      var_drug_df <- var_drug_df |>
-        dplyr::left_join(
-          ref_data[['drug']][['targeted_inhibition_any_label']],
-          by = c("SYMBOL")) |>
-        dplyr::left_join(
-          dplyr::filter(
-            ref_data[['drug']][['targeted_inhibition_on_label']],
-            .data$QUERY_SITE == primary_site),
-          by = c("SYMBOL")) |>
-        dplyr::select(-c("QUERY_SITE")) |>
-        dplyr::distinct() |>
-        dplyr::filter(
-          !is.na(.data$TARGETED_INHIBITORS_ALL2)) |>
-        dplyr::distinct()
-      if (NROW(var_drug_df) > 0) {
-        var_df <-
-          dplyr::left_join(
-            var_df,
-            var_drug_df,
-            by = c("VAR_ID","SYMBOL")
-          ) |>
-          dplyr::select(
-            -c("TARGETED_INHIBITORS",
-               "TARGETED_INHIBITORS_ALL")
-          )
-      }else{
-        #vcf_data_df$TARGETED_INHIBITORS_OFF_LABEL <- NA
-        var_df$TARGETED_INHIBITORS2 <- NA
-        var_df$TARGETED_INHIBITORS_ALL2 <- NA
-      }
-    }
-    else{
-      var_df$TARGETED_INHIBITORS2 <- NA
-      var_df$TARGETED_INHIBITORS_ALL2 <- NA
-    }
-  }
-
-  return(var_df)
+  join_targeted_drugs(
+    var_df, primary_site = primary_site, ref_data = ref_data,
+    drop_cols = c("TARGETED_INHIBITORS", "TARGETED_INHIBITORS_ALL"),
+    empty_cols = c("TARGETED_INHIBITORS2", "TARGETED_INHIBITORS_ALL2"))
 }
 
 #' Function that adds protein domain annotations (PFAM)
@@ -795,6 +752,28 @@ append_drug_var_link <- function(
     var_df,
     primary_site = "Breast",
     ref_data = NULL) {
+  join_targeted_drugs(
+    var_df, primary_site = primary_site, ref_data = ref_data,
+    drop_cols = NULL,
+    empty_cols = c("TARGETED_INHIBITORS", "TARGETED_INHIBITORS_ALL"))
+}
+
+#' Function that joins targeted drugs (any label, and on-label for the
+#' primary site) to a list of variants, by gene (SYMBOL)
+#'
+#' @param var_df data frame with variants (columns VAR_ID and SYMBOL)
+#' @param primary_site primary tumor sample site
+#' @param ref_data PCGR/CPSR reference data object
+#' @param drop_cols drug columns removed after the join
+#' @param empty_cols drug columns set to NA when no variant has targeted drugs
+#'
+#' @keywords internal
+join_targeted_drugs <- function(
+    var_df,
+    primary_site = "Breast",
+    ref_data = NULL,
+    drop_cols = NULL,
+    empty_cols = NULL) {
 
   if (any(grepl(paste0("^SYMBOL$"), names(var_df))) &
       any(grepl(paste0("^VAR_ID$"), names(var_df))) &
@@ -806,7 +785,7 @@ append_drug_var_link <- function(
     if (nrow(var_drug_df) > 0) {
       var_drug_df <- var_drug_df |>
         dplyr::left_join(
-            ref_data[['drug']][['targeted_inhibition_any_label']],
+          ref_data[['drug']][['targeted_inhibition_any_label']],
           by = c("SYMBOL")) |>
         dplyr::left_join(
           dplyr::filter(
@@ -818,22 +797,21 @@ append_drug_var_link <- function(
         dplyr::filter(
           !is.na(.data$TARGETED_INHIBITORS_ALL2)) |>
         dplyr::distinct()
-      if (NROW(var_drug_df) > 0) {
-        var_df <-
-          dplyr::left_join(
-            var_df,
-            var_drug_df,
-            by = c("VAR_ID","SYMBOL")
-          )
-      }else{
-        #vcf_data_df$TARGETED_INHIBITORS_OFF_LABEL <- NA
-        var_df$TARGETED_INHIBITORS <- NA
-        var_df$TARGETED_INHIBITORS_ALL <- NA
-      }
     }
-    else{
-      var_df$TARGETED_INHIBITORS <- NA
-      var_df$TARGETED_INHIBITORS_ALL <- NA
+    if (NROW(var_drug_df) > 0) {
+      var_df <-
+        dplyr::left_join(
+          var_df,
+          var_drug_df,
+          by = c("VAR_ID","SYMBOL")
+        )
+      if (!is.null(drop_cols)) {
+        var_df <- dplyr::select(var_df, -dplyr::all_of(drop_cols))
+      }
+    } else {
+      for (col in empty_cols) {
+        var_df[[col]] <- NA
+      }
     }
   }
 

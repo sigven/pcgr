@@ -58,6 +58,9 @@ indicates the bundle version for reporting purposes.
 
 **Tip 2**: The `data/grch3x/data_overview.grch3x.html` file provides a report with an overview and statistics of the key resources included in the reference bundle.
 
+You can also view the content reports of the latest reference bundles here:
+[https://sigven.github.io/pcgrdb/](https://sigven.github.io/pcgrdb/)
+
 #### Bash example
 
 ```{bash echo=FALSE}

@@ -45,27 +45,32 @@ by the user. The following sections may be included in the report:
   * The MSI classifier was trained on TCGA exome samples.
   * If an MSI result from an external MSI caller is provided (`--input_msi`), this is regarded as the primary result. In the HTML report, the external result and the classifier prediction (if available) are shown in separate tabs (_External caller_ and _PCGR classifier_), with a note on concordance in the first tab. In the PDF report, only the external result is shown in detail, with a note on concordance with the classifier prediction
 
-5. __Tumor mutational burden (TMB)__
+5. __HRD status__
+  * Result of an external HRD assay/tool (`--input_hrd`): HRD status (_HR-deficient_, _HR-proficient_ or _Indeterminate_), score and kind of score (as stated in the input file), and how the status was obtained (reported by the assay/tool, or derived by PCGR with `--input_hrd_threshold`)
+  * Genomic scar (HRD) score estimated by PCGR from the allele-specific copy number segments (`--estimate_hrd`; HRD-LOH, LST, TAI and their sum - research use only)
+  * If both are available, they are shown in separate tabs (_External assay/tool_ and _PCGR genomic scar score_) in the HTML report; in the PDF report, HRD is part of the _Composite genomic biomarkers_ section
+
+6. __Tumor mutational burden (TMB)__
 	* given a coding target region size specified by the user (ideally the __callable target size__), an estimate of the mutational burden is provided
 	* The estimated TMB is shown in the context of TMB distributions from different primary sites in TCGA
 
-6. __Mutational signatures__
+7. __Mutational signatures__
   * Estimation of relative contribution of [known mutational signatures](http://cancer.sanger.ac.uk/cosmic/signatures) in tumor sample (using [MutationalPatterns](https://github.com/ToolsVanBox/MutationalPatterns) as the underlying framework)
   * Datatable with signatures found and proposed underlying etiologies
   
-7. __Kataegis events__
+8. __Kataegis events__
   * Kataegis events are clusters of particular SNV types. The report includes a datatable with all detected kataegis events.
 
-8. __RNA fusions__
+9. __RNA fusions__
   * Fusion partners are annotated with respect to oncogene status and overlap in the Mitelman database of chromosomal aberrations in cancer
   * Clinical actionability evidence linked to fusion events is shown where available (AMP/ASCO/CAP guidelines)
 
-9. __RNA expression analysis__
+10. __RNA expression analysis__
   * Datatable with expression outliers - as compared to distribution in reference cohorts
   * Datatable with correlation between gene expression in query sample and samples in other reference cohorts (TCGA, Treehouse Childhood Cancer Initiative, DepMap)
   * Immune contexture profiling
 
-10. __Documentation__
+11. __Documentation__
   * Annotation resources - databases with version and licensing information
 	* Report contents - brief description of the main sections in the report
   * References - supporting scientific literature (key report elements)
@@ -431,6 +436,29 @@ The file has one data row, and the following columns (missing values are denoted
 | 9. `N_LOCI_EVALUATED` | Number of microsatellite loci evaluated |
 | 10. `N_LOCI_UNSTABLE` | Number of unstable microsatellite loci |
 
+### HRD result from external assay/tool (TSV)
+
+If an HRD result from an external assay/tool is provided (`--input_hrd`), a normalised copy of the result is written to a tab-separated values (TSV) file, with the following naming convention:
+
+- `<sample_id>.pcgr.<genome_assembly>.hrd.tsv`
+
+The file has one data row, and the following columns (missing values are denoted `.`):
+
+| Variable | Description |
+|----------|-------------|
+| 1. `SAMPLE_ID` | Sample identifier |
+| 2. `HRD_STATUS` | HRD status: `HR-deficient`, `HR-proficient` or `Indeterminate` |
+| 3. `HRD_STATUS_BASIS` | How the HRD status was obtained: `caller` (given in the input file) or `derived` (derived by PCGR from the score with `--input_hrd_threshold`) |
+| 4. `HRD_CALLER` | Name of the HRD assay/tool |
+| 5. `CALLER_VERSION` | Version of the HRD assay/tool |
+| 6. `HRD_SCORE_TYPE` | Kind of score: `genomic_scar`, `mutational_signature`, `composite` or `other` |
+| 7. `HRD_SCORE_DESCRIPTION` | Description of the score |
+| 8. `HRD_SCORE` | Score, as reported by the assay/tool |
+| 9. `HRD_SCORE_THRESHOLD_USED` | Threshold on the score for HR-deficient (by the assay/tool, or by PCGR if the status was derived) |
+| 10. `HRD_LOH` | Genomic scar component: HRD-LOH |
+| 11. `HRD_LST` | Genomic scar component: LST |
+| 12. `HRD_TAI` | Genomic scar component: TAI |
+
 ### Mutational signature contributions (TSV)
 
 We provide a tab-separated values (TSV) file with information about mutational signatures detected in the tumor sample. The file has the following naming convention:
@@ -672,6 +700,7 @@ The table below describes each sheet, when it is included, and any filtering or 
 | `TMB` | `--input_vcf` provided | Tumor mutational burden estimates (same content as the `.tmb.tsv` file) |
 | `MSI` | `--input_msi` provided | MSI result from an external MSI caller (same content as the `.msi.tsv` file) |
 | `MSI_INTERNAL` | `--input_vcf` provided and MSI estimation enabled | MSI classifier statistics and predicted stability status |
+| `HRD` | `--input_hrd` provided | HRD result from an external HRD assay/tool (same content as the `.hrd.tsv` file) |
 | `MUTATIONAL_SIGNATURE` | `--input_vcf` provided and signature estimation enabled | Mutational signature contributions (same content as the `.msigs.tsv.gz` file) |
 | `KATAEGIS_EVENTS` | `--input_vcf` provided and kataegis events detected | Kataegis loci identified from the somatic mutation profile |
 | `RNA_EXPRESSION_OUTLIERS` | `--input_rna_expression` provided and outlier detection enabled | Expression outlier genes/transcripts compared to reference cohorts. A subset of display-only columns (`GENENAME`, `CANCERGENE_EVIDENCE`, `TARGETED_INHIBITORS_ALL`, `ENSEMBL_GENE_ID`) are removed to reduce width |

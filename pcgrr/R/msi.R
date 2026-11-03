@@ -493,27 +493,12 @@ msi_status_is_high <- function(msi_content = NULL,
 #'
 #' @export
 load_external_msi <- function(fname = NULL) {
-  check_file_exists(fname)
-  msi_result <- as.data.frame(readr::read_tsv(
-    file = fname,
-    col_types = readr::cols(.default = readr::col_character()),
-    na = c(".", "NA", ""),
-    progress = FALSE))
-
-  required_cols <- c("MSI_STATUS", "MSI_STATUS_BASIS", "MSI_CALLER")
-  if (!all(required_cols %in% colnames(msi_result)) ||
-      NROW(msi_result) != 1) {
-    log4r_fatal(paste0(
-      "External MSI result (", fname, ") must have one data row and the columns: ",
-      paste(required_cols, collapse = ", ")))
-  }
-  for (num_col in c("MSI_SCORE", "MSI_SCORE_THRESHOLD_USED")) {
-    msi_result[[num_col]] <- suppressWarnings(as.numeric(msi_result[[num_col]]))
-  }
-  for (int_col in c("N_LOCI_EVALUATED", "N_LOCI_UNSTABLE")) {
-    msi_result[[int_col]] <- suppressWarnings(as.integer(msi_result[[int_col]]))
-  }
-  return(msi_result)
+  load_external_result(
+    fname,
+    required_cols = c("MSI_STATUS", "MSI_STATUS_BASIS", "MSI_CALLER"),
+    num_cols = c("MSI_SCORE", "MSI_SCORE_THRESHOLD_USED"),
+    int_cols = c("N_LOCI_EVALUATED", "N_LOCI_UNSTABLE"),
+    label = "MSI")
 }
 
 #' Function that generates report data for an external MSI result
@@ -526,22 +511,7 @@ load_external_msi <- function(fname = NULL) {
 #'
 #' @export
 generate_report_data_msi_external <- function(settings = NULL) {
-  external <- list(
-    eval = FALSE, result = data.frame(), threshold_user_defined = FALSE)
-  fname <- settings$molecular_data$fname_msi_tsv
-  if (is.null(fname) || identical(fname, "None") || !file.exists(fname)) {
-    return(external)
-  }
-  log4r_info("------")
-  log4r_info("Loading MSI result from external caller")
-  external[["result"]] <- load_external_msi(fname)
-  external[["threshold_user_defined"]] <-
-    isTRUE(as.logical(settings$conf$msi_external$threshold_user_defined))
-  external[["eval"]] <- TRUE
-  log4r_info(paste0(
-    "External MSI result (", external$result$MSI_CALLER, "): ",
-    external$result$MSI_STATUS))
-  return(external)
+  generate_report_data_external(settings, type = "msi")
 }
 
 #' Function that compares the external MSI result with the PCGR MSI classifier
@@ -757,64 +727,6 @@ msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction, color_pale
                    plot.margin = (grid::unit(c(0.5, 0.5, 0.5, 0.5), "cm"))) +
     ggplot2::geom_vline(xintercept = as.numeric(indel_fraction),
                         size = 1.1, linetype = "dotted")
-
-  return(p)
-
-}
-
-#' Function that plots the indel load for a given sample and
-#' contrasts this with the distribution for MSI-H/MSS samples from TCGA
-#'
-#' @param tcga_msi_dataset underlying dataset from TCGA used for development
-#' of statistical classifier
-#' @param indel_load fraction of indels of all mutations (SNVs + indels)
-#' @return p
-#'
-#' @export
-
-msi_indel_load_plot <- function(tcga_msi_dataset, indel_load, color_palette = pcgrr::color_palette) {
-
-  color_vec <- utils::head(
-    color_palette[["multi"]][["values"]], 2)
-  names(color_vec) <- c("MSS", "MSI.H")
-
-  p <- ggplot2::ggplot(data = tcga_msi_dataset) +
-    ggplot2::geom_histogram(
-      mapping = ggplot2::aes(x = .data$fracIndels,
-                             color = .data$MSI_status,
-                             fill = .data$MSI_status),
-      position = "dodge", binwidth = 0.01) +
-    ggplot2::ylab("Number of samples") +
-    ggplot2::scale_fill_manual(values = color_vec) +
-    ggplot2::scale_color_manual(values = color_vec) +
-    ggplot2::theme_classic() +
-    ggplot2::xlab("InDel load - somatic variants") +
-    ggplot2::theme(
-      plot.title =
-        ggplot2::element_text(family = "Helvetica",
-                              size = 16,
-                              hjust = 0.5, face = "bold"),
-      axis.text.x =
-        ggplot2::element_text(family = "Helvetica",
-                              size = 14, face = "bold"),
-      axis.title.x =
-        ggplot2::element_text(family = "Helvetica",
-                              size = 14),
-      legend.title =
-        ggplot2::element_blank(),
-      legend.text =
-        ggplot2::element_text(family = "Helvetica",
-                              size = 14),
-      axis.text.y =
-        ggplot2::element_text(family = "Helvetica",
-                              size = 14),
-      axis.title.y =
-        ggplot2::element_text(family = "Helvetica",
-                              size = 14, vjust = 1.5),
-      plot.margin = (grid::unit(c(0.5, 0.5, 0.5, 0.5), "cm"))) +
-    ggplot2::geom_vline(
-      xintercept = as.numeric(indel_load),
-      size = 1.1, linetype = "dotted")
 
   return(p)
 

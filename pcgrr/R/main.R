@@ -257,6 +257,18 @@ generate_report <-
       }
     }
 
+    ## HRD - result from an external HRD assay/tool (if available), and the
+    ## genomic scar score estimated by PCGR from the CNA segments (if
+    ## '--estimate_hrd' was used and the estimation succeeded)
+    rep[["content"]][["hrd"]][["internal_eval"]] <-
+      isTRUE(as.numeric(settings$conf$somatic_cna$estimate_hrd) == 1) &&
+      !is.null(settings$conf$somatic_cna$hrd_sum)
+    rep[["content"]][["hrd"]][["external"]] <-
+      generate_report_data_hrd_external(settings = settings)
+    rep[["content"]][["hrd"]][["eval"]] <-
+      isTRUE(rep[["content"]][["hrd"]][["internal_eval"]]) ||
+      isTRUE(rep[["content"]][["hrd"]][["external"]][["eval"]])
+
     ## Load somatic CNA data if available
     callset_cna <- NULL
     if (settings$molecular_data$fname_cna_gene_tsv != "None" &
@@ -1353,6 +1365,7 @@ write_report_excel <- function(report = NULL) {
                 'MSI',
                 'MSI_INTERNAL',
                 'MSI_BIOMARKER',
+                'HRD',
                 'MUTATIONAL_SIGNATURE',
                 'KATAEGIS_EVENTS',
                 'RNA_EXPRESSION_OUTLIERS',

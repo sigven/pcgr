@@ -80,6 +80,11 @@ if (pcg_report$content$msi$eval == FALSE ||
     isTRUE(pcg_report$content$msi$missing_data)) {
   msi_prediction <- 'OFF'
 }
+hrd_external_caller <- 'OFF'
+if (isTRUE(pcg_report$content$hrd$external$eval)) {
+  hrd_external_caller <-
+    pcgrr::hrd_external_display(pcg_report$content$hrd)$caller_label
+}
 msi_external_caller <- 'OFF'
 if (isTRUE(pcg_report$content$msi$external$eval)) {
   msi_external_caller <-
@@ -241,6 +246,7 @@ The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r
 * Variant actionability guidelines: __AMP/ASCO/CAP__
 * Variant oncogenicity guidelines: __ClinGen/CGC/VICC__
 * Biomarker sources: __`r bm_db_label`__
+* HRD assay/tool (external): __`r hrd_external_caller`__
 
 ```{r snv_indel_settings}
 #| output: asis

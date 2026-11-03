@@ -46,6 +46,9 @@ left <- c(
   item("Variant actionability guidelines", "AMP/ASCO/CAP"),
   item("Variant oncogenicity guidelines", "ClinGen/CGC/VICC"),
   item("Biomarker sources", pcgrr:::bm_db_label(pcg_report)),
+  item("HRD assay/tool (external)",
+       if (isTRUE(pcg_report$content$hrd$external$eval))
+         pcgrr::hrd_external_display(pcg_report$content$hrd)$caller_label else "OFF"),
   item("Tumor site", sp$site),
   item("Subject sex", conf$subject_properties$sex),
   item("Age at sampling (years)", conf$subject_properties$age))
