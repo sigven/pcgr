@@ -689,8 +689,9 @@ def refine_oncogenicity_with_oncokb(
    for idx, row in tsv_df.iterrows():
       existing_code   = str(row['ONCOGENICITY_CODE'])   if pd.notna(row['ONCOGENICITY_CODE'])   else '.'
       existing_score  = float(row['ONCOGENICITY_SCORE']) if pd.notna(row['ONCOGENICITY_SCORE']) else 0.0
-      oncogenicity_okb    = str(row['ONCOGENICITY_OKB'])    if pd.notna(row['ONCOGENICITY_OKB'])    else None
-      mutation_effect_okb = str(row['MUTATION_EFFECT_OKB'])  if pd.notna(row['MUTATION_EFFECT_OKB'])  else None
+      # missing OncoKB annotations are '.' (written with na_rep='.') or NaN
+      oncogenicity_okb    = str(row['ONCOGENICITY_OKB'])    if pd.notna(row['ONCOGENICITY_OKB'])    and str(row['ONCOGENICITY_OKB'])   != '.' else None
+      mutation_effect_okb = str(row['MUTATION_EFFECT_OKB'])  if pd.notna(row['MUTATION_EFFECT_OKB'])  and str(row['MUTATION_EFFECT_OKB']) != '.' else None
       is_tsg = row['TSG'] is True or str(row['TSG']).lower() == 'true'
       var_id = str(row['VAR_ID']) if pd.notna(row['VAR_ID']) else None
 
@@ -781,5 +782,5 @@ def refine_oncogenicity_with_oncokb(
       tsv_df.at[idx, 'ONCOGENICITY']       = updated_class
       n_refined += 1
 
-   tsv_df.to_csv(tsv_gz_fname, sep="\t", compression="gzip", index=False)
+   tsv_df.to_csv(tsv_gz_fname, sep="\t", compression="gzip", index=False, na_rep=".")
    logger.info(f"OncoKB oncogenicity refinement complete: {n_refined} / {len(tsv_df)} variants updated")

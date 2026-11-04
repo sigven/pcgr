@@ -74,7 +74,7 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
                                   clnsig = "therapeutic_sensitivity") {
   content <- report$content
   ## evidence context columns carried along for evidence-based tiers
-  ctx_cols <- c("BM_PRIMARY_SITE", "BM_CANCER_TYPE")
+  ctx_cols <- c("BM_PRIMARY_SITE", "BM_CANCER_TYPE", "BM_MAPPING_CONFIDENCE")
   ## variant records of a callset, with ACTIONABILITY_TIER according to clnsig
   ## (fusions are matched on VAR_ID/VARIANT_CLASS only, as their ENTREZGENE
   ## differs between variant and evidence records - see
@@ -163,7 +163,8 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
   d
 }
 
-#' Diagnostic hits to highlight as pills in the key findings
+#' Diagnostic hits to highlight in the key findings (section 'Diagnostic
+#' evidence')
 #'
 #' Only when a primary tumor site is specified: alterations (SNVs/InDels,
 #' copy number aberrations, RNA fusions) with _strong_ diagnostic evidence
@@ -175,16 +176,21 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
 #' only listed among the supporting findings.
 #'
 #' @param report PCGR report object
-#' @param max_pills maximum number of pills (remaining hits stay in the
+#' Hits are ranked by the resolution of the biomarker match (exact matches such
+#' as fusions before gene-level matches), see BM_MAPPING_CONFIDENCE.
+#'
+#' @param max_pills maximum number of hits (remaining hits stay in the
 #' supporting findings)
 #'
 #' @return list with 'pills' (plain-text pill labels, e.g. 'Diagnostic:
 #' EWSR1::FLI1 fusion (Ewing sarcoma)') and 'labels' (the corresponding
 #' markdown labels of tiered_alterations_hl(), used to avoid listing the
-#' same alterations again among the supporting findings)
+#' same alterations again among the supporting findings) and 'items'
+#' (markdown list items: label with cancer types of the evidence)
 #' @keywords internal
 diagnostic_pills_hl <- function(report, max_pills = 3) {
-  none <- list(pills = character(), labels = character())
+  none <- list(pills = character(), labels = character(),
+               items = character())
   site <- report$settings$conf$sample_properties$site
   if (is.null(site) || length(site) == 0 || is.na(site) ||
       site %in% c("Any", "")) {
@@ -204,19 +210,46 @@ diagnostic_pills_hl <- function(report, max_pills = 3) {
     tt[fill] <- cur[fill]
   }
   labels <- unique(d$LABEL)
+  ## rank hits by the resolution of the biomarker match
+  ## (BM_MAPPING_CONFIDENCE): exact matches (fusions, CNAs, variants matched
+  ## at the HGVS/codon level; 'high') before gene- or region-level matches
+  ## ('medium'/'low'); ties keep the order of tiered_alterations_hl()
+  ## (cancer association ranks, then symbol). Unknown confidence is neutral.
+  conf <- rep(2, NROW(d))
+  if ("BM_MAPPING_CONFIDENCE" %in% colnames(d)) {
+    cc <- tolower(as.character(d$BM_MAPPING_CONFIDENCE))
+    conf <- dplyr::case_when(
+      grepl("high", cc) ~ 3,
+      grepl("medium", cc) ~ 2,
+      grepl("low", cc) ~ 1,
+      .default = 2)
+  }
+  best <- vapply(labels, function(l) max(conf[d$LABEL == l]), numeric(1))
+  labels <- labels[order(-best, seq_along(labels))]
   labels <- utils::head(labels, max_pills)
+  ## cancer types of the evidence of a label (at most two)
+  types_of <- function(l) {
+    s <- tt[d$LABEL == l]
+    s <- s[!is.na(s) & s != "" & s != "Any"]
+    s <- s[!duplicated(tolower(s))]
+    utils::head(s[order(tolower(s))], 2)
+  }
   pills <- vapply(labels, function(l) {
     rows <- d$LABEL == l
     alt <- paste(d$SYMBOL[rows][1], d$ALTERATION[rows][1])
-    s <- tt[rows]
-    s <- s[!is.na(s) & s != "" & s != "Any"]
-    s <- s[!duplicated(tolower(s))]
-    s <- utils::head(s[order(tolower(s))], 2)
+    s <- types_of(l)
     paste0("Diagnostic: ", alt,
            if (length(s) > 0) paste0(" (", paste(s, collapse = ", "), ")")
            else "")
   }, character(1), USE.NAMES = FALSE)
-  list(pills = pills, labels = labels)
+  ## markdown list items (one per hit), e.g. '**EWSR1::FLI1** fusion (Ewing
+  ## Sarcoma)'
+  items <- vapply(labels, function(l) {
+    s <- types_of(l)
+    paste0(l, if (length(s) > 0)
+      paste0(" (", paste(md_escape_hl(s), collapse = ", "), ")") else "")
+  }, character(1), USE.NAMES = FALSE)
+  list(pills = pills, labels = labels, items = items)
 }
 
 #' Key findings of a PCGR report (highlights) as markdown
@@ -241,10 +274,10 @@ diagnostic_pills_hl <- function(report, max_pills = 3) {
 #' e.g. 'pcgr-cna'); each finding is only included when its section is part
 #' of the report
 #'
-#' @return list with 'lead' (markdown on actionable alterations), 'pills'
-#' (diagnostic hits - site specified, strong evidence - and positive composite
-#' biomarkers), 'pill_targets' (section label per pill), 'pill_kinds'
-#' ('diagnostic' or 'composite' per pill),
+#' @return list with 'lead' (markdown on therapeutically actionable alterations
+#' and, when a tumor site is specified, diagnostic evidence - strong evidence
+#' only), 'pills' (positive composite biomarkers), 'pill_targets' (section
+#' label per pill), 'pill_kinds' ('composite' per pill),
 #' 'warnings' (markdown on actionable
 #' variants removed by variant filtering, "" if none) and 'supporting'
 #' (markdown bullet list, "" if none)
@@ -268,7 +301,8 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
   }
   if (NROW(actionable) > 0) {
     lead <- c(lead, paste0(
-      sec_link("**Actionable alterations**", "pcgr-actionability"),
+      sec_link("**Therapeutically actionable alterations**",
+               "pcgr-actionability"),
       " (AMP/ASCO/CAP)\n\n",
       paste(c(tier_item(1, "strong clinical significance"),
               tier_item(2, "potential clinical significance")),
@@ -276,15 +310,23 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
   } else if (isTRUE(content$snv_indel$eval) || isTRUE(content$cna$eval) ||
              isTRUE(content$fusion$eval)) {
     lead <- c(lead, paste0(
-      sec_link("**No actionable alterations**", "pcgr-actionability"),
+      sec_link("**No therapeutically actionable alterations**",
+               "pcgr-actionability"),
       " of strong or potential clinical ",
       "significance (AMP/ASCO/CAP Tier 1/2) were identified."))
   }
 
-  ## --- Diagnostic hits as pills (site specified; strong evidence only) ---
-  ## shown once - below the actionable alterations, not repeated among the
-  ## supporting findings
+  ## --- Diagnostic hits (site specified; strong evidence only) ---
+  ## shown once - in a section below the therapeutically actionable
+  ## alterations, not repeated among the supporting findings
   diag_pills <- diagnostic_pills_hl(report)
+  ## ... as a section of its own (one item per hit, ranked by the resolution
+  ## of the biomarker match), parallel to the therapeutically actionable ones
+  if (length(diag_pills$items) > 0) {
+    lead <- c(lead, paste0(
+      sec_link("**Diagnostic evidence**", "pcgr-diagn-progn"), "\n\n",
+      paste0("- ", diag_pills$items, collapse = "\n")))
+  }
 
   ## --- Supporting findings ---
   supporting <- c()
@@ -388,9 +430,9 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
 
   ## composite genomic biomarkers - shown as pills (below the actionable
   ## alterations) only when positive (TMB-high, MSI-high); none otherwise
-  pills <- diag_pills$pills
-  pill_targets <- rep("pcgr-diagn-progn", length(diag_pills$pills))
-  pill_kinds <- rep("diagnostic", length(diag_pills$pills))
+  pills <- character()
+  pill_targets <- character()
+  pill_kinds <- character()
   if (isTRUE(content$tmb$eval) && isTRUE(content$tmb$tmb_high)) {
     est <- content$tmb$sample_estimate
     tmb_display <- conf$somatic_snv$tmb$tmb_display

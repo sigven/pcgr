@@ -48,7 +48,7 @@ def append_oncokb_snv_annotations(
         logger.warning("VAR_ID column absent from variant TSV - cannot merge OncoKB SNV annotations")
         for col in okb_renamed_cols:
             tsv_df[col] = pd.NA
-        tsv_df.to_csv(tsv_gz_fname, sep="\t", compression="gzip", index=False)
+        tsv_df.to_csv(tsv_gz_fname, sep="\t", compression="gzip", index=False, na_rep=".")
         return
 
     def _read_oncokb_maf(path: str, label: str) -> Optional[pd.DataFrame]:
@@ -101,7 +101,7 @@ def append_oncokb_snv_annotations(
         for col in okb_renamed_cols:
             tsv_df[col] = pd.NA
 
-    tsv_df.to_csv(tsv_gz_fname, sep="\t", compression="gzip", index=False)
+    tsv_df.to_csv(tsv_gz_fname, sep="\t", compression="gzip", index=False, na_rep=".")
     logger.info(f"OncoKB SNV columns written to {os.path.basename(tsv_gz_fname)}")
 
 

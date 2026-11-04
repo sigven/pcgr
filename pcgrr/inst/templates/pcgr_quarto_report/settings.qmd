@@ -207,8 +207,9 @@ cat("\n<div class=\"kf-title\"><span class=\"kf-title-text\">Key findings</span>
 cat("::: {.kf-lead}\n\n")
 cat(hl$lead, sep = "\n\n")
 cat("\n\n")
-## diagnostic hits (site specified, strong evidence) and positive composite
-## biomarkers (TMB-high, MSI-high, HR-deficient) as pills - none otherwise
+## positive composite biomarkers (TMB-high, MSI-high, HR-deficient) as pills -
+## none otherwise (diagnostic hits are a section of the lead, see
+## report_highlights())
 if (length(hl$pills) > 0) {
   pill_class <- ifelse(
     hl$pill_kinds == "diagnostic",

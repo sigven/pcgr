@@ -1122,7 +1122,7 @@ def run_pcgr(input_data, output_data, conf_options):
         logger.info('PCGR - TWO-HIT SECTION: Annotating TSG/LOH CNA records with somatic and germline two-hit candidates')
         cna_df_twohit = pd.read_csv(cna_gene_tsv, sep='\t', na_values='.', low_memory=False)
         cna_df_twohit = cna.append_twohit_candidates(cna_df_twohit, snv_df_twohit, germline_df, logger)
-        cna_df_twohit.to_csv(cna_gene_tsv, sep='\t', header=True, index=False)
+        cna_df_twohit.to_csv(cna_gene_tsv, sep='\t', header=True, index=False, na_rep='.')
         logger.info('Finished annotating two-hit candidates')
         print('----')
 

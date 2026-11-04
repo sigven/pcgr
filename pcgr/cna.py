@@ -222,7 +222,7 @@ def append_oncokb_fusion_annotations(
         logger.warning("FUSION_GENE absent from fusion TSV - cannot merge OncoKB fusion annotations")
         for col in okb_renamed_cols:
             tsv_df[col] = pd.NA
-        tsv_df.to_csv(tsv_fname, sep="\t", index=False)
+        tsv_df.to_csv(tsv_fname, sep="\t", index=False, na_rep=".")
         return
 
     # Drop any pre-existing OKB columns to make this function idempotent
@@ -262,7 +262,7 @@ def append_oncokb_fusion_annotations(
             tsv_df[col] = pd.NA
 
     tsv_df = tsv_df.drop(columns=['_OKB_FUSION'])
-    tsv_df.to_csv(tsv_fname, sep="\t", index=False)
+    tsv_df.to_csv(tsv_fname, sep="\t", index=False, na_rep=".")
     logger.info(f"OncoKB fusion columns written to {os.path.basename(tsv_fname)}")
 
 
@@ -297,7 +297,7 @@ def append_oncokb_cna_annotations(
         logger.warning("SYMBOL or VARIANT_CLASS absent from CNA gene TSV - cannot merge OncoKB CNA annotations")
         for col in okb_renamed_cols:
             tsv_df[col] = pd.NA
-        tsv_df.to_csv(tsv_fname, sep="\t", index=False)
+        tsv_df.to_csv(tsv_fname, sep="\t", index=False, na_rep=".")
         return
 
     # Drop any pre-existing OKB columns to make this function idempotent
@@ -341,7 +341,7 @@ def append_oncokb_cna_annotations(
         for col in okb_renamed_cols:
             tsv_df[col] = pd.NA
 
-    tsv_df.to_csv(tsv_fname, sep="\t", index=False)
+    tsv_df.to_csv(tsv_fname, sep="\t", index=False, na_rep=".")
     logger.info(f"OncoKB CNA columns written to {os.path.basename(tsv_fname)}")
 
 

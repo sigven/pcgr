@@ -5,7 +5,7 @@ same rules, with ties resolved alphabetically by gene symbol.
 
 **Leading findings**
 
-- __Actionable alterations__ (AMP/ASCO/CAP Tier 1, then Tier 2) among SNVs/InDels, copy number
+- __Therapeutically actionable alterations__ (AMP/ASCO/CAP Tier 1, then Tier 2) among SNVs/InDels, copy number
   aberrations and RNA fusions. Tiers refer to _therapeutic_ evidence only (as intended by the
   AMP/ASCO/CAP guidelines); prognostic and diagnostic evidence is not tiered. Within a tier:
   tissue-specific cancer association rank (highest first), then global cancer association rank.
@@ -16,18 +16,21 @@ same rules, with ties resolved alphabetically by gene symbol.
   (site code 0, "Any"), evidence from _all_ tumor types is considered rather than pan-cancer evidence only:
   strong evidence (levels A/B) in a pan-cancer biomarker is Tier 1, strong evidence in a tumor-type-specific
   biomarker (any tumor type) is Tier 2, and weak evidence (levels C/D/E) is Tier 3 and therefore not listed here.
-- __Diagnostic hits__: when a primary tumor site is specified, alterations with _strong_ diagnostic
+- __Diagnostic evidence__: when a primary tumor site is specified, alterations with _strong_ diagnostic
   evidence (CIViC levels A/B; OncoKB level Dx1) matching that site (e.g. an _EWSR1::FLI1_ fusion in
-  soft tissue tumors) are highlighted as labels directly below the actionable alterations, with the
-  cancer types of the evidence (at most two shown per label, and at most three labels; further hits are
-  listed among the supporting findings).
-  A hit shown here is not repeated among the supporting findings. No diagnostic label is shown when no primary
+  soft tissue tumors) are listed in a section of their own, directly below the therapeutically actionable
+  alterations, one item per hit and with the cancer types of the evidence (at most two shown per item, and
+  at most three items; further hits are listed among the supporting findings). Hits are ranked by the
+  resolution of the biomarker match: exact matches (e.g. fusions, copy number aberrations, variants matched
+  at the HGVS or codon level) before gene- or region-level matches; ties are resolved by cancer association
+  ranks, then gene symbol.
+  A hit shown here is not repeated among the supporting findings. No diagnostic evidence is shown when no primary
   tumor site is specified (site code 0, "Any"), as evidence from any tumor type is then considered -
   such alterations are listed among the supporting findings. Diagnostic evidence is not tiered
 - __Composite genomic biomarkers__: a tumor classified as *TMB-high* (with its TMB estimate, in
   mutations/Mb), *MSI-high* (high-confidence predictions only, P(MSI-H) >= 0.9) and/or
   *HR-deficient* (external HRD result only, `--input_hrd`) is marked with a highlighted label
-  directly below the actionable alterations. Nothing is shown when the tumor is neither TMB-high,
+  directly below the therapeutically actionable alterations. Nothing is shown when the tumor is neither TMB-high,
   MSI-high nor HR-deficient (TMB, MSI and HRD status are reported in full in the *Composite genomic
   biomarkers* section)
 
