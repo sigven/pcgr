@@ -163,14 +163,71 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
   d
 }
 
+#' Diagnostic hits to highlight as pills in the key findings
+#'
+#' Only when a primary tumor site is specified: alterations (SNVs/InDels,
+#' copy number aberrations, RNA fusions) with _strong_ diagnostic evidence
+#' (CIViC levels A/B, OncoKB Dx1) matching that site. With a site set, the
+#' diagnostic evidence is restricted to the site (see
+#' assign_amp_asco_cap_tiers()), so the internal evidence tier 1 is exactly
+#' strong, site-matching evidence. Nothing is returned for site 'Any' (code
+#' 0), where evidence from any tumor type is considered - such findings are
+#' only listed among the supporting findings.
+#'
+#' @param report PCGR report object
+#' @param max_pills maximum number of pills (remaining hits stay in the
+#' supporting findings)
+#'
+#' @return list with 'pills' (plain-text pill labels, e.g. 'Diagnostic:
+#' EWSR1::FLI1 fusion (Ewing sarcoma)') and 'labels' (the corresponding
+#' markdown labels of tiered_alterations_hl(), used to avoid listing the
+#' same alterations again among the supporting findings)
+#' @keywords internal
+diagnostic_pills_hl <- function(report, max_pills = 3) {
+  none <- list(pills = character(), labels = character())
+  site <- report$settings$conf$sample_properties$site
+  if (is.null(site) || length(site) == 0 || is.na(site) ||
+      site %in% c("Any", "")) {
+    return(none)
+  }
+  d <- tiered_alterations_hl(
+    report, tier = 1L, clnsig = "diagnostic_positive")
+  if (NROW(d) == 0) return(none)
+  ## cancer types of the evidence (CIViC disease / OncoKB tumor type; the
+  ## primary site where no cancer type is given), as for the supporting
+  ## findings
+  ctx_col <- intersect(c("BM_CANCER_TYPE", "BM_PRIMARY_SITE"), colnames(d))
+  tt <- rep(NA_character_, NROW(d))
+  for (cc in ctx_col) {
+    cur <- as.character(d[[cc]])
+    fill <- is.na(tt) | tt == ""
+    tt[fill] <- cur[fill]
+  }
+  labels <- unique(d$LABEL)
+  labels <- utils::head(labels, max_pills)
+  pills <- vapply(labels, function(l) {
+    rows <- d$LABEL == l
+    alt <- paste(d$SYMBOL[rows][1], d$ALTERATION[rows][1])
+    s <- tt[rows]
+    s <- s[!is.na(s) & s != "" & s != "Any"]
+    s <- s[!duplicated(tolower(s))]
+    s <- utils::head(s[order(tolower(s))], 2)
+    paste0("Diagnostic: ", alt,
+           if (length(s) > 0) paste0(" (", paste(s, collapse = ", "), ")")
+           else "")
+  }, character(1), USE.NAMES = FALSE)
+  list(pills = pills, labels = labels)
+}
+
 #' Key findings of a PCGR report (highlights) as markdown
 #'
 #' The most critical findings come first: somatic alterations of strong or
 #' potential clinical significance (AMP/ASCO/CAP Tier 1/2). These are
 #' followed by supporting findings, each included only when informative:
-#' prognostic and diagnostic biomarkers (Tier 1/2; also Tier 3 without a
-#' primary site, see progn_diagn_tiers() - listed with the cancer types
-#' of their evidence),
+#' prognostic and diagnostic biomarkers (listed with the cancer types of
+#' their evidence; untiered - see progn_diagn_tiers() for the evidence
+#' considered; strong diagnostic hits matching a specified tumor site are
+#' instead highlighted as pills, see diagnostic_pills_hl()),
 #' oncogenic/likely oncogenic SNV/InDel variants, composite genomic
 #' biomarkers (TMB, MSI, external HRD status), copy number variants (amplified proto-oncogenes,
 #' deleted tumor suppressors, genome doubling, HRD score), mutational
@@ -185,7 +242,9 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
 #' of the report
 #'
 #' @return list with 'lead' (markdown on actionable alterations), 'pills'
-#' (positive composite biomarkers), 'pill_targets' (section label per pill),
+#' (diagnostic hits - site specified, strong evidence - and positive composite
+#' biomarkers), 'pill_targets' (section label per pill), 'pill_kinds'
+#' ('diagnostic' or 'composite' per pill),
 #' 'warnings' (markdown on actionable
 #' variants removed by variant filtering, "" if none) and 'supporting'
 #' (markdown bullet list, "" if none)
@@ -222,22 +281,29 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
       "significance (AMP/ASCO/CAP Tier 1/2) were identified."))
   }
 
+  ## --- Diagnostic hits as pills (site specified; strong evidence only) ---
+  ## shown once - below the actionable alterations, not repeated among the
+  ## supporting findings
+  diag_pills <- diagnostic_pills_hl(report)
+
   ## --- Supporting findings ---
   supporting <- c()
 
-  ## prognostic and diagnostic biomarkers (AMP/ASCO/CAP Tier 1/2, and Tier 3
-  ## when no primary site is set - see progn_diagn_tiers()) - one
+  ## prognostic and diagnostic biomarkers (evidence selected by internal
+  ## tier, see progn_diagn_tiers() - not shown as tiers) - one
   ## finding per evidence type, listing alterations with the cancer types of
   ## their evidence (CIViC disease / OncoKB OncoTree tumor type; the primary
   ## site where no cancer type is given) - more informative than the tier
   ## here (falls back to the tier if neither is available); only included
   ## when any such evidence is found
   ## types: description prefix per evidence type (clnsig)
-  bm_items <- function(types) {
+  bm_items <- function(types, exclude_labels = character()) {
     items <- c()
     for (clnsig in names(types)) {
       d <- tiered_alterations_hl(
         report, tier = progn_diagn_tiers(report), clnsig = clnsig)
+      ## alterations already highlighted as pills are not listed again
+      d <- d[!d$LABEL %in% exclude_labels, , drop = FALSE]
       if (NROW(d) == 0) next
       ctx_col <- intersect(c("BM_CANCER_TYPE", "BM_PRIMARY_SITE"), colnames(d))
       if (length(ctx_col) > 0) {
@@ -280,7 +346,8 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
       paste(progn, collapse = "; ")))
   }
   ## (only evidence supporting a diagnosis is listed - no qualifier needed)
-  diagn <- bm_items(c(diagnostic_positive = ""))
+  diagn <- bm_items(c(diagnostic_positive = ""),
+                    exclude_labels = diag_pills$labels)
   if (length(diagn) > 0) {
     supporting <- c(supporting, paste0(
       sec_link("**Diagnostic biomarkers:**", "pcgr-diagn-progn"), " ",
@@ -321,8 +388,9 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
 
   ## composite genomic biomarkers - shown as pills (below the actionable
   ## alterations) only when positive (TMB-high, MSI-high); none otherwise
-  pills <- character()
-  pill_targets <- character()
+  pills <- diag_pills$pills
+  pill_targets <- rep("pcgr-diagn-progn", length(diag_pills$pills))
+  pill_kinds <- rep("diagnostic", length(diag_pills$pills))
   if (isTRUE(content$tmb$eval) && isTRUE(content$tmb$tmb_high)) {
     est <- content$tmb$sample_estimate
     tmb_display <- conf$somatic_snv$tmb$tmb_display
@@ -332,18 +400,21 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
     pills <- c(pills, if (NROW(est) > 0) paste0(
       "TMB-high (", round(est$TMB_ESTIMATE[1], 1), " mut/Mb)") else "TMB-high")
     pill_targets <- c(pill_targets, "pcgr-tmb")
+    pill_kinds <- c(pill_kinds, "composite")
   }
   ## MSI-high - external MSI call, or high-confidence classifier prediction
   if (isTRUE(content$msi$eval) &&
       msi_status_is_high(content$msi, high_confidence_only = TRUE)) {
     pills <- c(pills, "MSI-high")
     pill_targets <- c(pill_targets, "pcgr-msi")
+    pill_kinds <- c(pill_kinds, "composite")
   }
   ## HR-deficient - external HRD result only (the genomic scar score of
   ## PCGR is not thresholded, and is listed with the copy number features)
   if (isTRUE(content$hrd$eval) && hrd_status_is_deficient(content$hrd)) {
     pills <- c(pills, "HR-deficient")
     pill_targets <- c(pill_targets, "pcgr-hrd")
+    pill_kinds <- c(pill_kinds, "composite")
   }
 
   ## copy number features
@@ -482,6 +553,7 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
     lead = paste(lead, collapse = "\n\n"),
     pills = pills,
     pill_targets = pill_targets,
+    pill_kinds = pill_kinds,
     warnings = if (length(warnings) > 0) paste0(
       "**Filtered actionable variants** (not considered in this report - ",
       "see ", sec_link("*Variant filtering*", "pcgr-variant-filtering"),

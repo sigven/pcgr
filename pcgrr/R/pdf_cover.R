@@ -81,10 +81,12 @@ pdf_cover_typst <- function(report) {
     "#pcgr-highlights[\n#pcgr-hl-lead[\n```\n\n",
     hl$lead, "\n\n",
     "```{=typst}\n",
-    ## positive composite biomarkers (TMB-high, MSI-high) as pills
+    ## diagnostic hits and positive composite biomarkers (TMB-high, MSI-high)
+    ## as pills
     if (length(hl$pills) > 0) paste0(
       "#pcgr-hl-pills((", paste0('"', typst_str(hl$pills), '",', collapse = " "),
       "), targets: (", paste0('"', hl$pill_targets, '",', collapse = " "),
+      "), kinds: (", paste0('"', hl$pill_kinds, '",', collapse = " "),
       "))\n"),
     "]\n",
     ## actionable variants removed by variant filtering

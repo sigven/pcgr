@@ -43,8 +43,8 @@ prep_bm_display_tbl <- function(
   if (is.null(rep)) {
     log4r_fatal("report object is NULL")
   }
-  ## Tier 3 (weak evidence) is included for prognostic/diagnostic biomarkers
-  ## when no primary site is set - see progn_diagn_tiers()
+  ## (internal) tier 3 (weak evidence) is included for prognostic/diagnostic
+  ## biomarkers when no primary site is set - see progn_diagn_tiers()
   if (!is.numeric(tier) || !all(tier %in% c(1, 2, 3)) || length(tier) == 0) {
     log4r_fatal("tier must be a non-empty integer vector with values in {1, 2, 3}")
   }
@@ -1200,13 +1200,16 @@ bm_db_citation <- function(report, fusion = FALSE) {
   }
 }
 
-#' Actionability tiers of prognostic and diagnostic biomarker evidence shown
-#' in the reports (HTML/PDF sections, key findings)
+#' Internal evidence tiers of prognostic and diagnostic biomarker evidence
+#' shown in the reports (HTML/PDF sections, key findings)
 #'
-#' With a primary site, Tier 1/2 evidence is shown (evidence matching the
-#' primary site). Without a primary site (site 'Any'), evidence from any
-#' tumor type is considered, for which weak evidence (levels C/D/E) is always
-#' Tier 3 - Tier 3 evidence is then also shown.
+#' Prognostic and diagnostic evidence is not tiered in the reports (AMP/ASCO/CAP
+#' tiers refer to therapeutic evidence only); the internal tiers are used to
+#' select which evidence is shown. With a primary site, evidence matching the
+#' primary site is shown (internal tiers 1/2: strong/weak evidence). Without a
+#' primary site (site 'Any'), evidence from any tumor type is considered, for
+#' which weak evidence (levels C/D/E) always gets internal tier 3 - which is
+#' then also shown.
 #'
 #' @param report PCGR report object
 #'
@@ -1265,6 +1268,6 @@ progn_diagn_tier_note <- function(report) {
   }
   paste0(
     "As no primary tumor site was specified, prognostic and diagnostic ",
-    "biomarker evidence from any tumor type is shown, including Tier 3 ",
-    "(weak evidence - levels C/D/E).")
+    "biomarker evidence from any tumor type is shown, including weak ",
+    "evidence (levels C/D/E).")
 }

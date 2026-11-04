@@ -83,7 +83,7 @@ The primary tissue/site of the tumor sample that is analyzed can and should be b
 
 * `--tumor_site <value>`
 
-This option takes a value between 0 and 30, reflecting the main primary sites/tissues for human cancers. This information is used e.g. to discriminate between on and off-label targeted therapies from the actionable biomarkers detected in the sample. Note that the default value is __0__ (implies __Any__ tissue/site) - only pan-cancer biomarkers will be considered for Tier I assignment, and all tumor-specific biomarkers will be considered as non-matching site evidence for Tier II/III assignment.
+This option takes a value between 0 and 30, reflecting the main primary sites/tissues for human cancers. This information is used e.g. to discriminate between on and off-label targeted therapies from the actionable biomarkers detected in the sample. Note that the default value is __0__ (implies __Any__ tissue/site) - only pan-cancer biomarkers will be considered for Tier I assignment, and all tumor-specific biomarkers will be considered as non-matching site evidence for Tier II/III assignment. Prognostic, diagnostic and resistance evidence is not tiered in this way: with a tumor site specified, only evidence matching that site is reported, whereas with the default value, evidence from any tumor type is considered (including weak evidence), and listed with the cancer types of the evidence.
 
 The following lists the possible encodings, and the corresponding primary tissues/sites:
 

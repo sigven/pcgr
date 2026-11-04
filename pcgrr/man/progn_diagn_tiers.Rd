@@ -2,8 +2,8 @@
 % Please edit documentation in R/biomarkers.R
 \name{progn_diagn_tiers}
 \alias{progn_diagn_tiers}
-\title{Actionability tiers of prognostic and diagnostic biomarker evidence shown
-in the reports (HTML/PDF sections, key findings)}
+\title{Internal evidence tiers of prognostic and diagnostic biomarker evidence
+shown in the reports (HTML/PDF sections, key findings)}
 \usage{
 progn_diagn_tiers(report)
 }
@@ -14,8 +14,11 @@ progn_diagn_tiers(report)
 integer vector of tiers
 }
 \description{
-With a primary site, Tier 1/2 evidence is shown (evidence matching the
-primary site). Without a primary site (site 'Any'), evidence from any
-tumor type is considered, for which weak evidence (levels C/D/E) is always
-Tier 3 - Tier 3 evidence is then also shown.
+Prognostic and diagnostic evidence is not tiered in the reports (AMP/ASCO/CAP
+tiers refer to therapeutic evidence only); the internal tiers are used to
+select which evidence is shown. With a primary site, evidence matching the
+primary site is shown (internal tiers 1/2: strong/weak evidence). Without a
+primary site (site 'Any'), evidence from any tumor type is considered, for
+which weak evidence (levels C/D/E) always gets internal tier 3 - which is
+then also shown.
 }

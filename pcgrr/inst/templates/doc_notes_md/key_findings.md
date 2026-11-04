@@ -6,8 +6,24 @@ same rules, with ties resolved alphabetically by gene symbol.
 **Leading findings**
 
 - __Actionable alterations__ (AMP/ASCO/CAP Tier 1, then Tier 2) among SNVs/InDels, copy number
-  aberrations and RNA fusions. Within a tier: tissue-specific cancer association rank (highest first),
-  then global cancer association rank. If none are found, this is stated explicitly.
+  aberrations and RNA fusions. Tiers refer to _therapeutic_ evidence only (as intended by the
+  AMP/ASCO/CAP guidelines); prognostic and diagnostic evidence is not tiered. Within a tier:
+  tissue-specific cancer association rank (highest first), then global cancer association rank.
+  If none are found, this is stated explicitly. When a primary tumor site is specified, therapeutic
+  evidence is matched against that site: strong evidence (levels A/B) in the same tumor type or in a pan-cancer
+  biomarker is Tier 1, whereas strong evidence in other tumor types, or weak evidence (levels C/D/E) in the same
+  tumor type, is Tier 2. When no primary tumor site is specified
+  (site code 0, "Any"), evidence from _all_ tumor types is considered rather than pan-cancer evidence only:
+  strong evidence (levels A/B) in a pan-cancer biomarker is Tier 1, strong evidence in a tumor-type-specific
+  biomarker (any tumor type) is Tier 2, and weak evidence (levels C/D/E) is Tier 3 and therefore not listed here.
+- __Diagnostic hits__: when a primary tumor site is specified, alterations with _strong_ diagnostic
+  evidence (CIViC levels A/B; OncoKB level Dx1) matching that site (e.g. an _EWSR1::FLI1_ fusion in
+  soft tissue tumors) are highlighted as labels directly below the actionable alterations, with the
+  cancer types of the evidence (at most two shown per label, and at most three labels; further hits are
+  listed among the supporting findings).
+  A hit shown here is not repeated among the supporting findings. No diagnostic label is shown when no primary
+  tumor site is specified (site code 0, "Any"), as evidence from any tumor type is then considered -
+  such alterations are listed among the supporting findings. Diagnostic evidence is not tiered
 - __Composite genomic biomarkers__: a tumor classified as *TMB-high* (with its TMB estimate, in
   mutations/Mb), *MSI-high* (high-confidence predictions only, P(MSI-H) >= 0.9) and/or
   *HR-deficient* (external HRD result only, `--input_hrd`) is marked with a highlighted label
@@ -23,13 +39,18 @@ same rules, with ties resolved alphabetically by gene symbol.
 **Supporting findings** (in this order)
 
 - __Prognostic biomarkers__: alterations (SNVs/InDels, copy number aberrations, RNA fusions) with
-  AMP/ASCO/CAP Tier 1/2 evidence of poor or better outcome, each with the cancer types of its
-  evidence (CIViC disease or OncoKB tumor type, at most three; Tier 1 first, then cancer
-  association rank)
-- __Diagnostic biomarkers__: alterations with Tier 1/2 evidence supporting a diagnosis, each with
-  the cancer types of its evidence (shown and ordered as for prognostic biomarkers)
-- When no primary tumor site is specified, prognostic and diagnostic evidence from any tumor type is
-  considered, and Tier 3 evidence (weak evidence - levels C/D/E) is also listed
+  evidence of poor or better outcome, each with the cancer types of its evidence (CIViC disease or
+  OncoKB tumor type, at most three). The cancer types are the main information element: prognostic
+  and diagnostic evidence is not tiered (tiers refer to therapeutic evidence only)
+- __Diagnostic biomarkers__: alterations with evidence supporting a diagnosis, each with the cancer
+  types of its evidence (shown and ordered as for prognostic biomarkers). Alterations are listed
+  here also when they have no therapeutic relevance at all. Strong hits matching a specified tumor site
+  are shown as diagnostic labels in the leading findings instead (see above), and are not repeated here
+- With a primary tumor site specified, only prognostic and diagnostic evidence matching that site
+  is considered (strong or weak). When no primary tumor site is specified (site code 0, "Any"),
+  evidence from any tumor type is considered, including weak evidence. Strong evidence is defined as
+  CIViC levels A/B and OncoKB levels Dx1/Px1; weak evidence as CIViC levels C/D/E and OncoKB levels
+  Dx2/Dx3/Px2/Px3
 - __SNV/InDel variants__: number of oncogenic / likely oncogenic SNVs/InDels (all, including those
   listed as actionable - their number is stated), with the first five of the variants *not* already
   listed as actionable (oncogenicity score, highest first, then tissue-specific and global cancer

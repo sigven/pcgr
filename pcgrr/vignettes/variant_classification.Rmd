@@ -94,4 +94,25 @@ _tier-defining_ or _additional_ support:
   tier assignment (e.g. a non-matching-site strong item on a Tier I variant,
   or pan-cancer weak evidence on a Tier I or II variant)
 
+### Prognostic, diagnostic and resistance evidence
+
+AMP/ASCO/CAP tiers are assigned from **therapeutic** evidence only (treatment sensitivity,
+as intended by the guidelines). Prognostic (poor/better outcome) and diagnostic evidence
+does _not_ influence the tier of a variant, and is shown without tiers: each alteration is
+listed with the cancer types of its evidence (CIViC disease or OncoKB tumor type). Which
+evidence is considered depends on the primary tumor site (`--tumor_site`):
+
+| Primary tumor site | Prognostic/diagnostic/resistance evidence considered |
+|---|---|
+| Specified (e.g. _Soft Tissue_) | Evidence matching that site only (strong or weak) |
+| `Any` (code 0) | Evidence from any tumor type, including weak evidence |
+
+Strong evidence is defined as CIViC levels A/B and OncoKB levels Dx1/Px1 (diagnostic/prognostic),
+weak evidence as CIViC levels C/D/E and OncoKB levels Dx2/Dx3/Px2/Px3. In the key findings of
+the report, a diagnostic hit with _strong_ evidence matching a specified tumor site (e.g. an
+_EWSR1::FLI1_ fusion in soft tissue tumors) is highlighted as a label below the actionable
+alterations; with `Any`, diagnostic evidence is listed among the supporting findings only.
+The prognostic/diagnostic codes in the Excel biomarker sheets (`PP`, `PB`, `D`) are internal
+evidence-strength ranks used to select the evidence shown, not AMP/ASCO/CAP tiers.
+
 ## References

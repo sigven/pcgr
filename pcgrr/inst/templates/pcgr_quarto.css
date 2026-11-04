@@ -441,8 +441,8 @@ h2, #TOC>ul>li {
   white-space: nowrap;
 }
 
-/* Positive composite genomic biomarkers (TMB-high, MSI-high) in the key
-   findings, as pills */
+/* Diagnostic hits and positive composite genomic biomarkers (TMB-high,
+   MSI-high) in the key findings, as pills */
 .pcgr-biomarker-pills {
   margin: 0.6em 0 0.2em 0;
 }
@@ -456,6 +456,11 @@ h2, #TOC>ul>li {
   padding: 3px 12px;
   border-radius: 12px;
   margin-right: 6px;
+}
+/* Diagnostic hit (site specified, strong evidence) - diagnosis colour of
+   the biomarker call-outs (color_palette$bm_callout$diagnostic_positive) */
+.pcgr-biomarker-pill--diagnostic {
+  background-color: #6A1B9A;
 }
 
 /* Data input status (report header), as a compact row of chips - filled

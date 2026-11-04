@@ -1447,8 +1447,10 @@ callout_biomarker_scope <- function(variant_label = "variants") {
     "## Note &mdash; biomarker types and report scope\n\n",
     "The ultimate _variant tier classification_ in PCGR is driven by **therapeutic sensitivity** biomarkers ",
     "(i.e. those related to treatment response). Evidence items where variants match ",
-    "**resistance**, **prognostic**, or **diagnostic** biomarkers are also shown &mdash; ",
-    "all restricted to biomarkers matching the tumor type of the query sample.\n\n",
+    "**resistance**, **prognostic**, or **diagnostic** biomarkers are also shown (prognostic and ",
+    "diagnostic evidence without tiers) &mdash; restricted to biomarkers matching the tumor ",
+    "type of the query sample when a primary tumor site is specified, and considered for any ",
+    "tumor type otherwise (site code 0).\n\n",
     "The complete set of **Tier III** ", variant_label,
     " (uncertain/unknown clinical significance) is only available in the TSV and Excel workbook outputs.\n\n",
     ":::\n"

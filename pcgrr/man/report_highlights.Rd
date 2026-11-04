@@ -18,7 +18,9 @@ of the report}
 }
 \value{
 list with 'lead' (markdown on actionable alterations), 'pills'
-(positive composite biomarkers), 'pill_targets' (section label per pill),
+(diagnostic hits - site specified, strong evidence - and positive composite
+biomarkers), 'pill_targets' (section label per pill), 'pill_kinds'
+('diagnostic' or 'composite' per pill),
 'warnings' (markdown on actionable
 variants removed by variant filtering, "" if none) and 'supporting'
 (markdown bullet list, "" if none)
@@ -27,9 +29,10 @@ variants removed by variant filtering, "" if none) and 'supporting'
 The most critical findings come first: somatic alterations of strong or
 potential clinical significance (AMP/ASCO/CAP Tier 1/2). These are
 followed by supporting findings, each included only when informative:
-prognostic and diagnostic biomarkers (Tier 1/2; also Tier 3 without a
-primary site, see progn_diagn_tiers() - listed with the cancer types
-of their evidence),
+prognostic and diagnostic biomarkers (listed with the cancer types of
+their evidence; untiered - see progn_diagn_tiers() for the evidence
+considered; strong diagnostic hits matching a specified tumor site are
+instead highlighted as pills, see diagnostic_pills_hl()),
 oncogenic/likely oncogenic SNV/InDel variants, composite genomic
 biomarkers (TMB, MSI, external HRD status), copy number variants (amplified proto-oncogenes,
 deleted tumor suppressors, genome doubling, HRD score), mutational

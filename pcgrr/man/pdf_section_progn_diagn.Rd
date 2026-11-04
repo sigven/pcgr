@@ -2,7 +2,7 @@
 % Please edit documentation in R/pdf_tables.R
 \name{pdf_section_progn_diagn}
 \alias{pdf_section_progn_diagn}
-\title{Prognostic and diagnostic biomarker evidence of Tier 1/2 aberrations
+\title{Prognostic and diagnostic biomarker evidence of aberrations
 (SNVs/InDels, CNAs, RNA fusions) for the PDF report - one table per
 variant category and evidence type (poor/better outcome, diagnosis
 supported), same evidence selection as the prognostic and diagnostic
@@ -26,7 +26,7 @@ markdown with raw Typst tables (character), to be printed with
 cat() in a chunk with output 'asis'
 }
 \description{
-Prognostic and diagnostic biomarker evidence of Tier 1/2 aberrations
+Prognostic and diagnostic biomarker evidence of aberrations
 (SNVs/InDels, CNAs, RNA fusions) for the PDF report - one table per
 variant category and evidence type (poor/better outcome, diagnosis
 supported), same evidence selection as the prognostic and diagnostic

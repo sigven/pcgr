@@ -266,7 +266,7 @@ pdf_section_bm_evidence <- function(
   paste(out, collapse = "")
 }
 
-#' Prognostic and diagnostic biomarker evidence of Tier 1/2 aberrations
+#' Prognostic and diagnostic biomarker evidence of aberrations
 #' (SNVs/InDels, CNAs, RNA fusions) for the PDF report - one table per
 #' variant category and evidence type (poor/better outcome, diagnosis
 #' supported), same evidence selection as the prognostic and diagnostic
@@ -318,9 +318,8 @@ pdf_section_progn_diagn <- function(
   if (length(out) == 0) {
     return(pdf_note(kind = "empty", paste0(
       "Based on available data in ", bm_db_tier_label(report),
-      ", no prognostic or diagnostic biomarker evidence (Tier ",
-      paste(tier, collapse = "/"), ") was found for somatic aberrations ",
-      "in this tumor sample.")))
+      ", no prognostic or diagnostic biomarker evidence was found for ",
+      "somatic aberrations in this tumor sample.")))
   }
   paste(out, collapse = "")
 }

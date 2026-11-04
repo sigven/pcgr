@@ -207,11 +207,15 @@ cat("\n<div class=\"kf-title\"><span class=\"kf-title-text\">Key findings</span>
 cat("::: {.kf-lead}\n\n")
 cat(hl$lead, sep = "\n\n")
 cat("\n\n")
-## positive composite biomarkers (TMB-high, MSI-high) as pills - none
-## otherwise
+## diagnostic hits (site specified, strong evidence) and positive composite
+## biomarkers (TMB-high, MSI-high, HR-deficient) as pills - none otherwise
 if (length(hl$pills) > 0) {
+  pill_class <- ifelse(
+    hl$pill_kinds == "diagnostic",
+    "pcgr-biomarker-pill pcgr-biomarker-pill--diagnostic",
+    "pcgr-biomarker-pill")
   cat("<div class='pcgr-biomarker-pills'>",
-      paste0("<span class='pcgr-biomarker-pill'>",
+      paste0("<span class='", pill_class, "'>",
              htmltools::htmlEscape(hl$pills), "</span>", collapse = ""),
       "</div>\n\n", sep = "")
 }
