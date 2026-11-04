@@ -1280,30 +1280,7 @@ effect_prediction_algos <- as.data.frame(
              show_col_types = F))
 usethis::use_data(effect_prediction_algos, overwrite = T)
 
-#---- cancer_phenotypes_regex ----#
-cancer_phenotypes_regex <-
-  paste0("(cancer|carcinoma|tumor|neoplasm|gangliom|lymphom|leukem|meningiom",
-         "|blastoma|melanom|chordom|adenoma|sarcom|mesotheli|ependymom|glioma",
-         "|neurofibro|keratoacan|nevus|brca|polyposis|myelodysplastic|cowden",
-         "|gardner|noonan|fanconi|carney|bullosa|schwanno|li-fraumeni|xeroderma",
-         "|leiomyom|muir-|nijmegen|neoplasia|trichoepithelioma|brooke|turcot",
-         "|exostos|lynch|drash|wilm|perlman|fibrofolliculomas|hippel|hamartom",
-         "|bloom|werner|peutz|tuberous|angiomyolipoma",
-         "|dihydropyrimidine dehydrogenase deficiency",
-         "|lymphoproliferative|stat3|teratoma|thrombocytop|tp63|weaver",
-         "|pheochromo|gorlin|telangiectasia|hemangiom|osteochondro|response",
-         "|polg-related|ras-associated|dyskeratosis",
-         "|tyrosine kinase inhibitor|fluorouracil|methotrexate|capecitabine",
-         "|imatinib|erlotinib|gefitinib|sunitinib|vemurafenib|crizotinib|cetuximab",
-         "|dabrafenib|osimertinib|afatinib|neratinib|lapatinib|ponatinib|regorafenib",
-         "|vandetanib|bosutinib|axitinib|cabozantinib|brigatinib|ripretinib|lenvatinib",
-         "|midostaurin|duvelisib|copanlisib|alpelisib|larotrectinib|entrectinib",
-         "|programmed death ligand|adp-ribose|doxorubicin|cisplatin|carboplatin",
-         "|familial adenomatous polyposis|hereditary breast and ovarian cancer",
-         "|hereditary nonpolyposis colorectal cancer|multiple endocrine neoplasia",
-         "|waardenburg|beckwidth|birt-hogg|diamond|frasier",
-         "|infantile myofibromatosis|proteus|rothmund|russel)")
-usethis::use_data(cancer_phenotypes_regex, overwrite = T)
+## cancer_phenotypes_regex moved to the cpsr package (only used by CPSR)
 
 
 tcga_cohorts <- as.data.frame(
@@ -1436,8 +1413,7 @@ exonic_filter_levels <-
 usethis::use_data(germline_filter_levels, overwrite = T)
 usethis::use_data(exonic_filter_levels, overwrite = T)
 
-rm(cancer_phenotypes_regex,
-   effect_prediction_algos,
+rm(effect_prediction_algos,
    tcga_cohorts,
    immune_celltypes2,
    artefact_signatures,

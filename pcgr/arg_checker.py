@@ -950,6 +950,11 @@ def verify_args_cpsr(arg_dict):
     verify_required_args(arg_dict, logger)
     
     ### Optional arguments
+    ## Deprecated: --clinvar_report_noncancer (non-cancer ClinVar variants are reported by default)
+    if arg_dict.get('clinvar_report_noncancer', False):
+        warn_msg = ("Option '--clinvar_report_noncancer' is deprecated and has no effect - ClinVar variants attributed to "
+                    "non-cancer phenotypes are now reported by default (use '--clinvar_cancer_only' to exclude them)")
+        warn_message(warn_msg, logger)
     ## Provide virtual_panel_id or a custom list from panel 0
     if arg_dict['virtual_panel_id'] == "-1" and not arg_dict['custom_list']:
         err_msg = (

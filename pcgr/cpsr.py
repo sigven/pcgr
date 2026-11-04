@@ -57,7 +57,8 @@ def get_args():
     optional_classification.add_argument('--gwas_findings', action='store_true',dest='gwas_findings',default=False, help='Report overlap with low to moderate cancer risk variants (tag SNPs) identified from genome-wide association studies, default: %(default)s')    
     optional_classification.add_argument('--max_af_gnomad', type = float, default = 0.9, dest = 'max_af_gnomad', help='Ignore reporting novel variants with gnomAD maximum allele frequency (AF) across populations greater than this value, default: %(default)s')
     optional_classification.add_argument('--clinvar_trust_level', type=int, choices=[0,1,2,3,4], default=0, dest='clinvar_trust_level',help='Level of trust/authority assigned to CPSR-based variant classification relative to existing ClinVar records: \n' + pcgr_vars.clinvar_trust_levels_help_display + '\n(default: %(default)s)')
-    optional_classification.add_argument('--clinvar_report_noncancer', action='store_true', help='Report also ClinVar-classified variants attributed to phenotypes/conditions NOT directly related to tumor development, default: %(default)s')
+    optional_classification.add_argument('--clinvar_cancer_only', action='store_true', help='Exclude ClinVar-classified variants attributed only to phenotypes/conditions NOT related to cancer\n(variants with unspecified ClinVar phenotypes, e.g. \'not provided\', are retained), default: %(default)s')
+    optional_classification.add_argument('--clinvar_report_noncancer', action='store_true', help=argparse.SUPPRESS)
     
     optional_vcfanno.add_argument('--vcfanno_n_proc', default = 4, type = int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
 

@@ -283,7 +283,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
                 3: 'Override zero- and single-star ClinVar records, and records with non-cancer phenotypes',
                 4: 'CPSR always classifies'
             }[int(arg_dict['clinvar_trust_level'])],
-            'clinvar_report_noncancer': int(arg_dict['clinvar_report_noncancer'])
+            'clinvar_cancer_only': int(arg_dict['clinvar_cancer_only'])
         }
             
 
