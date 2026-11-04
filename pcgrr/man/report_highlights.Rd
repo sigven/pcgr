@@ -28,8 +28,8 @@ The most critical findings come first: somatic alterations of strong or
 potential clinical significance (AMP/ASCO/CAP Tier 1/2). These are
 followed by supporting findings, each included only when informative:
 prognostic and diagnostic biomarkers (Tier 1/2; also Tier 3 without a
-primary site, see progn_diagn_tiers() - then listed with the primary sites
-of their evidence instead of the tier),
+primary site, see progn_diagn_tiers() - listed with the cancer types
+of their evidence),
 oncogenic/likely oncogenic SNV/InDel variants, composite genomic
 biomarkers (TMB, MSI, external HRD status), copy number variants (amplified proto-oncogenes,
 deleted tumor suppressors, genome doubling, HRD score), mutational

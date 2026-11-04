@@ -441,6 +441,24 @@ generate_report_data_msi <- function(
   return(pcg_report_msi)
 }
 
+#' MSI status as displayed in the report (MSI status cards)
+#'
+#' Harmonizes the MSI status labels of the external MSI caller ('MSI-H',
+#' 'MSS', 'Indeterminate') and the PCGR MSI classifier
+#' ('MSI.H (Microsatellite instability - high)', 'MSS (Microsatellite stable)')
+#' to 'MSI-high' / 'MSS' (other values unchanged)
+#'
+#' @param status MSI status (character)
+#' @return display label (character)
+#' @keywords internal
+msi_status_display <- function(status) {
+  status <- as.character(status)
+  dplyr::case_when(
+    grepl("^MSI[-.]H", status) ~ "MSI-high",
+    grepl("^MSS", status) ~ "MSS",
+    .default = status)
+}
+
 #' Function that tells if the MSI status of the sample is MSI-high
 #'
 #' If a result from an external MSI caller is available (MSI-H or MSS), this

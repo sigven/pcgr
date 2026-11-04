@@ -23,8 +23,8 @@ from the corresponding bm_evidence classification of each callset)}
 }
 \value{
 data frame with LABEL, SYMBOL, ALTERATION and ACTIONABILITY_TIER;
-for evidence-based tiers also BM_PRIMARY_SITE (one row per primary site of
-the evidence items)
+for evidence-based tiers also BM_PRIMARY_SITE and BM_CANCER_TYPE (one row
+per primary site/cancer type of the evidence items)
 }
 \description{
 Somatic alterations with an actionability tier (SNVs/InDels, CNAs, RNA

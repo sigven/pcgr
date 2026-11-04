@@ -29,7 +29,7 @@ bslib::layout_columns(
   height = "110px",
   bslib::value_box(
     title = "MSI status",
-    value = msi_ext$status,
+    value = pcgrr:::msi_status_display(msi_ext$status),
     showcase = NULL,
     theme = ext_status_theme
   ),

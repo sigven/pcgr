@@ -23,7 +23,8 @@ col_status_ext <- if (msi_ext_pdf$status == "Indeterminate")
   pcgrr::color_palette$warning else if (msi_ext_pdf$status == "MSI-H")
   pcgrr::color_palette$oncogenicity$values[1] else NULL
 cat(pcgrr:::pdf_kpi_row(list(
-  list(title = "MSI status", value = msi_ext_pdf$status, color = col_status_ext),
+  list(title = "MSI status", value = pcgrr:::msi_status_display(msi_ext_pdf$status),
+       color = col_status_ext),
   list(title = msi_ext_pdf$score_title, value = msi_ext_pdf$score_value),
   list(title = if (is.na(msi_ext_pdf$loci_value)) "MSI caller" else
          "Unstable loci / evaluated loci",
@@ -168,7 +169,7 @@ col_status <- if (uncertain_pdf) pcgrr::color_palette$warning else if
   (is_msi_h_pdf) pcgrr::color_palette$oncogenicity$values[1] else NULL
 cat(pcgrr:::pdf_kpi_row(list(
   list(title = "MSI status",
-       value = if (is_msi_h_pdf) "MSI-H" else "MSS",
+       value = if (is_msi_h_pdf) "MSI-high" else "MSS",
        color = col_status),
   list(title = prob_label_pdf, value = as.character(prob_display_pdf),
        color = col_status),

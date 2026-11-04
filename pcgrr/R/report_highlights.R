@@ -67,12 +67,14 @@ fmt_list_hl <- function(x, max_show = 5) {
 #' from the corresponding bm_evidence classification of each callset)
 #'
 #' @return data frame with LABEL, SYMBOL, ALTERATION and ACTIONABILITY_TIER;
-#' for evidence-based tiers also BM_PRIMARY_SITE (one row per primary site of
-#' the evidence items)
+#' for evidence-based tiers also BM_PRIMARY_SITE and BM_CANCER_TYPE (one row
+#' per primary site/cancer type of the evidence items)
 #' @keywords internal
 tiered_alterations_hl <- function(report, tier = c(1, 2),
                                   clnsig = "therapeutic_sensitivity") {
   content <- report$content
+  ## evidence context columns carried along for evidence-based tiers
+  ctx_cols <- c("BM_PRIMARY_SITE", "BM_CANCER_TYPE")
   ## variant records of a callset, with ACTIONABILITY_TIER according to clnsig
   ## (fusions are matched on VAR_ID/VARIANT_CLASS only, as their ENTREZGENE
   ## differs between variant and evidence records - see
@@ -94,11 +96,10 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
     if (!all(join_cols %in% colnames(cls)) ||
         !all(join_cols %in% colnames(v))) return(v[0, , drop = FALSE])
     dplyr::inner_join(
-      dplyr::select(v, -dplyr::any_of(c("ACTIONABILITY_TIER",
-                                        "BM_PRIMARY_SITE"))),
+      dplyr::select(v, -dplyr::any_of(c("ACTIONABILITY_TIER", ctx_cols))),
       dplyr::distinct(dplyr::select(
         cls, dplyr::all_of(c(join_cols, "ACTIONABILITY_TIER")),
-        dplyr::any_of("BM_PRIMARY_SITE"))),
+        dplyr::any_of(ctx_cols))),
       by = join_cols, relationship = "many-to-many")
   }
   recs <- list()
@@ -110,9 +111,7 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
       TISSUE_ASSOC_RANK = snv$TISSUE_ASSOC_RANK,
       GLOBAL_ASSOC_RANK = snv$GLOBAL_ASSOC_RANK,
       ACTIONABILITY_TIER = suppressWarnings(as.integer(snv$ACTIONABILITY_TIER)))
-    if ("BM_PRIMARY_SITE" %in% colnames(snv)) {
-      recs$snv$BM_PRIMARY_SITE <- snv$BM_PRIMARY_SITE
-    }
+    for (cc in intersect(ctx_cols, colnames(snv))) recs$snv[[cc]] <- snv[[cc]]
   }
   cna <- variant_tiers("cna")
   if (isTRUE(content$cna$eval) && NROW(cna) > 0 &&
@@ -125,20 +124,16 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
         cna$VARIANT_CLASS %in% c("homdel", "hemdel", "hetdel") ~ "loss",
         .default = as.character(cna$VARIANT_CLASS)),
       ACTIONABILITY_TIER = suppressWarnings(as.integer(cna$ACTIONABILITY_TIER)))
-    if ("BM_PRIMARY_SITE" %in% colnames(cna)) {
-      recs$cna$BM_PRIMARY_SITE <- cna$BM_PRIMARY_SITE
-    }
+    for (cc in intersect(ctx_cols, colnames(cna))) recs$cna[[cc]] <- cna[[cc]]
   }
   fus <- variant_tiers("fusion")
   if (isTRUE(content$fusion$eval) && NROW(fus) > 0) {
     f <- fusion_tier_records(fus)
     ## (one record per fusion row, in the same order)
     if (NROW(f) > 0) {
-      if ("BM_PRIMARY_SITE" %in% colnames(fus)) {
-        f$BM_PRIMARY_SITE <- fus$BM_PRIMARY_SITE
-      }
+      for (cc in intersect(ctx_cols, colnames(fus))) f[[cc]] <- fus[[cc]]
       recs$fusion <- f[, intersect(c("SYMBOL", "ALTERATION",
-                                     "ACTIONABILITY_TIER", "BM_PRIMARY_SITE"),
+                                     "ACTIONABILITY_TIER", ctx_cols),
                                    colnames(f))]
     }
   }
@@ -174,8 +169,8 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
 #' potential clinical significance (AMP/ASCO/CAP Tier 1/2). These are
 #' followed by supporting findings, each included only when informative:
 #' prognostic and diagnostic biomarkers (Tier 1/2; also Tier 3 without a
-#' primary site, see progn_diagn_tiers() - then listed with the primary sites
-#' of their evidence instead of the tier),
+#' primary site, see progn_diagn_tiers() - listed with the cancer types
+#' of their evidence),
 #' oncogenic/likely oncogenic SNV/InDel variants, composite genomic
 #' biomarkers (TMB, MSI, external HRD status), copy number variants (amplified proto-oncogenes,
 #' deleted tumor suppressors, genome doubling, HRD score), mutational
@@ -232,12 +227,11 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
 
   ## prognostic and diagnostic biomarkers (AMP/ASCO/CAP Tier 1/2, and Tier 3
   ## when no primary site is set - see progn_diagn_tiers()) - one
-  ## finding per evidence type, listing alterations with their tier; when no
-  ## primary site is set, with the primary sites of the evidence instead
-  ## (more informative than the tier there); only included when any such
-  ## evidence is found
-  site <- conf$sample_properties$site
-  any_site <- is.null(site) || isTRUE(site == "Any")
+  ## finding per evidence type, listing alterations with the cancer types of
+  ## their evidence (CIViC disease / OncoKB OncoTree tumor type; the primary
+  ## site where no cancer type is given) - more informative than the tier
+  ## here (falls back to the tier if neither is available); only included
+  ## when any such evidence is found
   ## types: description prefix per evidence type (clnsig)
   bm_items <- function(types) {
     items <- c()
@@ -245,18 +239,31 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
       d <- tiered_alterations_hl(
         report, tier = progn_diagn_tiers(report), clnsig = clnsig)
       if (NROW(d) == 0) next
-      if (any_site && "BM_PRIMARY_SITE" %in% colnames(d)) {
-        ## (labels in order of first appearance - tier, then ranks)
-        sites <- lapply(split(d$BM_PRIMARY_SITE,
-                              factor(d$LABEL, levels = unique(d$LABEL))),
-                        function(s) sort(unique(s[!is.na(s) & s != ""])))
-        ctx <- vapply(sites, function(s) {
+      ctx_col <- intersect(c("BM_CANCER_TYPE", "BM_PRIMARY_SITE"), colnames(d))
+      if (length(ctx_col) > 0) {
+        tt <- as.character(d[[ctx_col[1]]])
+        if (length(ctx_col) > 1) {
+          tt[is.na(tt) | tt == ""] <-
+            as.character(d[[ctx_col[2]]])[is.na(tt) | tt == ""]
+        }
+        tt[tt %in% "Any"] <- "Multiple tumor types"
+        ## (labels in order of first appearance - tier, then ranks; cancer
+        ## types de-duplicated ignoring case, as names differ in case
+        ## between sources)
+        types_lbl <- lapply(
+          split(tt, factor(d$LABEL, levels = unique(d$LABEL))),
+          function(s) {
+            s <- s[!is.na(s) & s != ""]
+            s <- s[!duplicated(tolower(s))]
+            s[order(tolower(s))]
+          })
+        ctx <- vapply(types_lbl, function(s) {
           if (length(s) > 3) s <- c(utils::head(s, 3),
                                     paste0("+", length(s) - 3, " more"))
           if (length(s) == 0) "" else
             paste0(" (", paste(md_escape_hl(s), collapse = ", "), ")")
         }, character(1))
-        lbl <- paste0(names(sites), ctx)
+        lbl <- paste0(names(types_lbl), ctx)
       } else {
         d <- d[!duplicated(d$LABEL), , drop = FALSE]
         lbl <- paste0(d$LABEL, " (Tier ", d$ACTIONABILITY_TIER, ")")

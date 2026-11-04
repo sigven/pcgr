@@ -168,9 +168,7 @@ bslib::page_fillable(
     height = "140px",
     bslib::value_box(
       title = "MSI status",
-      value = stringr::str_replace(
-        msi_stats[['predicted_class']],
-        "MSI.H","MSI-H"),
+      value = pcgrr:::msi_status_display(msi_stats[['predicted_class']]),
       showcase = NULL,
       theme = status_box_theme
     ),
