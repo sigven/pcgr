@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9016</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9017</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -187,6 +187,23 @@ In the PDF report, only the external result is shown in detail, with a
 note on concordance with the classifier prediction</li>
 </ul>
 <ol start="5" style="list-style-type: decimal">
+<li><strong>HRD status</strong></li>
+</ol>
+<ul>
+<li>Result of an external HRD assay/tool (<code>--input_hrd</code>): HRD
+status (<em>HR-deficient</em>, <em>HR-proficient</em> or
+<em>Indeterminate</em>), score and kind of score (as stated in the input
+file), and how the status was obtained (reported by the assay/tool, or
+derived by PCGR with <code>--input_hrd_threshold</code>)</li>
+<li>Genomic scar (HRD) score estimated by PCGR from the allele-specific
+copy number segments (<code>--estimate_hrd</code>; HRD-LOH, LST, TAI and
+their sum - research use only)</li>
+<li>If both are available, they are shown in separate tabs (<em>External
+assay/tool</em> and <em>PCGR genomic scar score</em>) in the HTML
+report; in the PDF report, HRD is part of the <em>Composite genomic
+biomarkers</em> section</li>
+</ul>
+<ol start="6" style="list-style-type: decimal">
 <li>
 <strong>Tumor mutational burden (TMB)</strong>
 <ul>
@@ -206,14 +223,14 @@ as the underlying framework)</li>
 <li>Datatable with signatures found and proposed underlying
 etiologies</li>
 </ul>
-<ol start="7" style="list-style-type: decimal">
+<ol start="8" style="list-style-type: decimal">
 <li><strong>Kataegis events</strong></li>
 </ol>
 <ul>
 <li>Kataegis events are clusters of particular SNV types. The report
 includes a datatable with all detected kataegis events.</li>
 </ul>
-<ol start="8" style="list-style-type: decimal">
+<ol start="9" style="list-style-type: decimal">
 <li><strong>RNA fusions</strong></li>
 </ol>
 <ul>
@@ -223,7 +240,7 @@ cancer</li>
 <li>Clinical actionability evidence linked to fusion events is shown
 where available (AMP/ASCO/CAP guidelines)</li>
 </ul>
-<ol start="9" style="list-style-type: decimal">
+<ol start="10" style="list-style-type: decimal">
 <li><strong>RNA expression analysis</strong></li>
 </ol>
 <ul>
@@ -234,7 +251,7 @@ and samples in other reference cohorts (TCGA, Treehouse Childhood Cancer
 Initiative, DepMap)</li>
 <li>Immune contexture profiling</li>
 </ul>
-<ol start="10" style="list-style-type: decimal">
+<ol start="11" style="list-style-type: decimal">
 <li><strong>Documentation</strong></li>
 </ol>
 <ul>
@@ -1931,6 +1948,99 @@ if the status was derived: default or set with
 </table>
 </div>
 <div class="section level3">
+<h3 id="hrd-result-from-external-assaytool-tsv">HRD result from external assay/tool (TSV)<a class="anchor" aria-label="anchor" href="#hrd-result-from-external-assaytool-tsv"></a>
+</h3>
+<p>If an HRD result from an external assay/tool is provided
+(<code>--input_hrd</code>), a normalised copy of the result is written
+to a tab-separated values (TSV) file, with the following naming
+convention:</p>
+<ul>
+<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.hrd.tsv</code></li>
+</ul>
+<p>The file has one data row, and the following columns (missing values
+are denoted <code>.</code>):</p>
+<table class="table">
+<colgroup>
+<col width="43%">
+<col width="56%">
+</colgroup>
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>1. <code>SAMPLE_ID</code>
+</td>
+<td>Sample identifier</td>
+</tr>
+<tr class="even">
+<td>2. <code>HRD_STATUS</code>
+</td>
+<td>HRD status: <code>HR-deficient</code>, <code>HR-proficient</code> or
+<code>Indeterminate</code>
+</td>
+</tr>
+<tr class="odd">
+<td>3. <code>HRD_STATUS_BASIS</code>
+</td>
+<td>How the HRD status was obtained: <code>caller</code> (given in the
+input file) or <code>derived</code> (derived by PCGR from the score with
+<code>--input_hrd_threshold</code>)</td>
+</tr>
+<tr class="even">
+<td>4. <code>HRD_CALLER</code>
+</td>
+<td>Name of the HRD assay/tool</td>
+</tr>
+<tr class="odd">
+<td>5. <code>CALLER_VERSION</code>
+</td>
+<td>Version of the HRD assay/tool</td>
+</tr>
+<tr class="even">
+<td>6. <code>HRD_SCORE_TYPE</code>
+</td>
+<td>Kind of score: <code>genomic_scar</code>,
+<code>mutational_signature</code>, <code>composite</code> or
+<code>other</code>
+</td>
+</tr>
+<tr class="odd">
+<td>7. <code>HRD_SCORE_DESCRIPTION</code>
+</td>
+<td>Description of the score</td>
+</tr>
+<tr class="even">
+<td>8. <code>HRD_SCORE</code>
+</td>
+<td>Score, as reported by the assay/tool</td>
+</tr>
+<tr class="odd">
+<td>9. <code>HRD_SCORE_THRESHOLD_USED</code>
+</td>
+<td>Threshold on the score for HR-deficient (by the assay/tool, or by
+PCGR if the status was derived)</td>
+</tr>
+<tr class="even">
+<td>10. <code>HRD_LOH</code>
+</td>
+<td>Genomic scar component: HRD-LOH</td>
+</tr>
+<tr class="odd">
+<td>11. <code>HRD_LST</code>
+</td>
+<td>Genomic scar component: LST</td>
+</tr>
+<tr class="even">
+<td>12. <code>HRD_TAI</code>
+</td>
+<td>Genomic scar component: TAI</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
 <h3 id="mutational-signature-contributions-tsv">Mutational signature contributions (TSV)<a class="anchor" aria-label="anchor" href="#mutational-signature-contributions-tsv"></a>
 </h3>
 <p>We provide a tab-separated values (TSV) file with information about
@@ -2949,12 +3059,16 @@ column name conflicts</td>
 <td>
 <code>--input_vcf</code> provided and biomarker hits exist</td>
 <td>One row per biomarker evidence item matched to a somatic SNV/InDel.
-A <code>TIER</code> column encodes evidence category and actionability
-tier (e.g. <code>T1</code>/<code>T2</code>/<code>T3</code> = therapeutic
+A <code>TIER</code> column encodes evidence category and rank
+(e.g. <code>T1</code>/<code>T2</code>/<code>T3</code> = therapeutic
 sensitivity, <code>R1</code>/<code>R2</code>/<code>R3</code> =
 therapeutic resistance, <code>PP1</code>–<code>PP2</code> = poor
 prognosis, <code>PB1</code>–<code>PB2</code> = better prognosis,
-<code>D1</code>–<code>D2</code> = diagnostic positive).
+<code>D1</code>–<code>D2</code> = diagnostic positive). Only the
+therapeutic categories (<code>T</code>, <code>R</code>) are AMP/ASCO/CAP
+actionability tiers; for prognostic and diagnostic evidence
+(<code>PP</code>, <code>PB</code>, <code>D</code>) the number is an
+internal evidence-strength rank (lower = stronger evidence), not a tier.
 Diagnostic-negative evidence is excluded</td>
 </tr>
 <tr class="even">
@@ -3035,6 +3149,13 @@ the same <code>TIER</code> encoding and sorting as
 <td>MSI classifier statistics and predicted stability status</td>
 </tr>
 <tr class="even">
+<td><code>HRD</code></td>
+<td>
+<code>--input_hrd</code> provided</td>
+<td>HRD result from an external HRD assay/tool (same content as the
+<code>.hrd.tsv</code> file)</td>
+</tr>
+<tr class="odd">
 <td><code>MUTATIONAL_SIGNATURE</code></td>
 <td>
 <code>--input_vcf</code> provided and signature estimation
@@ -3042,13 +3163,13 @@ enabled</td>
 <td>Mutational signature contributions (same content as the
 <code>.msigs.tsv.gz</code> file)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>KATAEGIS_EVENTS</code></td>
 <td>
 <code>--input_vcf</code> provided and kataegis events detected</td>
 <td>Kataegis loci identified from the somatic mutation profile</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>RNA_EXPRESSION_OUTLIERS</code></td>
 <td>
 <code>--input_rna_expression</code> provided and outlier detection
@@ -3058,7 +3179,7 @@ A subset of display-only columns (<code>GENENAME</code>,
 <code>CANCERGENE_EVIDENCE</code>, <code>TARGETED_INHIBITORS_ALL</code>,
 <code>ENSEMBL_GENE_ID</code>) are removed to reduce width</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>RNA_IMMUNE_CONTEXTURE</code></td>
 <td>
 <code>--input_rna_expression</code> provided</td>

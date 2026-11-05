@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9016</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9017</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -339,13 +339,6 @@
 
         <dt>
 
-          <code><a href="cancer_phenotypes_regex.html">cancer_phenotypes_regex</a></code>
-
-        </dt>
-        <dd>Regular expression of terms indicative of cancer-related phenotypes and syndromes</dd>
-
-        <dt>
-
           <code><a href="check_common_colnames.html">check_common_colnames()</a></code>
 
         </dt>
@@ -612,10 +605,24 @@
 
         <dt>
 
+          <code><a href="generate_report_data_external.html">generate_report_data_external()</a></code>
+
+        </dt>
+        <dd>Function that generates report data for the result of an external assay/tool (MSI or HRD)</dd>
+
+        <dt>
+
           <code><a href="generate_report_data_fusion.html">generate_report_data_fusion()</a></code>
 
         </dt>
         <dd>Function that generates fusion data for PCGR report</dd>
+
+        <dt>
+
+          <code><a href="generate_report_data_hrd_external.html">generate_report_data_hrd_external()</a></code>
+
+        </dt>
+        <dd>Function that generates report data for an external HRD result</dd>
 
         <dt>
 
@@ -773,6 +780,27 @@
 
         <dt>
 
+          <code><a href="hrd_external_display.html">hrd_external_display()</a></code>
+
+        </dt>
+        <dd>Function that prepares display strings for an external HRD result</dd>
+
+        <dt>
+
+          <code><a href="hrd_score_type_label.html">hrd_score_type_label()</a></code>
+
+        </dt>
+        <dd>Broad categories of HRD scores (HRD_SCORE_TYPE of an external HRD result)</dd>
+
+        <dt>
+
+          <code><a href="hrd_status_is_deficient.html">hrd_status_is_deficient()</a></code>
+
+        </dt>
+        <dd>Function that checks whether the tumor is HR-deficient according to an external HRD result</dd>
+
+        <dt>
+
           <code><a href="immune_celltypes.html">immune_celltypes</a></code>
 
         </dt>
@@ -794,6 +822,13 @@
 
         <dt>
 
+          <code><a href="init_external_result.html">init_external_result()</a></code>
+
+        </dt>
+        <dd>Function that initiates the report element of an external result</dd>
+
+        <dt>
+
           <code><a href="init_fusion_content.html">init_fusion_content()</a></code>
 
         </dt>
@@ -805,6 +840,13 @@
 
         </dt>
         <dd>Function that initiates report element with germline variant information (CPSR)</dd>
+
+        <dt>
+
+          <code><a href="init_hrd_content.html">init_hrd_content()</a></code>
+
+        </dt>
+        <dd>Function that initiates report element with HRD results</dd>
 
         <dt>
 
@@ -955,10 +997,24 @@
 
         <dt>
 
+          <code><a href="load_external_hrd.html">load_external_hrd()</a></code>
+
+        </dt>
+        <dd>Function that loads the normalised result of an external HRD assay/tool</dd>
+
+        <dt>
+
           <code><a href="load_external_msi.html">load_external_msi()</a></code>
 
         </dt>
         <dd>Function that loads the normalised result of an external MSI caller</dd>
+
+        <dt>
+
+          <code><a href="load_external_result.html">load_external_result()</a></code>
+
+        </dt>
+        <dd>Function that loads the normalised result of an external assay/tool</dd>
 
         <dt>
 
@@ -1092,13 +1148,6 @@
 
         </dt>
         <dd>Function that plots the indel fraction for a given sample and contrasts this with the distribution for MSI-H/MSS samples from TCGA</dd>
-
-        <dt>
-
-          <code><a href="msi_indel_load_plot.html">msi_indel_load_plot()</a></code>
-
-        </dt>
-        <dd>Function that plots the indel load for a given sample and contrasts this with the distribution for MSI-H/MSS samples from TCGA</dd>
 
         <dt>
 
@@ -1312,6 +1361,13 @@
 
         <dt>
 
+          <code><a href="prep_bm_display_tbl.html">prep_bm_display_tbl()</a></code>
+
+        </dt>
+        <dd>Function that gathers data tables on biomarker variants (predictive, prognostic or diagnostic) for display in report</dd>
+
+        <dt>
+
           <code><a href="prep_diagn_display_tbl.html">prep_diagn_display_tbl()</a></code>
 
         </dt>
@@ -1357,7 +1413,7 @@
           <code><a href="progn_diagn_tiers.html">progn_diagn_tiers()</a></code>
 
         </dt>
-        <dd>Actionability tiers of prognostic and diagnostic biomarker evidence shown in the reports (HTML/PDF sections, key findings)</dd>
+        <dd>Internal evidence tiers of prognostic and diagnostic biomarker evidence shown in the reports (HTML/PDF sections, key findings)</dd>
 
         <dt>
 
@@ -1378,7 +1434,7 @@
           <code><a href="render_actble_bm_table.html">render_actble_bm_table()</a></code>
 
         </dt>
-        <dd>Build biomarker reactable with category-aware styling Combines tier 1 and tier 2 records in one table. Header uses tier 1 color; THERAPY_MATCH cell background reflects the row's tier (1 or 2).</dd>
+        <dd>Build actionable (predictive) biomarker reactable</dd>
 
         <dt>
 
@@ -1410,6 +1466,13 @@
 
         <dt>
 
+          <code><a href="render_bm_table.html">render_bm_table()</a></code>
+
+        </dt>
+        <dd>Build biomarker reactable with category-aware styling Combines tier 1 and tier 2 (and for predictive biomarkers, tier 3) records in one table. Header uses tier 1 color; the summary cell (THERAPY_MATCH, PROGNOSTIC_OUTCOME or DIAGNOSTIC_EVIDENCE) background reflects the row's tier.</dd>
+
+        <dt>
+
           <code><a href="render_classification_cell.html">render_classification_cell()</a></code>
 
         </dt>
@@ -1420,7 +1483,7 @@
           <code><a href="render_diagn_bm_table.html">render_diagn_bm_table()</a></code>
 
         </dt>
-        <dd>Build biomarker reactable with category-aware styling Combines tier 1 and tier 2 records in one table. Header uses tier 1 color; THERAPY_MATCH cell background reflects the row's tier (1 or 2).</dd>
+        <dd>Build diagnostic biomarker reactable</dd>
 
         <dt>
 
@@ -1469,14 +1532,14 @@
           <code><a href="render_progn_bm_table.html">render_progn_bm_table()</a></code>
 
         </dt>
-        <dd>Build biomarker reactable with category-aware styling Combines tier 1 and tier 2 records in one table. Header uses tier 1 color; THERAPY_MATCH cell background reflects the row's tier (1 or 2).</dd>
+        <dd>Build prognostic biomarker reactable</dd>
 
         <dt>
 
           <code><a href="render_prognostic_outcome.html">render_prognostic_outcome()</a></code>
 
         </dt>
-        <dd>Render prognostic outcome cell with background color based on actionability tier (Generated by Claude Opus 4.6 with some manual tweaks)</dd>
+        <dd>Render prognostic outcome (or diagnostic evidence) cell with background color based on actionability tier (Generated by Claude Opus 4.6 with some manual tweaks)</dd>
 
         <dt>
 

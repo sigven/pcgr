@@ -1,8 +1,6 @@
-# Build biomarker reactable with category-aware styling Combines tier 1 and tier 2 records in one table. Header uses tier 1 color; THERAPY_MATCH cell background reflects the row's tier (1 or 2).
+# Build prognostic biomarker reactable
 
-Build biomarker reactable with category-aware styling Combines tier 1
-and tier 2 records in one table. Header uses tier 1 color; THERAPY_MATCH
-cell background reflects the row's tier (1 or 2).
+Build prognostic biomarker reactable
 
 ## Usage
 
@@ -19,16 +17,22 @@ render_progn_bm_table(
 
 - rctbl_recs:
 
-  List with \$main and \$nested data frames. \$main must contain
-  ACTIONABILITY_TIER with values 1 and 2.
+  List with \$main and \$nested data frames, as returned by
+  `prep_bm_display_tbl`. \$main must contain ACTIONABILITY_TIER with
+  values 1 and 2.
 
 - variant_category:
 
-  One of "snv_indel", "cnv", "fusion"
+  One of "snv_indel", "cna", "fusion", "msi", "tmb" (msi and tmb for
+  predictive biomarkers only)
 
 - clnsig:
 
-  One of "therapeutic_sensitivity" or "therapeutic_resistance",
+  One of "prognostic_poor" or "prognostic_better"
+
+- color_palette:
+
+  color palette (default: pcgrr::color_palette)
 
 ## Value
 

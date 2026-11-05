@@ -85,13 +85,17 @@ indicated in parentheses):
 
 Clinical actionability assessment of somatic SNVs/InDels, gene copy
 number aberrations, and RNA fusions found in the tumor sample implements
-recommendation guidelines by AMP/ASCO/CAP (Li et al. 2017).
-Specifically, different levels of actionability are implemented in the
-following manner:
+recommendation guidelines by AMP/ASCO/CAP (Li et al. 2017). Tiers are
+assigned from *therapeutic* evidence only (treatment sensitivity), as
+intended by the guidelines. Prognostic, diagnostic and resistance
+evidence does not influence the tier of an alteration - it is listed
+separately, without tiers (see the sections on prognostic and diagnostic
+biomarkers). Specifically, different levels of actionability are
+implemented in the following manner:
 
 - **Tier I: Variants of strong clinical significance** — aberrations
-  linked to predictive, prognostic, or diagnostic biomarkers in the
-  [CIViC database](https://civicdb.org) and the [Cancer Biomarkers
+  linked to predictive (therapeutic) biomarkers in the [CIViC
+  database](https://civicdb.org) and the [Cancer Biomarkers
   Database](https://www.cancergenomeinterpreter.org/2021/biomarkers)
   (and optionally [OncoKB](https://oncokb.org)) that show
   - Strong clinical evidence (approved therapies, guidelines, late-phase
@@ -103,8 +107,8 @@ following manner:
   - Strong clinical evidence in a **pan-cancer** (`Any`) context
     (treated as equivalent to a matching-site strong item)
 - **Tier II: Variants of potential clinical significance** — aberrations
-  linked to predictive, prognostic, or diagnostic biomarkers in the
-  [CIViC database](https://civicdb.org) and the [Cancer Biomarkers
+  linked to predictive (therapeutic) biomarkers in the [CIViC
+  database](https://civicdb.org) and the [Cancer Biomarkers
   Database](https://www.cancergenomeinterpreter.org/2021/biomarkers)
   (and optionally [OncoKB](https://oncokb.org)) that show either
   - Strong clinical evidence ([CIViC
@@ -220,6 +224,32 @@ either *tier-defining* or *additional* support:
 - **Additional** — the item provides supporting context but did not
   drive the tier assignment (e.g. a non-matching-site strong item on a
   Tier I variant, or pan-cancer weak evidence on a Tier I or II variant)
+
+### Prognostic, diagnostic and resistance evidence
+
+AMP/ASCO/CAP tiers are assigned from **therapeutic** evidence only
+(treatment sensitivity, as intended by the guidelines). Prognostic
+(poor/better outcome) and diagnostic evidence does *not* influence the
+tier of a variant, and is shown without tiers: each alteration is listed
+with the cancer types of its evidence (CIViC disease or OncoKB tumor
+type). Which evidence is considered depends on the primary tumor site
+(`--tumor_site`):
+
+| Primary tumor site | Prognostic/diagnostic/resistance evidence considered |
+|----|----|
+| Specified (e.g. *Soft Tissue*) | Evidence matching that site only (strong or weak) |
+| `Any` (code 0) | Evidence from any tumor type, including weak evidence |
+
+Strong evidence is defined as CIViC levels A/B and OncoKB levels Dx1/Px1
+(diagnostic/prognostic), weak evidence as CIViC levels C/D/E and OncoKB
+levels Dx2/Dx3/Px2/Px3. In the key findings of the report, a diagnostic
+hit with *strong* evidence matching a specified tumor site (e.g. an
+*EWSR1::FLI1* fusion in soft tissue tumors) is highlighted as a label
+below the actionable alterations; with `Any`, diagnostic evidence is
+listed among the supporting findings only. The prognostic/diagnostic
+codes in the Excel biomarker sheets (`PP`, `PB`, `D`) are internal
+evidence-strength ranks used to select the evidence shown, not
+AMP/ASCO/CAP tiers.
 
 ## References
 

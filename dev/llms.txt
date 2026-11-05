@@ -348,9 +348,6 @@ sigven AT ifi.uio.no
   : Build display data for potential two-hit events (nested reactable)
 - [`callout_biomarker_scope()`](https://sigven.github.io/pcgr/dev/reference/callout_biomarker_scope.md)
   : Emit the shared "biomarker types and report scope" callout note
-- [`cancer_phenotypes_regex`](https://sigven.github.io/pcgr/dev/reference/cancer_phenotypes_regex.md)
-  : Regular expression of terms indicative of cancer-related phenotypes
-  and syndromes
 - [`check_common_colnames()`](https://sigven.github.io/pcgr/dev/reference/check_common_colnames.md)
   : Function that checks whether a set of column names are present in
   two different data frames
@@ -447,8 +444,13 @@ sigven AT ifi.uio.no
   (MSI-H or TMB-H) for the PCGR report
 - [`generate_report_data_expression()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_expression.md)
   : Function that generates expression data for PCGR report
+- [`generate_report_data_external()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_external.md)
+  : Function that generates report data for the result of an external
+  assay/tool (MSI or HRD)
 - [`generate_report_data_fusion()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_fusion.md)
   : Function that generates fusion data for PCGR report
+- [`generate_report_data_hrd_external()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_hrd_external.md)
+  : Function that generates report data for an external HRD result
 - [`generate_report_data_kataegis()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_kataegis.md)
   : Function that generates data frame with potential kataegis events
 - [`generate_report_data_msi()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_msi.md)
@@ -508,6 +510,14 @@ sigven AT ifi.uio.no
   : Function that assigns a logical (STATUS_LIKELY_GERMLINE_HOMOZYGOUS)
   reflecting whether a variant is likely homozygous (germline) - based
   on allelic fraction (VAF_TUMOR)
+- [`hrd_external_display()`](https://sigven.github.io/pcgr/dev/reference/hrd_external_display.md)
+  : Function that prepares display strings for an external HRD result
+- [`hrd_score_type_label()`](https://sigven.github.io/pcgr/dev/reference/hrd_score_type_label.md)
+  : Broad categories of HRD scores (HRD_SCORE_TYPE of an external HRD
+  result)
+- [`hrd_status_is_deficient()`](https://sigven.github.io/pcgr/dev/reference/hrd_status_is_deficient.md)
+  : Function that checks whether the tumor is HR-deficient according to
+  an external HRD result
 - [`immune_celltypes`](https://sigven.github.io/pcgr/dev/reference/immune_celltypes.md)
   : Data frame with immune cell types
 - [`init_biomarker_content()`](https://sigven.github.io/pcgr/dev/reference/init_biomarker_content.md)
@@ -515,11 +525,15 @@ sigven AT ifi.uio.no
   information
 - [`init_expression_content()`](https://sigven.github.io/pcgr/dev/reference/init_expression_content.md)
   : Function that initiates report element with expression information
+- [`init_external_result()`](https://sigven.github.io/pcgr/dev/reference/init_external_result.md)
+  : Function that initiates the report element of an external result
 - [`init_fusion_content()`](https://sigven.github.io/pcgr/dev/reference/init_fusion_content.md)
   : Function that initiates report element with fusion information
 - [`init_germline_content()`](https://sigven.github.io/pcgr/dev/reference/init_germline_content.md)
   : Function that initiates report element with germline variant
   information (CPSR)
+- [`init_hrd_content()`](https://sigven.github.io/pcgr/dev/reference/init_hrd_content.md)
+  : Function that initiates report element with HRD results
 - [`init_kataegis_content()`](https://sigven.github.io/pcgr/dev/reference/init_kataegis_content.md)
   : Function that initiates report element with kataegis information
 - [`init_msi_content()`](https://sigven.github.io/pcgr/dev/reference/init_msi_content.md)
@@ -568,8 +582,13 @@ sigven AT ifi.uio.no
   : Load expression outlier results
 - [`load_expression_similarity()`](https://sigven.github.io/pcgr/dev/reference/load_expression_similarity.md)
   : Load expression similarity results
+- [`load_external_hrd()`](https://sigven.github.io/pcgr/dev/reference/load_external_hrd.md)
+  : Function that loads the normalised result of an external HRD
+  assay/tool
 - [`load_external_msi()`](https://sigven.github.io/pcgr/dev/reference/load_external_msi.md)
   : Function that loads the normalised result of an external MSI caller
+- [`load_external_result()`](https://sigven.github.io/pcgr/dev/reference/load_external_result.md)
+  : Function that loads the normalised result of an external assay/tool
 - [`load_reference_data()`](https://sigven.github.io/pcgr/dev/reference/load_reference_data.md)
   : Function that parses and loads reference data from files in the
   assembly-specific PCGR bundle directory
@@ -619,9 +638,6 @@ sigven AT ifi.uio.no
 - [`msi_indel_fraction_plot()`](https://sigven.github.io/pcgr/dev/reference/msi_indel_fraction_plot.md)
   : Function that plots the indel fraction for a given sample and
   contrasts this with the distribution for MSI-H/MSS samples from TCGA
-- [`msi_indel_load_plot()`](https://sigven.github.io/pcgr/dev/reference/msi_indel_load_plot.md)
-  : Function that plots the indel load for a given sample and contrasts
-  this with the distribution for MSI-H/MSS samples from TCGA
 - [`msi_status_is_high()`](https://sigven.github.io/pcgr/dev/reference/msi_status_is_high.md)
   : Function that tells if the MSI status of the sample is MSI-high
 - [`mutational_signatures_doc_note()`](https://sigven.github.io/pcgr/dev/reference/mutational_signatures_doc_note.md)
@@ -709,6 +725,9 @@ sigven AT ifi.uio.no
 - [`prep_actble_display_tbl()`](https://sigven.github.io/pcgr/dev/reference/prep_actble_display_tbl.md)
   : Function that gathers data tables on actionable variants for display
   in report (tier 1 + tier 2)
+- [`prep_bm_display_tbl()`](https://sigven.github.io/pcgr/dev/reference/prep_bm_display_tbl.md)
+  : Function that gathers data tables on biomarker variants (predictive,
+  prognostic or diagnostic) for display in report
 - [`prep_diagn_display_tbl()`](https://sigven.github.io/pcgr/dev/reference/prep_diagn_display_tbl.md)
   : Function that gathers data tables on diagnostic variants
 - [`prep_progn_display_tbl()`](https://sigven.github.io/pcgr/dev/reference/prep_progn_display_tbl.md)
@@ -725,17 +744,15 @@ sigven AT ifi.uio.no
   : Note on the tiers of prognostic/diagnostic biomarker evidence shown,
   for reports without a primary site (see progn_diagn_tiers())
 - [`progn_diagn_tiers()`](https://sigven.github.io/pcgr/dev/reference/progn_diagn_tiers.md)
-  : Actionability tiers of prognostic and diagnostic biomarker evidence
-  shown in the reports (HTML/PDF sections, key findings)
+  : Internal evidence tiers of prognostic and diagnostic biomarker
+  evidence shown in the reports (HTML/PDF sections, key findings)
 - [`remove_cols_from_df()`](https://sigven.github.io/pcgr/dev/reference/remove_cols_from_df.md)
   : Function that removes column(s) from data frame
 - [`render_acmg_pills_cell()`](https://sigven.github.io/pcgr/dev/reference/render_acmg_pills_cell.md)
   : Render ACMG criteria as individual colored pills (Generated by
   Claude Sonnet 5)
 - [`render_actble_bm_table()`](https://sigven.github.io/pcgr/dev/reference/render_actble_bm_table.md)
-  : Build biomarker reactable with category-aware styling Combines tier
-  1 and tier 2 records in one table. Header uses tier 1 color;
-  THERAPY_MATCH cell background reflects the row's tier (1 or 2).
+  : Build actionable (predictive) biomarker reactable
 - [`render_alteration_cell()`](https://sigven.github.io/pcgr/dev/reference/render_alteration_cell.md)
   : Render sample alteration with confidence icon Uses filled circle +
   bold for high confidence, hollow circle + muted for medium confidence
@@ -749,13 +766,17 @@ sigven AT ifi.uio.no
 - [`render_bar_cell()`](https://sigven.github.io/pcgr/dev/reference/render_bar_cell.md)
   : Render a value between 0 and 1 as a horizontal bar (Generated by
   Claude Opus 4.6 with some manual tweaks)
+- [`render_bm_table()`](https://sigven.github.io/pcgr/dev/reference/render_bm_table.md)
+  : Build biomarker reactable with category-aware styling Combines tier
+  1 and tier 2 (and for predictive biomarkers, tier 3) records in one
+  table. Header uses tier 1 color; the summary cell (THERAPY_MATCH,
+  PROGNOSTIC_OUTCOME or DIAGNOSTIC_EVIDENCE) background reflects the
+  row's tier.
 - [`render_classification_cell()`](https://sigven.github.io/pcgr/dev/reference/render_classification_cell.md)
   : Render germline clinical significance as a colored badge (Generated
   by Claude Sonnet 5)
 - [`render_diagn_bm_table()`](https://sigven.github.io/pcgr/dev/reference/render_diagn_bm_table.md)
-  : Build biomarker reactable with category-aware styling Combines tier
-  1 and tier 2 records in one table. Header uses tier 1 color;
-  THERAPY_MATCH cell background reflects the row's tier (1 or 2).
+  : Build diagnostic biomarker reactable
 - [`render_diagnosis()`](https://sigven.github.io/pcgr/dev/reference/render_diagnosis.md)
   : Render diagnosis cell with background color based on actionability
   tier (Generated by Claude Opus 4.6 with some manual tweaks)
@@ -776,13 +797,11 @@ sigven AT ifi.uio.no
   : Style oncogenicity cell background based on value (Generated by
   Claude Opus 4.6 with some manual tweaks)
 - [`render_progn_bm_table()`](https://sigven.github.io/pcgr/dev/reference/render_progn_bm_table.md)
-  : Build biomarker reactable with category-aware styling Combines tier
-  1 and tier 2 records in one table. Header uses tier 1 color;
-  THERAPY_MATCH cell background reflects the row's tier (1 or 2).
+  : Build prognostic biomarker reactable
 - [`render_prognostic_outcome()`](https://sigven.github.io/pcgr/dev/reference/render_prognostic_outcome.md)
-  : Render prognostic outcome cell with background color based on
-  actionability tier (Generated by Claude Opus 4.6 with some manual
-  tweaks)
+  : Render prognostic outcome (or diagnostic evidence) cell with
+  background color based on actionability tier (Generated by Claude Opus
+  4.6 with some manual tweaks)
 - [`render_source_logos()`](https://sigven.github.io/pcgr/dev/reference/render_source_logos.md)
   : Render one or more source logos from a pipe-separated string
   (Generated by Claude Opus 4.6 with some manual tweaks)

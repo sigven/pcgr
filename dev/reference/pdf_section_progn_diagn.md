@@ -1,6 +1,6 @@
-# Prognostic and diagnostic biomarker evidence of Tier 1/2 aberrations (SNVs/InDels, CNAs, RNA fusions) for the PDF report - one table per variant category and evidence type (poor/better outcome, diagnosis supported), same evidence selection as the prognostic and diagnostic tabs of the HTML report
+# Prognostic and diagnostic biomarker evidence of aberrations (SNVs/InDels, CNAs, RNA fusions) for the PDF report - one table per variant category and evidence type (poor/better outcome, diagnosis supported), same evidence selection as the prognostic and diagnostic tabs of the HTML report
 
-Prognostic and diagnostic biomarker evidence of Tier 1/2 aberrations
+Prognostic and diagnostic biomarker evidence of aberrations
 (SNVs/InDels, CNAs, RNA fusions) for the PDF report - one table per
 variant category and evidence type (poor/better outcome, diagnosis
 supported), same evidence selection as the prognostic and diagnostic

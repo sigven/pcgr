@@ -46,4 +46,5 @@ prep_actble_display_tbl(
 
 - variant_category:
 
-  cna, snv_indel, fusion, msi, or tmb
+  cna, snv_indel, fusion, msi, or tmb (msi and tmb for predictive
+  biomarkers only)

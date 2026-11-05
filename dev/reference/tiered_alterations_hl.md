@@ -33,4 +33,6 @@ tiered_alterations_hl(
 
 ## Value
 
-data frame with LABEL, SYMBOL, ALTERATION and ACTIONABILITY_TIER
+data frame with LABEL, SYMBOL, ALTERATION and ACTIONABILITY_TIER; for
+evidence-based tiers also BM_PRIMARY_SITE and BM_CANCER_TYPE (one row
+per primary site/cancer type of the evidence items)

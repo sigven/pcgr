@@ -352,6 +352,112 @@ the two results side by side (tabs *External caller* and *PCGR
 classifier*) and indicates if they are discordant. The external result
 takes precedence for the assessment of MSI-High biomarker evidence.
 
+### HRD result from an external assay/tool
+
+If homologous recombination deficiency (HRD) has been assessed with a
+dedicated HRD assay or tool (e.g. a genomic instability score from an
+SNP panel, or a mutational signature-based classifier), the result can
+be provided to PCGR, as an alternative (or addition) to the genomic scar
+score estimated by PCGR from the copy number segments
+(`--estimate_hrd`):
+
+- `--input_hrd <FILE>`: the HRD result for the tumor sample (format
+  below)
+- `--input_hrd_threshold <SCORE>`: threshold on the score (`HRD_SCORE`)
+  at or above which the tumor is classified as *HR-deficient* (see
+  below)
+
+The file name and extension are not used - the content of the file is
+checked. An external HRD result can be used with any type of sequencing
+assay (including tumor-only and targeted panel data), and does not
+require copy number data.
+
+#### Format
+
+A tab-separated file with a header line and a single data row (one
+sample). Minimal examples, with an HRD status reported by the
+assay/tool, or with a score only (status derived by PCGR with
+`--input_hrd_threshold`):
+
+| HRD_CALLER | HRD_SCORE_TYPE | HRD_STATUS   |
+|------------|----------------|--------------|
+| MyAssay    | genomic_scar   | HR-deficient |
+
+| HRD_CALLER  | HRD_SCORE_TYPE | HRD_SCORE |
+|-------------|----------------|-----------|
+| HiSNP Ultra | genomic_scar   | 47        |
+
+| Column | Required | Description |
+|----|----|----|
+| `HRD_CALLER` | yes | Name of the HRD assay/tool |
+| `HRD_SCORE_TYPE` | yes | Kind of HRD score, see the categories below |
+| `HRD_STATUS` | yes, unless `HRD_SCORE` is given | HRD status of the tumor sample, see accepted values below |
+| `HRD_SCORE` | yes, unless `HRD_STATUS` is given | Numeric score, as reported by the assay/tool (higher values indicating HR deficiency) |
+| `CALLER_VERSION` | no | Version of the HRD assay/tool |
+| `HRD_SCORE_DESCRIPTION` | no | Description of the score, e.g. `GIS (HRD-LOH + LST + TAI)` or `probability of HRD` |
+| `HRD_SCORE_THRESHOLD_USED` | no | Threshold on the score applied by the assay/tool for `HRD_STATUS` |
+| `HRD_LOH`, `HRD_LST`, `HRD_TAI` | no | Genomic scar components (counts), if reported |
+
+A full example:
+
+| HRD_CALLER | HRD_SCORE_TYPE | HRD_STATUS | HRD_SCORE | CALLER_VERSION | HRD_SCORE_DESCRIPTION | HRD_SCORE_THRESHOLD_USED | HRD_LOH | HRD_LST | HRD_TAI |
+|----|----|----|----|----|----|----|----|----|----|
+| MyAssay | genomic_scar | HR-deficient | 47 | 1.2 | GIS (HRD-LOH + LST + TAI) | 42 | 15 | 20 | 12 |
+
+Additional columns are ignored, and missing optional values may be left
+empty or set to `.`/`NA`.
+
+#### Score types
+
+‘HRD’ covers measurements of different kinds, on different scales. PCGR
+does not infer the kind of score - it is stated with `HRD_SCORE_TYPE`,
+and shown in the report (values are not case-sensitive):
+
+| `HRD_SCORE_TYPE` | Kind of score | Examples |
+|----|----|----|
+| `genomic_scar` | Genomic scar score from copy number/allelic imbalance profiles | Genomic instability score (HRD-LOH + LST + TAI, e.g. Myriad myChoice CDx, scarHRD), genome-wide LOH |
+| `mutational_signature` | Classifier based on mutational patterns | CHORD, SigMA |
+| `composite` | Model combining genomic scars and mutational signatures | HRDetect |
+| `other` | Other or proprietary scores |  |
+
+#### HRD status
+
+Accepted values for `HRD_STATUS` (not case-sensitive) are listed below.
+Other values give an error.
+
+| Value(s) | Interpreted as |
+|----|----|
+| `HR-deficient`, `Deficient`, `HRD`, `HRD-positive`, `HRD+`, `Positive` | *HR-deficient* |
+| `HR-proficient`, `Proficient`, `HRP`, `HRD-negative`, `HRD-`, `Negative` | *HR-proficient* |
+| `Indeterminate`, `Undetermined`, `Equivocal`, `Inconclusive`, `Unknown`, `Borderline` | *Indeterminate* |
+
+#### Threshold for HR deficiency
+
+Thresholds for HR deficiency are specific to the assay/tool (and often
+to the tumor type, e.g. a genomic instability score of 42 or above for
+the Myriad myChoice CDx assay in ovarian cancer), so PCGR has no default
+threshold, and the user is responsible for the threshold used:
+
+- without `--input_hrd_threshold`, the `HRD_STATUS` given in the file is
+  used as is (the file must then have an `HRD_STATUS`)
+- with `--input_hrd_threshold`, the status is derived from `HRD_SCORE`
+  (required): *HR-deficient* if the score is at or above the threshold,
+  otherwise *HR-proficient*. An `HRD_STATUS` in the file is then not
+  used (a warning is given if it differs from the derived status)
+
+The report indicates how the status was obtained, and which threshold
+was used.
+
+#### Combining with the PCGR genomic scar score
+
+If both `--input_hrd` and `--estimate_hrd` are used, the report shows
+the two results side by side (tabs *External assay/tool* and *PCGR
+genomic scar score*). The two are not compared: even two genomic scar
+scores may differ in definition, scale and calibration, so the threshold
+of the external assay/tool does not apply to the PCGR score. The
+external HRD result is not (yet) used for the assessment of biomarker
+evidence.
+
 ### Gene expression
 
 The user can submit a file with bulk gene/transcript expression data to

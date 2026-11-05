@@ -39,6 +39,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_germline_popfreq_status.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_germline_popfreq_status_old.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_mutation_type.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/assign_presence_status.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_somatic_classification.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_somatic_germline_evidence.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_variant_tiers_cna.html</loc></url>
@@ -62,7 +63,6 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/build_rt_row_details.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/build_twohit_display_data.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/callout_biomarker_scope.html</loc></url>
-<url><loc>https://sigven.github.io/pcgr/dev/reference/cancer_phenotypes_regex.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/check_common_colnames.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/check_file_exists.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/clean_gnomad_annotations.html</loc></url>
@@ -76,6 +76,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/decode_unicode_escapes.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/detect_vcf_sample_name.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/df_string_replace.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/diagnostic_pills_hl.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/doc_note_markdown.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/effect_prediction_algos.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/exclude_non_chrom_variants.html</loc></url>
@@ -109,7 +110,9 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_complex_biomarker.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_expression.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_external.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_fusion.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_hrd_external.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_kataegis.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_msi.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_msi_external.html</loc></url>
@@ -133,13 +136,18 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/het_af_germline_status.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/hex_to_rgba.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/hom_af_status.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/hrd_external_display.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/hrd_score_type_label.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/hrd_status_is_deficient.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/html_to_text.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/immune_celltypes.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/index.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/init_biomarker_content.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/init_expression_content.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/init_external_result.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/init_fusion_content.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/init_germline_content.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/init_hrd_content.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/init_kataegis_content.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/init_msi_content.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/init_mutsignature_content.html</loc></url>
@@ -153,6 +161,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/init_vstats_fusion.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/init_vstats_snv_indel.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/is_hotspot_variant.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/join_targeted_drugs.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/kataegis_detect.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/kataegis_input.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/key_findings_doc_note.html</loc></url>
@@ -162,7 +171,9 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_expression_csq.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_expression_outliers.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_expression_similarity.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/load_external_hrd.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_external_msi.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/load_external_result.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_reference_data.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_rna_fusions.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/load_somatic_cna.html</loc></url>
@@ -184,7 +195,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_doc_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_external_display.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_indel_fraction_plot.html</loc></url>
-<url><loc>https://sigven.github.io/pcgr/dev/reference/msi_indel_load_plot.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/msi_status_display.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_status_is_high.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/mutational_signatures_doc_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncogenicity_criteria.html</loc></url>
@@ -243,6 +254,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/popmax_af_gnomad.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/predict_msi_status.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/prep_actble_display_tbl.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/prep_bm_display_tbl.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/prep_diagn_display_tbl.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/prep_progn_display_tbl.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/process_oncokb_cna.html</loc></url>
@@ -259,6 +271,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_alteration_classification_style.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_alteration_clinvar_style.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_bar_cell.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/render_bm_table.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_classification_cell.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_diagn_bm_table.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_diagnosis.html</loc></url>

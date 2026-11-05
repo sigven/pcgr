@@ -111,7 +111,11 @@ actionable biomarkers detected in the sample. Note that the default
 value is **0** (implies **Any** tissue/site) - only pan-cancer
 biomarkers will be considered for Tier I assignment, and all
 tumor-specific biomarkers will be considered as non-matching site
-evidence for Tier II/III assignment.
+evidence for Tier II/III assignment. Prognostic, diagnostic and
+resistance evidence is not tiered in this way: with a tumor site
+specified, only evidence matching that site is reported, whereas with
+the default value, evidence from any tumor type is considered (including
+weak evidence), and listed with the cancer types of the evidence.
 
 The following lists the possible encodings, and the corresponding
 primary tissues/sites:
@@ -268,7 +272,7 @@ segments:
 
 - `--estimate_hrd` — compute HRD-LOH + LST + TAI (following the
   scarHRD/Sztupinszki et al. algorithm) from the CNA segments, shown in
-  the CNA section of the report. **Research use only** - not a validated
+  the HRD section of the report. **Research use only** - not a validated
   diagnostic measure, and only clinically thresholded (as the Myriad
   myChoice CDx assay) for ovarian cancer. Requires genome-wide (WGS/WES)
   CNA segments - not supported with `--assay TARGETED`, and the segments
@@ -381,6 +385,26 @@ targeted panel data. See the [input
 section](https://sigven.github.io/pcgr/dev/articles/input.html#msi-result-from-an-external-caller)
 for details on the supported formats.
 
+### External HRD result
+
+If HRD has been assessed with a dedicated HRD assay or tool, the result
+can be provided via:
+
+- `--input_hrd <FILE>` - the HRD result file (one row; `HRD_CALLER`,
+  `HRD_SCORE_TYPE`, and `HRD_STATUS` and/or `HRD_SCORE`)
+- `--input_hrd_threshold <SCORE>` - threshold on the score for
+  HR-deficient (score \>= threshold). Required if the file has no
+  `HRD_STATUS`; if given, the status is derived from the score. There is
+  no default, as thresholds are specific to the assay/tool
+
+The kind of score (genomic scar score, mutational signature-based
+classifier, composite model, or other) is stated in the file
+(`HRD_SCORE_TYPE`). This can be used instead of, or together with, the
+genomic scar score of PCGR (`--estimate_hrd`), and for any type of
+assay, including tumor-only and targeted panel data. See the [input
+section](https://sigven.github.io/pcgr/dev/articles/input.html#hrd-result-from-an-external-assaytool)
+for details on the format.
+
 ### Configuration of output files
 
 If you only want the Excel/TSV output (with all variant classifications
@@ -407,6 +431,7 @@ usage:
   [--input_rna_fusion <INPUT_RNA_FUSION>]
   [--input_rna_expression <INPUT_RNA_EXPRESSION>]
   [--input_msi <INPUT_MSI>]
+  [--input_hrd <INPUT_HRD>]
   [--vep_dir <VEP_DIR>]
   --refdata_dir <REFDATA_DIR>
   --output_dir <OUTPUT_DIR>
@@ -438,6 +463,9 @@ Input file options:
   --input_msi INPUT_MSI
                         Summary result file from an external MSI caller (MSIsensor-pro, or generic format) - see
                         --input_msi_caller
+  --input_hrd INPUT_HRD
+                        Result file from an external HRD assay/tool (tab-separated, one row; HRD_CALLER,
+                        HRD_SCORE_TYPE, and HRD_STATUS and/or HRD_SCORE)
 
 SNV/InDel analysis options:
   --vep_dir VEP_DIR     Directory of VEP cache, e.g. $HOME/.vep (required when --input_vcf is provided)
@@ -631,6 +659,10 @@ Somatic CNA analysis options:
   --estimate_hrd        Estimate a genomic instability ('HRD') score (HRD-LOH + LST + TAI) from the
                         allele-specific copy number segments - research use only, requires
                         genome-wide (WGS/WES) segments, default: False
+  --input_hrd_threshold INPUT_HRD_THRESHOLD
+                        Threshold on the score of the external HRD result (HRD_SCORE in --input_hrd) for
+                        HR-deficient (score >= threshold). Required if the file has no HRD_STATUS; if
+                        given, the status is derived from the score (no default)
 
 RNA expression and fusion options:
   --fusion_min_split_reads FUSION_MIN_SPLIT_READS
@@ -750,6 +782,7 @@ e.g. for RNA expression data
 (`<sample_id>.pcgr.grch37.expression.tsv.gz`,
 `expression_outliers.tsv.gz` and `expression_similarity.tsv.gz`) and for
 an external MSI result provided with `--input_msi`
-(`<sample_id>.pcgr.grch37.msi.tsv`). See the [output
-section](https://sigven.github.io/pcgr/dev/articles/output.md) for
-details.
+(`<sample_id>.pcgr.grch37.msi.tsv`), and for an external HRD result
+provided with `--input_hrd` (`<sample_id>.pcgr.grch37.hrd.tsv`). See the
+[output section](https://sigven.github.io/pcgr/dev/articles/output.md)
+for details.

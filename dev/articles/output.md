@@ -70,13 +70,27 @@ report:
   report, only the external result is shown in detail, with a note on
   concordance with the classifier prediction
 
-5.  **Tumor mutational burden (TMB)**
+5.  **HRD status**
+
+- Result of an external HRD assay/tool (`--input_hrd`): HRD status
+  (*HR-deficient*, *HR-proficient* or *Indeterminate*), score and kind
+  of score (as stated in the input file), and how the status was
+  obtained (reported by the assay/tool, or derived by PCGR with
+  `--input_hrd_threshold`)
+- Genomic scar (HRD) score estimated by PCGR from the allele-specific
+  copy number segments (`--estimate_hrd`; HRD-LOH, LST, TAI and their
+  sum - research use only)
+- If both are available, they are shown in separate tabs (*External
+  assay/tool* and *PCGR genomic scar score*) in the HTML report; in the
+  PDF report, HRD is part of the *Composite genomic biomarkers* section
+
+6.  **Tumor mutational burden (TMB)**
     - given a coding target region size specified by the user (ideally
       the **callable target size**), an estimate of the mutational
       burden is provided
     - The estimated TMB is shown in the context of TMB distributions
       from different primary sites in TCGA
-6.  **Mutational signatures**
+7.  **Mutational signatures**
 
 - Estimation of relative contribution of [known mutational
   signatures](http://cancer.sanger.ac.uk/cosmic/signatures) in tumor
@@ -85,19 +99,19 @@ report:
   as the underlying framework)
 - Datatable with signatures found and proposed underlying etiologies
 
-7.  **Kataegis events**
+8.  **Kataegis events**
 
 - Kataegis events are clusters of particular SNV types. The report
   includes a datatable with all detected kataegis events.
 
-8.  **RNA fusions**
+9.  **RNA fusions**
 
 - Fusion partners are annotated with respect to oncogene status and
   overlap in the Mitelman database of chromosomal aberrations in cancer
 - Clinical actionability evidence linked to fusion events is shown where
   available (AMP/ASCO/CAP guidelines)
 
-9.  **RNA expression analysis**
+10. **RNA expression analysis**
 
 - Datatable with expression outliers - as compared to distribution in
   reference cohorts
@@ -106,7 +120,7 @@ report:
   Initiative, DepMap)
 - Immune contexture profiling
 
-10. **Documentation**
+11. **Documentation**
 
 - Annotation resources - databases with version and licensing
   information
@@ -496,6 +510,32 @@ denoted `.`):
 | 9\. `N_LOCI_EVALUATED` | Number of microsatellite loci evaluated |
 | 10\. `N_LOCI_UNSTABLE` | Number of unstable microsatellite loci |
 
+### HRD result from external assay/tool (TSV)
+
+If an HRD result from an external assay/tool is provided
+(`--input_hrd`), a normalised copy of the result is written to a
+tab-separated values (TSV) file, with the following naming convention:
+
+- `<sample_id>.pcgr.<genome_assembly>.hrd.tsv`
+
+The file has one data row, and the following columns (missing values are
+denoted `.`):
+
+| Variable | Description |
+|----|----|
+| 1\. `SAMPLE_ID` | Sample identifier |
+| 2\. `HRD_STATUS` | HRD status: `HR-deficient`, `HR-proficient` or `Indeterminate` |
+| 3\. `HRD_STATUS_BASIS` | How the HRD status was obtained: `caller` (given in the input file) or `derived` (derived by PCGR from the score with `--input_hrd_threshold`) |
+| 4\. `HRD_CALLER` | Name of the HRD assay/tool |
+| 5\. `CALLER_VERSION` | Version of the HRD assay/tool |
+| 6\. `HRD_SCORE_TYPE` | Kind of score: `genomic_scar`, `mutational_signature`, `composite` or `other` |
+| 7\. `HRD_SCORE_DESCRIPTION` | Description of the score |
+| 8\. `HRD_SCORE` | Score, as reported by the assay/tool |
+| 9\. `HRD_SCORE_THRESHOLD_USED` | Threshold on the score for HR-deficient (by the assay/tool, or by PCGR if the status was derived) |
+| 10\. `HRD_LOH` | Genomic scar component: HRD-LOH |
+| 11\. `HRD_LST` | Genomic scar component: LST |
+| 12\. `HRD_TAI` | Genomic scar component: TAI |
+
 ### Mutational signature contributions (TSV)
 
 We provide a tab-separated values (TSV) file with information about
@@ -774,7 +814,7 @@ manageable.
 | `DATA_VERSIONS` | Always | Version information for all databases used in the annotation and analysis |
 | `SAMPLE_ASSAY` | Always | Subject, sample and assay properties (`CATEGORY` column: `SUBJECT`, `SAMPLE` or `ASSAY`): subject sex and age at tumor sampling, tumor site, purity, ploidy (each with its source - `provided`: value from `--tumor_purity`/`--tumor_ploidy`; `estimated`: ploidy estimated by PCGR from the copy number segments; purity is never estimated by PCGR), assay type (WGS/WES/TARGETED), tumor-normal/tumor-only mode, and effective target size |
 | `SOMATIC_SNV_INDEL` | `--input_vcf` provided | Somatic SNV/InDel annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH` and `VEP_ALL_CSQ`. **Filtered** to exonic variants (`EXONIC_STATUS == "exonic"`) plus any non-exonic variant with an actionability tier ≤ 3. User-retained VCF INFO tags (`--retained_info_tags`) are appended as additional columns. `HGVSP` is renamed to `HGVSp_short` to avoid column name conflicts |
-| `SOMATIC_SNV_INDEL_BIOMARKER` | `--input_vcf` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic SNV/InDel. A `TIER` column encodes evidence category and actionability tier (e.g. `T1`/`T2`/`T3` = therapeutic sensitivity, `R1`/`R2`/`R3` = therapeutic resistance, `PP1`–`PP2` = poor prognosis, `PB1`–`PB2` = better prognosis, `D1`–`D2` = diagnostic positive). Diagnostic-negative evidence is excluded |
+| `SOMATIC_SNV_INDEL_BIOMARKER` | `--input_vcf` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic SNV/InDel. A `TIER` column encodes evidence category and rank (e.g. `T1`/`T2`/`T3` = therapeutic sensitivity, `R1`/`R2`/`R3` = therapeutic resistance, `PP1`–`PP2` = poor prognosis, `PB1`–`PB2` = better prognosis, `D1`–`D2` = diagnostic positive). Only the therapeutic categories (`T`, `R`) are AMP/ASCO/CAP actionability tiers; for prognostic and diagnostic evidence (`PP`, `PB`, `D`) the number is an internal evidence-strength rank (lower = stronger evidence), not a tier. Diagnostic-negative evidence is excluded |
 | `SOMATIC_CNA` | `--input_cna` provided | CNA gene-level annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to genes with a non-missing `ACTIONABILITY_TIER` |
 | `CNA_SUMMARY` | `--input_cna` provided | Sample-level scores derived from the copy number segments - fraction of genome altered and (with `--estimate_hrd`) the HRD score components (same content as the `.cna_summary.tsv` file) |
 | `MSI_BIOMARKER` | tumor classified as MSI-High | Biomarker evidence items (CIViC; OncoKB if enabled) for MSI-High, with AMP/ASCO/CAP tier |
@@ -785,6 +825,7 @@ manageable.
 | `TMB` | `--input_vcf` provided | Tumor mutational burden estimates (same content as the `.tmb.tsv` file) |
 | `MSI` | `--input_msi` provided | MSI result from an external MSI caller (same content as the `.msi.tsv` file) |
 | `MSI_INTERNAL` | `--input_vcf` provided and MSI estimation enabled | MSI classifier statistics and predicted stability status |
+| `HRD` | `--input_hrd` provided | HRD result from an external HRD assay/tool (same content as the `.hrd.tsv` file) |
 | `MUTATIONAL_SIGNATURE` | `--input_vcf` provided and signature estimation enabled | Mutational signature contributions (same content as the `.msigs.tsv.gz` file) |
 | `KATAEGIS_EVENTS` | `--input_vcf` provided and kataegis events detected | Kataegis loci identified from the somatic mutation profile |
 | `RNA_EXPRESSION_OUTLIERS` | `--input_rna_expression` provided and outlier detection enabled | Expression outlier genes/transcripts compared to reference cohorts. A subset of display-only columns (`GENENAME`, `CANCERGENE_EVIDENCE`, `TARGETED_INHIBITORS_ALL`, `ENSEMBL_GENE_ID`) are removed to reduce width |

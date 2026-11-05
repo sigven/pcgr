@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9016</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9017</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -605,6 +605,281 @@ used, the report shows the two results side by side (tabs <em>External
 caller</em> and <em>PCGR classifier</em>) and indicates if they are
 discordant. The external result takes precedence for the assessment of
 MSI-High biomarker evidence.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="hrd-result-from-an-external-assaytool">HRD result from an external assay/tool<a class="anchor" aria-label="anchor" href="#hrd-result-from-an-external-assaytool"></a>
+</h3>
+<p>If homologous recombination deficiency (HRD) has been assessed with a
+dedicated HRD assay or tool (e.g. a genomic instability score from an
+SNP panel, or a mutational signature-based classifier), the result can
+be provided to PCGR, as an alternative (or addition) to the genomic scar
+score estimated by PCGR from the copy number segments
+(<code>--estimate_hrd</code>):</p>
+<ul>
+<li>
+<code>--input_hrd &lt;FILE&gt;</code>: the HRD result for the tumor
+sample (format below)</li>
+<li>
+<code>--input_hrd_threshold &lt;SCORE&gt;</code>: threshold on the
+score (<code>HRD_SCORE</code>) at or above which the tumor is classified
+as <em>HR-deficient</em> (see below)</li>
+</ul>
+<p>The file name and extension are not used - the content of the file is
+checked. An external HRD result can be used with any type of sequencing
+assay (including tumor-only and targeted panel data), and does not
+require copy number data.</p>
+<div class="section level4">
+<h4 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a>
+</h4>
+<p>A tab-separated file with a header line and a single data row (one
+sample). Minimal examples, with an HRD status reported by the
+assay/tool, or with a score only (status derived by PCGR with
+<code>--input_hrd_threshold</code>):</p>
+<table class="table">
+<thead><tr class="header">
+<th>HRD_CALLER</th>
+<th>HRD_SCORE_TYPE</th>
+<th>HRD_STATUS</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>MyAssay</td>
+<td>genomic_scar</td>
+<td>HR-deficient</td>
+</tr></tbody>
+</table>
+<table class="table">
+<thead><tr class="header">
+<th>HRD_CALLER</th>
+<th>HRD_SCORE_TYPE</th>
+<th>HRD_SCORE</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>HiSNP Ultra</td>
+<td>genomic_scar</td>
+<td>47</td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="32%">
+<col width="41%">
+</colgroup>
+<thead><tr class="header">
+<th>Column</th>
+<th>Required</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>HRD_CALLER</code></td>
+<td>yes</td>
+<td>Name of the HRD assay/tool</td>
+</tr>
+<tr class="even">
+<td><code>HRD_SCORE_TYPE</code></td>
+<td>yes</td>
+<td>Kind of HRD score, see the categories below</td>
+</tr>
+<tr class="odd">
+<td><code>HRD_STATUS</code></td>
+<td>yes, unless <code>HRD_SCORE</code> is given</td>
+<td>HRD status of the tumor sample, see accepted values below</td>
+</tr>
+<tr class="even">
+<td><code>HRD_SCORE</code></td>
+<td>yes, unless <code>HRD_STATUS</code> is given</td>
+<td>Numeric score, as reported by the assay/tool (higher values
+indicating HR deficiency)</td>
+</tr>
+<tr class="odd">
+<td><code>CALLER_VERSION</code></td>
+<td>no</td>
+<td>Version of the HRD assay/tool</td>
+</tr>
+<tr class="even">
+<td><code>HRD_SCORE_DESCRIPTION</code></td>
+<td>no</td>
+<td>Description of the score,
+e.g. <code>GIS (HRD-LOH + LST + TAI)</code> or
+<code>probability of HRD</code>
+</td>
+</tr>
+<tr class="odd">
+<td><code>HRD_SCORE_THRESHOLD_USED</code></td>
+<td>no</td>
+<td>Threshold on the score applied by the assay/tool for
+<code>HRD_STATUS</code>
+</td>
+</tr>
+<tr class="even">
+<td>
+<code>HRD_LOH</code>, <code>HRD_LST</code>,
+<code>HRD_TAI</code>
+</td>
+<td>no</td>
+<td>Genomic scar components (counts), if reported</td>
+</tr>
+</tbody>
+</table>
+<p>A full example:</p>
+<table class="table">
+<colgroup>
+<col width="8%">
+<col width="11%">
+<col width="8%">
+<col width="7%">
+<col width="11%">
+<col width="16%">
+<col width="18%">
+<col width="6%">
+<col width="6%">
+<col width="6%">
+</colgroup>
+<thead><tr class="header">
+<th>HRD_CALLER</th>
+<th>HRD_SCORE_TYPE</th>
+<th>HRD_STATUS</th>
+<th>HRD_SCORE</th>
+<th>CALLER_VERSION</th>
+<th>HRD_SCORE_DESCRIPTION</th>
+<th>HRD_SCORE_THRESHOLD_USED</th>
+<th>HRD_LOH</th>
+<th>HRD_LST</th>
+<th>HRD_TAI</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>MyAssay</td>
+<td>genomic_scar</td>
+<td>HR-deficient</td>
+<td>47</td>
+<td>1.2</td>
+<td>GIS (HRD-LOH + LST + TAI)</td>
+<td>42</td>
+<td>15</td>
+<td>20</td>
+<td>12</td>
+</tr></tbody>
+</table>
+<p>Additional columns are ignored, and missing optional values may be
+left empty or set to <code>.</code>/<code>NA</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="score-types">Score types<a class="anchor" aria-label="anchor" href="#score-types"></a>
+</h4>
+<p>‘HRD’ covers measurements of different kinds, on different scales.
+PCGR does not infer the kind of score - it is stated with
+<code>HRD_SCORE_TYPE</code>, and shown in the report (values are not
+case-sensitive):</p>
+<table class="table">
+<colgroup>
+<col width="41%">
+<col width="34%">
+<col width="23%">
+</colgroup>
+<thead><tr class="header">
+<th><code>HRD_SCORE_TYPE</code></th>
+<th>Kind of score</th>
+<th>Examples</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>genomic_scar</code></td>
+<td>Genomic scar score from copy number/allelic imbalance profiles</td>
+<td>Genomic instability score (HRD-LOH + LST + TAI, e.g. Myriad myChoice
+CDx, scarHRD), genome-wide LOH</td>
+</tr>
+<tr class="even">
+<td><code>mutational_signature</code></td>
+<td>Classifier based on mutational patterns</td>
+<td>CHORD, SigMA</td>
+</tr>
+<tr class="odd">
+<td><code>composite</code></td>
+<td>Model combining genomic scars and mutational signatures</td>
+<td>HRDetect</td>
+</tr>
+<tr class="even">
+<td><code>other</code></td>
+<td>Other or proprietary scores</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level4">
+<h4 id="hrd-status">HRD status<a class="anchor" aria-label="anchor" href="#hrd-status"></a>
+</h4>
+<p>Accepted values for <code>HRD_STATUS</code> (not case-sensitive) are
+listed below. Other values give an error.</p>
+<table class="table">
+<colgroup>
+<col width="38%">
+<col width="61%">
+</colgroup>
+<thead><tr class="header">
+<th>Value(s)</th>
+<th>Interpreted as</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>
+<code>HR-deficient</code>, <code>Deficient</code>, <code>HRD</code>,
+<code>HRD-positive</code>, <code>HRD+</code>, <code>Positive</code>
+</td>
+<td><em>HR-deficient</em></td>
+</tr>
+<tr class="even">
+<td>
+<code>HR-proficient</code>, <code>Proficient</code>,
+<code>HRP</code>, <code>HRD-negative</code>, <code>HRD-</code>,
+<code>Negative</code>
+</td>
+<td><em>HR-proficient</em></td>
+</tr>
+<tr class="odd">
+<td>
+<code>Indeterminate</code>, <code>Undetermined</code>,
+<code>Equivocal</code>, <code>Inconclusive</code>, <code>Unknown</code>,
+<code>Borderline</code>
+</td>
+<td><em>Indeterminate</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level4">
+<h4 id="threshold-for-hr-deficiency">Threshold for HR deficiency<a class="anchor" aria-label="anchor" href="#threshold-for-hr-deficiency"></a>
+</h4>
+<p>Thresholds for HR deficiency are specific to the assay/tool (and
+often to the tumor type, e.g. a genomic instability score of 42 or above
+for the Myriad myChoice CDx assay in ovarian cancer), so PCGR has no
+default threshold, and the user is responsible for the threshold
+used:</p>
+<ul>
+<li>without <code>--input_hrd_threshold</code>, the
+<code>HRD_STATUS</code> given in the file is used as is (the file must
+then have an <code>HRD_STATUS</code>)</li>
+<li>with <code>--input_hrd_threshold</code>, the status is derived from
+<code>HRD_SCORE</code> (required): <em>HR-deficient</em> if the score is
+at or above the threshold, otherwise <em>HR-proficient</em>. An
+<code>HRD_STATUS</code> in the file is then not used (a warning is given
+if it differs from the derived status)</li>
+</ul>
+<p>The report indicates how the status was obtained, and which threshold
+was used.</p>
+</div>
+<div class="section level4">
+<h4 id="combining-with-the-pcgr-genomic-scar-score">Combining with the PCGR genomic scar score<a class="anchor" aria-label="anchor" href="#combining-with-the-pcgr-genomic-scar-score"></a>
+</h4>
+<p>If both <code>--input_hrd</code> and <code>--estimate_hrd</code> are
+used, the report shows the two results side by side (tabs <em>External
+assay/tool</em> and <em>PCGR genomic scar score</em>). The two are not
+compared: even two genomic scar scores may differ in definition, scale
+and calibration, so the threshold of the external assay/tool does not
+apply to the PCGR score. The external HRD result is not (yet) used for
+the assessment of biomarker evidence.</p>
 </div>
 </div>
 <div class="section level3">

@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9016</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9017</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,7 @@
 <h2 id="v2-4-0">v2.4.0<a class="anchor" aria-label="anchor" href="#v2-4-0"></a>
 </h2>
 <ul>
-<li>Date: <strong>2026-10-XX</strong>
+<li>Date: <strong>2026-11-XX</strong>
 </li>
 <li>Data bundle update (<code>20261022</code>) and software updates
 <ul>
@@ -129,6 +129,22 @@ PCGR’s statistical MSI classifier output is now named
 </ul>
 </li>
 <li>
+<strong>External HRD result</strong>
+<ul>
+<li>HRD results from external HRD assays/tools (e.g. genome-wide SNP
+panels, mutational signature-based classifiers) can now be provided with
+<code>--input_hrd</code>, in a simple tab-separated format. The kind of
+score is stated by the user in the file (<code>HRD_SCORE_TYPE</code>:
+<code>genomic_scar</code>, <code>mutational_signature</code>,
+<code>composite</code> or <code>other</code>), and is not inferred by
+PCGR. The HRD status
+(<em>HR-deficient</em>/<em>HR-proficient</em>/<em>Indeterminate</em>) is
+either given in the file, or derived from the score with a user-defined
+threshold (<code>--input_hrd_threshold</code>; no default, as thresholds
+are specific to the assay/tool)</li>
+</ul>
+</li>
+<li>
 <strong>HTML report tables and figures</strong>
 <ul>
 <li>Germline findings table now uses <a href="https://glin.github.io/reactable/" class="external-link">reactable</a> (in place of DT),
@@ -159,14 +175,14 @@ callout</li>
 by OncoKB are listed first, with the <em>Fusion gene</em> cell tinted by
 oncogenicity (as for the CNA table)</li>
 <li>Key findings: prognostic (poor/better outcome) and diagnostic
-biomarkers (AMP/ASCO/CAP Tier 1/2) among SNVs/InDels, CNAs and RNA
-fusions are listed as supporting findings (HTML report and PDF
-cover)</li>
+biomarkers among SNVs/InDels, CNAs and RNA fusions are listed as
+supporting findings, with the cancer types of the evidence (HTML report
+and PDF cover)</li>
 <li>Prognostic and diagnostic biomarkers without a primary tumor site
 (<code>--tumor_site 0</code>): evidence from any tumor type is
-considered, and Tier 3 evidence (levels C/D/E) is also shown - in the
-HTML report (SNV/InDel, CNA and RNA fusion sections), the PDF report and
-the key findings</li>
+considered, including weak evidence (levels C/D/E) - in the HTML report
+(SNV/InDel, CNA and RNA fusion sections), the PDF report and the key
+findings</li>
 <li>Report header: assay mode (tumor-control/tumor-only) shown as a
 title badge next to assay type and genome assembly; data input status
 shown as a compact row of chips (including <em>Germline variants
@@ -216,6 +232,30 @@ plot caption</li>
 <strong>whole-genome doubling status (WGD)</strong> are now derived from
 the allele-specific copy number segments, and reported in the
 <code>cna_summary.tsv</code> output file</li>
+<li>
+<strong>Tiers and diagnostic/prognostic evidence</strong>
+<ul>
+<li>AMP/ASCO/CAP tiers apply to <em>therapeutic</em> evidence only (as
+intended by the guidelines). Prognostic and diagnostic evidence is no
+longer presented with tiers in the report (HTML, PDF and key findings):
+the cancer types of the evidence are the main information element. The
+<code>PP</code>/<code>PB</code>/<code>D</code> codes in the
+<code>TIER</code> column of the Excel biomarker sheets are unchanged,
+and now documented as internal evidence-strength ranks</li>
+<li>Key findings: a diagnostic hit with <em>strong</em> evidence (CIViC
+A/B, OncoKB Dx1) matching the specified tumor site (e.g. an
+<em>EWSR1::FLI1</em> fusion in soft tissue tumors) is listed in a
+section <em>Diagnostic evidence</em> below the therapeutically
+actionable alterations (one item per hit, ranked by the resolution of
+the biomarker match; not repeated among the supporting findings).
+Nothing is shown without a primary tumor site
+(<code>--tumor_site 0</code>)</li>
+<li>Documentation of tier assignment and of the evidence considered for
+prognostic, diagnostic and resistance biomarkers (primary tumor site
+specified vs. <code>0</code>) aligned across the report, the key
+findings note and the website</li>
+</ul>
+</li>
 <li>
 <strong>PDF report</strong> - a focused PDF report is now generated
 by default (opt out with the new <code>--no_pdf</code> option)
