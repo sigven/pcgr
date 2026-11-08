@@ -14,7 +14,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software workflow fo
   - according to *actionability*: prioritizing therapeutic options related to somatic DNA aberrations ([AMP/ASCO/CAP guidelines](https://pubmed.ncbi.nlm.nih.gov/27993330/))
 - Tumor mutational burden (TMB) estimation
 - Mutational signature analysis
-- Microsatellite instability (MSI) classification
+- Microsatellite instability (MSI) and homologous recombination deficiency (HRD) assessment
 - RNA-seq support - gene expression outlier detection, sample similarity analysis, and immune contexture profiling
 
 PCGR supports both of the most recent human genome assemblies (GRCh37/GRCh38), and accepts variant calls from both tumor-control and tumor-only sequencing assays. Much of the functionality is intended for whole-exome/whole-genome sequencing assays, but you can also apply PCGR to output from targeted sequencing panels. If you are interested in the interrogation of germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).

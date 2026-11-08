@@ -113,7 +113,7 @@ mutational_signatures_doc_note <- function() {
 
 }
 
-#' Get documentation string for MSI status prediction
+#' Get documentation string for MSI status (external caller, PCGR classifier)
 #'
 #' @return A documentation string
 #'
@@ -131,6 +131,29 @@ msi_doc_note <- function() {
   return(
     glue::glue(
       msi_template, pubmed_url = pubmed_url, wikipedia_url = wikipedia_url
+    )
+  )
+
+}
+
+#' Get documentation string for HRD status (external assay/tool, PCGR genomic
+#' scar score)
+#'
+#' @return A documentation string
+#'
+#' @export
+#'
+hrd_doc_note <- function() {
+
+  doc_md_file <- system.file(
+    "templates", "doc_notes_md", "hrd.md", package = "pcgrr")
+  hrd_template <- paste0(readLines(doc_md_file, warn = FALSE), collapse = "\n")
+
+  pubmed_url <- "https://pubmed.ncbi.nlm.nih.gov/"
+
+  return(
+    glue::glue(
+      hrd_template, pubmed_url = pubmed_url
     )
   )
 

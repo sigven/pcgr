@@ -1250,7 +1250,7 @@ def annotate_cna_segments(input_cna_segment_fname: str,
         .str.cat(cna_segment_level_df['loh'].astype(str).replace('.', ''), sep='|')
     )
     segments_out['CN_MAJOR_MINOR_IMPUTED'] = cna_segment_level_df['cn_major_minor_imputed'].values
-    segments_out.drop_duplicates(inplace=True)
+    segments_out = segments_out.drop_duplicates()
     segments_out.to_csv(output_segment_fname, sep="\t", header=True, index=False)
 
     ## annotate with protein-coding transcripts (gene-level output only - segments with
@@ -1283,7 +1283,7 @@ def annotate_cna_segments(input_cna_segment_fname: str,
         ## Append actionability evidence to input amplifications (column 'biomarker_match')
         cna_query_segment_df = cna_query_segment_df.merge(
             biomarkers['actionable_df'], left_on=["aberration_key"], right_on=["aberration_key"], how="left")
-        cna_query_segment_df.drop(['amp_cond', 'gain_cond', 'hetloss_cond', 'homloss_cond', 'hemloss_cond', 'aberration_key'], axis=1, inplace=True)
+        cna_query_segment_df = cna_query_segment_df.drop(['amp_cond', 'gain_cond', 'hetloss_cond', 'homloss_cond', 'hemloss_cond', 'aberration_key'], axis=1)
         cna_query_segment_df.loc[cna_query_segment_df['biomarker_match'].isnull(),"biomarker_match"] = '.'
 
     ## remove all temporary files
@@ -1302,12 +1302,12 @@ def annotate_cna_segments(input_cna_segment_fname: str,
     cna_query_segment_df.columns = [col.upper() for col in cna_query_segment_df.columns]
     #cna_query_segment_df.columns = map(str.upper, cna_query_segment_df.columns)
 
-    cna_query_segment_df.rename(columns = {
+    cna_query_segment_df = cna_query_segment_df.rename(columns = {
         'CHROMOSOME':'CHROM',
         'SEGMENT_ID':'VAR_ID',
         'N_MAJOR':'CN_MAJOR',
         'N_MINOR':'CN_MINOR'
-    }, inplace = True)
+    })
     cna_query_segment_df['VAR_ID'] = \
         cna_query_segment_df['VAR_ID'].str.cat(
             cna_query_segment_df['CN_MAJOR'].astype(str), sep=":").str.cat(
@@ -1375,13 +1375,13 @@ def annotate_cytoband(
     cytoband_first = cytoband_first.reset_index(drop = True)
     cytoband_first = \
         cytoband_first[['chromosome','segment_start','segment_end','segment_name','cytoband_name']]
-    cytoband_first.rename({'cytoband_name': 'cytoband_first'}, axis=1, inplace=True)
+    cytoband_first = cytoband_first.rename({'cytoband_name': 'cytoband_first'}, axis=1)
         
     cytoband_last = pd.concat([segments_last, tmp2], axis = 1)
     cytoband_last = cytoband_last.reset_index(drop = True)
     cytoband_last = \
         cytoband_last[['chromosome','segment_start','segment_end','segment_name','cytoband_name']]
-    cytoband_last.rename({'cytoband_name': 'cytoband_last'}, axis=1, inplace=True)
+    cytoband_last = cytoband_last.rename({'cytoband_name': 'cytoband_last'}, axis=1)
         
     segments_cytoband = cytoband_first.merge(
         cytoband_last, left_on=["chromosome","segment_start","segment_end","segment_name"], 
@@ -1508,14 +1508,14 @@ def annotate_transcripts(cna_segments_bt: BedTool,
             cna_segments_annotated = pd.concat([core_segment_annotations, gene_annotations], axis = 1)
             
             if {'genename'}.issubset(cna_segments_annotated.columns):
-                cna_segments_annotated.drop('genename', inplace=True, axis=1)
+                cna_segments_annotated = cna_segments_annotated.drop('genename', axis=1)
             
             if os.path.exists(gene_xref_tsv_fname):
                 gene_xref_df = pd.read_csv(
                     str(gene_xref_tsv_fname), sep="\t", na_values=".", usecols=["entrezgene","name"], low_memory=False)
                 gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notnull()].drop_duplicates()
                 gene_xref_df["entrezgene"] = gene_xref_df["entrezgene"].astype("int64").astype("string")
-                gene_xref_df.rename(columns = {'name':'genename'}, inplace = True)                                        
+                gene_xref_df = gene_xref_df.rename(columns = {'name':'genename'})                                        
                 cna_segments_annotated = cna_segments_annotated.merge(
                     gene_xref_df, left_on=["entrezgene"], right_on=["entrezgene"], how="left")
                 cna_segments_annotated["entrezgene"] = cna_segments_annotated['entrezgene'].str.replace("\\.[0-9]{1,}$", "", regex = True)

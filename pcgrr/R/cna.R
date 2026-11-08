@@ -1109,6 +1109,7 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL, table_display_cols =
   assertable::assert_colnames(
     cna_df_display,
     c("ACTIONABLE_GENE",
+      "ACTIONABILITY_TIER",
       "ONCOGENE",
       "ENTREZGENE",
       "ONCOGENICITY_OKB",
@@ -1148,11 +1149,13 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL, table_display_cols =
       oncogene_ampl_gain_variants,
       tsgene_loss_variants
     ) |>
-    ## Default ordering: OncoKB-curated Oncogenic / Likely Oncogenic events
-    ## first (when OncoKB annotation is available), then by the existing
-    ## CN / cancer-association ranking. All-NA (no OncoKB token) leaves the
-    ## prior order untouched.
+    ## Default ordering: therapeutically actionable events first (tier 1, then
+    ## tier 2), then OncoKB-curated Oncogenic / Likely Oncogenic events (when
+    ## OncoKB annotation is available), then by the existing CN /
+    ## cancer-association ranking. All-NA (no OncoKB token) leaves the prior
+    ## order untouched.
     dplyr::mutate(
+      ACTIONABILITY_TIER = actionable_tier(.data$ACTIONABILITY_TIER),
       .okb_onc_rank = dplyr::case_when(
         .data$ONCOGENICITY_OKB == "Oncogenic"        ~ 1L,
         .data$ONCOGENICITY_OKB == "Likely Oncogenic" ~ 2L,
@@ -1161,13 +1164,16 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL, table_display_cols =
     ) |>
     dplyr::select(
       dplyr::any_of(
-        c(table_display_cols$cna_other_oncogenic, ".okb_onc_rank")
+        c(table_display_cols$cna_other_oncogenic,
+          "ACTIONABILITY_TIER", ".okb_onc_rank")
       )
     ) |>
+    dplyr::relocate("ACTIONABILITY_TIER", .after = "GENENAME") |>
     append_styled_cna_vclass(
       colname = "VARIANT_CLASS_DISPLAY"
     ) |>
     dplyr::arrange(
+      .data$ACTIONABILITY_TIER,
       .data$.okb_onc_rank,
       .data$CN_TOTAL,
       dplyr::desc(.data$TISSUE_ASSOC_RANK),

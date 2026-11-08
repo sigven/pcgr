@@ -35,9 +35,11 @@ def parse_expression(expression_fname_tsv: str,
         error_message(err_msg, logger)
     sample_gene_expression  = sample_gene_expression.rename(columns = {'TargetID':'ID'})
     
-    ## Remove version number from transcript identifiers
-    sample_gene_expression['ID'] = sample_gene_expression['ID'].str.replace(r'(\\.[0-9]{1,})$', '', regex=True)
-    sample_gene_expression.sort_values(by=['ID','TPM'], ascending=[True, False], inplace = True)
+    ## Remove version number from Ensembl gene/transcript identifiers - these are unversioned in the
+    ## gene index, whereas RefSeq transcript identifiers and some symbol aliases (e.g. 'KB-226F1.2')
+    ## legitimately end with '.N' there, and must be kept as is
+    sample_gene_expression['ID'] = sample_gene_expression['ID'].str.replace(r'^(ENS[GT]R?[0-9]+)\.[0-9]+$', r'\1', regex=True)
+    sample_gene_expression = sample_gene_expression.sort_values(by=['ID','TPM'], ascending=[True, False])
     dup_ids = len(sample_gene_expression['ID']) - len(sample_gene_expression['ID'].drop_duplicates())
     if dup_ids > 0: 
         logger.warning(f"Found N = {dup_ids} duplicate identifiers - resolving duplicates by keeping the highest TPM value")
@@ -94,7 +96,7 @@ def parse_expression(expression_fname_tsv: str,
                 if {'ensembl_transcript_id','refseq_transcript_id'}.issubset(refseq2ensembl.columns):
                     refseq2ensembl = refseq2ensembl[['ensembl_transcript_id','refseq_transcript_id']].drop_duplicates().rename(columns=str.upper)
                     refseq2ensembl = refseq2ensembl.loc[~refseq2ensembl['REFSEQ_TRANSCRIPT_ID'].isna(), :]
-                    refseq2ensembl.loc[:,'REFSEQ_TRANSCRIPT_ID'] = refseq2ensembl.loc[:,'REFSEQ_TRANSCRIPT_ID'].str.split('&')
+                    refseq2ensembl['REFSEQ_TRANSCRIPT_ID'] = refseq2ensembl['REFSEQ_TRANSCRIPT_ID'].str.split('&')
                     refseq2ensembl = refseq2ensembl.explode('REFSEQ_TRANSCRIPT_ID').drop_duplicates().reset_index(drop = True)
                     refseq2ensembl = refseq2ensembl.rename(columns = {'REFSEQ_TRANSCRIPT_ID':'ID'}).drop_duplicates(subset = ['ID'])
                             
@@ -197,7 +199,7 @@ def integrate_variant_expression(variant_set: pd.DataFrame,
                         if s == 'gene':
                             v = 'TPM_GENE'                           
                         if v in variant_set.columns:
-                            variant_set.drop(v, inplace=True, axis=1)
+                            variant_set = variant_set.drop(v, axis=1)
                         if {v,'ENSEMBL_GENE_ID'}.issubset(expression_data[s].columns) and \
                             'ENSEMBL_GENE_ID' in variant_set.columns:
                                 exp_gene = expression_data[s][[v,'ENSEMBL_GENE_ID']]
@@ -221,7 +223,7 @@ def integrate_variant_expression(variant_set: pd.DataFrame,
                                 var2trans, exp_data_minimal, on = 'ENSEMBL_TRANSCRIPT_ID', how = 'left')                                
                             var2exp = var2trans.groupby(['VAR_ID','ENSEMBL_TRANSCRIPT_ID']).agg({'TPM':'max'}).reset_index()
                             if 'TPM' in variant_set.columns:
-                                variant_set.drop('TPM', inplace=True, axis=1)
+                                variant_set = variant_set.drop('TPM', axis=1)
                             if {'TPM','VAR_ID','ENSEMBL_TRANSCRIPT_ID'}.issubset(var2exp.columns):
                                 var2exp = var2exp[['TPM','VAR_ID','ENSEMBL_TRANSCRIPT_ID']].drop_duplicates()
                                 variant_set = variant_set.merge(var2exp, on = ['VAR_ID','ENSEMBL_TRANSCRIPT_ID'], how = 'left')
@@ -285,12 +287,12 @@ def aggregate_tpm_per_cons(variant_set: pd.DataFrame,
                 cons2exp = pd.merge(var2exp, var2trans, on = ['VAR_ID','consTPM_SINGLE','ENTREZGENE'], how = 'left').drop_duplicates()
                 cons2exp = cons2exp.sort_values(by=['VAR_ID','consTPM'], ascending=[True,False])
                 cons2exp.columns = ['VAR_ID','consTPM_SINGLE','ENTREZGENE','consTPM','consENSEMBL_TRANSCRIPT_ID']
-                cons2exp.drop(['consENSEMBL_TRANSCRIPT_ID'], axis = 1, inplace = True)
+                cons2exp = cons2exp.drop(['consENSEMBL_TRANSCRIPT_ID'], axis = 1)
                 variant_set['consTPM_SINGLE'] = variant_set['CONSEQUENCE'].str.replace('&.+','', regex=True)
                 
                 if {'VAR_ID','ENTREZGENE','consTPM_SINGLE'}.issubset(variant_set.columns):                    
                     variant_set = variant_set.merge(cons2exp, on = ['VAR_ID','ENTREZGENE','consTPM_SINGLE'], how = 'left')
-                    variant_set.drop(['consTPM_SINGLE'], axis = 1, inplace = True)
+                    variant_set = variant_set.drop(['consTPM_SINGLE'], axis = 1)
                   
         
     

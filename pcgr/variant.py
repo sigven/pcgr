@@ -85,17 +85,17 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
             if num_recs_with_clinvar_hits > 0:
                 
                 if {'CLINVAR_TRAITS_ALL'}.issubset(vcf2tsv_df.columns):
-                    vcf2tsv_df.drop('CLINVAR_TRAITS_ALL', inplace=True, axis=1)
+                    vcf2tsv_df = vcf2tsv_df.drop('CLINVAR_TRAITS_ALL', axis=1)
         
                 if os.path.exists(clinvar_tsv_fname):
                     clinvar_data_df = pd.read_csv(
                         clinvar_tsv_fname, sep="\t", 
-                        usecols=["variation_id","origin_simple","VAR_ID","trait","classification","conflicted"],
+                        usecols=["variation_id","origin_simple","VAR_ID","trait","classification"],
                         low_memory = False)
                     clinvar_data_df['classification'] = clinvar_data_df['classification'].str.replace("_", " ", regex = True)
-                    clinvar_data_df.loc[(clinvar_data_df['classification'] == "CPP Unknown") & (clinvar_data_df['conflicted'] == 1),"classification"] = \
+                    clinvar_data_df.loc[clinvar_data_df['classification'] == "Conflicting Classification","classification"] = \
                         "Conflicting classifications of pathogenicity"
-                    clinvar_data_df.loc[(clinvar_data_df['classification'] == "CPP Unknown") & (clinvar_data_df['conflicted'] == 0),"classification"] = \
+                    clinvar_data_df.loc[clinvar_data_df['classification'] == "No Classification","classification"] = \
                         "No classification"
                     clinvar_data_df['CLINVAR_TRAITS_ALL'] = clinvar_data_df['classification'].str.cat(
                         clinvar_data_df['origin_simple'].str.capitalize().str.cat(
@@ -117,19 +117,19 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
             
             ## merge variant set with PFAM domain annotations
             if num_recs_with_pfam_hits > 0:
-                vcf2tsv_df.drop(['PFAM_DOMAIN_NAME', 'PFAM_ENTRY_LOCATIONS'], axis=1, errors='ignore', inplace=True)
+                vcf2tsv_df = vcf2tsv_df.drop(['PFAM_DOMAIN_NAME', 'PFAM_ENTRY_LOCATIONS'], axis=1, errors='ignore')
                 if os.path.exists(protein_domain_tsv_fname):
                     pfam_data_df = pd.read_csv(
                         protein_domain_tsv_fname, sep="\t",
                         usecols=["pfam_id", "pfam_name", "pfam_entry_locations", "entrezgene"]
                     ).drop_duplicates()
-                    pfam_data_df.rename(
+                    pfam_data_df = pfam_data_df.rename(
                         columns={
                             'pfam_id': 'PFAM_DOMAIN',
                             'pfam_name': 'PFAM_DOMAIN_NAME',
                             'pfam_entry_locations': 'PFAM_ENTRY_LOCATIONS',
                             'entrezgene': 'ENTREZGENE'
-                        }, inplace=True)
+                        })
                     vcf2tsv_df = vcf2tsv_df.merge(
                         pfam_data_df,
                         on=["PFAM_DOMAIN", "ENTREZGENE"],
@@ -144,14 +144,14 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
             if num_recs_with_entrez_hits > 0:
                 
                 if {'GENENAME'}.issubset(vcf2tsv_df.columns):
-                    vcf2tsv_df.drop('GENENAME', inplace=True, axis=1)
+                    vcf2tsv_df = vcf2tsv_df.drop('GENENAME', axis=1)
                 
                 if os.path.exists(gene_xref_tsv_fname):
                     gene_xref_df = pd.read_csv(
                         gene_xref_tsv_fname, sep="\t", na_values=".", 
                         low_memory=False, usecols=["entrezgene","name"])
                     gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notnull()].drop_duplicates()
-                    gene_xref_df.rename(columns = {'entrezgene':'ENTREZGENE', 'name':'GENENAME'}, inplace = True)                
+                    gene_xref_df = gene_xref_df.rename(columns = {'entrezgene':'ENTREZGENE', 'name':'GENENAME'})                
                     vcf2tsv_df = vcf2tsv_df.merge(gene_xref_df, left_on=["ENTREZGENE"], right_on=["ENTREZGENE"], how="left")
                 else:
                     logger.error(f"Could not find {gene_xref_tsv_fname} needed for gene name annotation - exiting")
@@ -289,12 +289,12 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, logger) -> pd.
     refdata_assembly_dir = yaml_data["reference_data"]["path"]    
             
     if {'Consequence','EFFECT_PREDICTIONS','CLINVAR_CONFLICTED'}.issubset(variant_set.columns):
-        variant_set.rename(columns = {'Consequence':'CONSEQUENCE'}, inplace = True)
+        variant_set = variant_set.rename(columns = {'Consequence':'CONSEQUENCE'})
         variant_set['clinvar_conflicted_bool'] = True
         variant_set.loc[variant_set['CLINVAR_CONFLICTED'] == 1, "clinvar_conflicted_bool"] = True
         variant_set.loc[variant_set['CLINVAR_CONFLICTED'] != 1, "clinvar_conflicted_bool"] = False
-        variant_set.drop('CLINVAR_CONFLICTED', inplace=True, axis=1)        
-        variant_set.rename(columns = {'clinvar_conflicted_bool':'CLINVAR_CONFLICTED'}, inplace = True)
+        variant_set = variant_set.drop('CLINVAR_CONFLICTED', axis=1)        
+        variant_set = variant_set.rename(columns = {'clinvar_conflicted_bool':'CLINVAR_CONFLICTED'})
         
     
     if not {'VCF_SAMPLE_ID'}.issubset(variant_set.columns):

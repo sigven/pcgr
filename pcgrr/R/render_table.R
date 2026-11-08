@@ -61,6 +61,7 @@ build_oncogenicity_col_defs <- function(
       align = "center",
       minWidth = 140
     ),
+    ACTIONABILITY_TIER = actionability_tier_col_def(data),
     VAF_TUMOR = reactable::colDef(
       name = "Allelic Fraction",
       cell = render_bar_cell(fill_color = "#5D5165"),
@@ -103,6 +104,99 @@ build_oncogenicity_col_defs <- function(
   }
 
   col_defs
+}
+
+#' Keep only the therapeutically actionable tiers (1 and 2) of an
+#' actionability tier vector
+#'
+#' Used for the oncogenicity tables, where tier 1 and 2 alterations are listed
+#' first and flagged. Lower tiers (uncertain significance) are not treated as
+#' actionable here.
+#'
+#' @param x actionability tier
+#'
+#' @return integer vector with values 1, 2 or NA
+#'
+#' @export
+#'
+actionable_tier <- function(x) {
+  tier <- suppressWarnings(as.integer(x))
+  dplyr::if_else(tier %in% c(1L, 2L), tier, NA_integer_)
+}
+
+#' Column definition for the tier badge of the oncogenicity tables
+#'
+#' The column is hidden if no alteration in the table is actionable.
+#'
+#' @param data table with column ACTIONABILITY_TIER, as returned by
+#' \code{actionable_tier()}
+#' @param color_palette PCGR color palette (tier colors)
+#'
+#' @return a reactable column definition
+#'
+#' @export
+#'
+actionability_tier_col_def <- function(
+    data, color_palette = pcgrr::color_palette) {
+  tier_colors <- color_palette$tier_sensitivity$values
+  reactable::colDef(
+    name = "Tier",
+    show = any(!is.na(data$ACTIONABILITY_TIER)),
+    cell = render_tier_cell(
+      tier_letter = "T",
+      tier_colors = list(
+        t1 = tier_colors[1], t2 = tier_colors[2], t3 = tier_colors[3])),
+    align = "center",
+    maxWidth = 70
+  )
+}
+
+#' Order the variants of an oncogenicity table (SNVs/InDels)
+#'
+#' Therapeutically actionable variants (tier 1, then tier 2) are listed first,
+#' followed by all other variants. Within each of these groups, variants are
+#' ranked by oncogenicity score and cancer association ranks. VUS are further
+#' ranked by the presence of a pathogenic ClinVar classification, within the
+#' positions held by VUS. The table is limited after the actionable variants
+#' are put first, so that these are not lost for samples with many variants.
+#'
+#' @param d data frame with variants
+#' @param n_max maximum number of variants to keep
+#'
+#' @return ordered data frame, where ACTIONABILITY_TIER holds tiers 1 and 2
+#' only (see \code{actionable_tier()}), and is placed next to ONCOGENICITY
+#'
+#' @export
+#'
+order_oncogenicity_table <- function(d, n_max) {
+  d <- d |>
+    dplyr::mutate(
+      ACTIONABILITY_TIER = actionable_tier(.data$ACTIONABILITY_TIER)) |>
+    dplyr::relocate("ACTIONABILITY_TIER", .after = "ONCOGENICITY") |>
+    dplyr::arrange(
+      .data$ACTIONABILITY_TIER,
+      dplyr::desc(.data$ONCOGENICITY_SCORE),
+      dplyr::desc(.data$TISSUE_ASSOC_RANK),
+      dplyr::desc(.data$GLOBAL_ASSOC_RANK)) |>
+    utils::head(n_max)
+
+  is_vus <- !is.na(d$ONCOGENICITY) & d$ONCOGENICITY == "VUS"
+  if (any(is_vus)) {
+    ## VUS with a pathogenic ClinVar classification have a higher likelihood
+    ## of being oncogenic. The tier comes first, as the VUS positions span the
+    ## actionable and the other variants.
+    d[is_vus, ] <- d[is_vus, ] |>
+      dplyr::mutate(
+        .path_clinvar = !is.na(.data$CLINVAR_CLASSIFICATION) &
+          stringr::str_detect(
+            tolower(.data$CLINVAR_CLASSIFICATION), "pathogenic")) |>
+      dplyr::arrange(
+        .data$ACTIONABILITY_TIER,
+        dplyr::desc(.data$.path_clinvar),
+        dplyr::desc(.data$ONCOGENICITY_SCORE)) |>
+      dplyr::select(-".path_clinvar")
+  }
+  d
 }
 
 #' Build column definitions for the germline findings table with

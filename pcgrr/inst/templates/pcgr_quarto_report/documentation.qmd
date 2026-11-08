@@ -143,9 +143,15 @@ __A note on variant loss-of-function annotation__
 
 :::
 
-::: {.callout-note title="MSI classification" collapse="true"}
+::: {.callout-note title="MSI status" collapse="true"}
 
 `r pcgrr::msi_doc_note()`
+
+:::
+
+::: {.callout-note title="HRD status" collapse="true"}
+
+`r pcgrr::hrd_doc_note()`
 
 :::
 

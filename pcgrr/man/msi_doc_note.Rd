@@ -2,7 +2,7 @@
 % Please edit documentation in R/documentation.R
 \name{msi_doc_note}
 \alias{msi_doc_note}
-\title{Get documentation string for MSI status prediction}
+\title{Get documentation string for MSI status (external caller, PCGR classifier)}
 \usage{
 msi_doc_note()
 }
@@ -10,5 +10,5 @@ msi_doc_note()
 A documentation string
 }
 \description{
-Get documentation string for MSI status prediction
+Get documentation string for MSI status (external caller, PCGR classifier)
 }
