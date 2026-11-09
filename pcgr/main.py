@@ -222,7 +222,7 @@ def cli():
                                       "copy number segments (default: %(default)s)"))
     optional_cna.add_argument("--input_hrd_threshold", dest="input_hrd_threshold", type=float, default=None,
                               help = ("Threshold on the score of the external HRD result (HRD_SCORE in --input_hrd) for "
-                                      "HR-deficient (score >= threshold). Required if the file has no HRD_STATUS; if given, the "
+                                      "HR-deficient (score >= threshold).\nRequired if the file has no HRD_STATUS; if given, the "
                                       "status is derived from the score (no default - thresholds are specific to the HRD assay/tool)"))
 
     optional_rna.add_argument("--fusion_min_split_reads", type=int, default=3, dest="fusion_min_split_reads", 

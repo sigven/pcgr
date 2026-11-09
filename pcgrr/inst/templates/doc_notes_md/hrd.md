@@ -10,6 +10,7 @@ from which PCGR derives the status. PCGR sets no default threshold, as these are
 and TAI), computed on autosomes from allele-specific copy number segments (`--input_cna`) 
 following the [scarHRD](https://github.com/sztup/scarHRD) algorithm 
 ([Sztupinszki et al., 2018]({pubmed_url}29978035)). It requires genome-wide segments 
-(i.e. _not_ targeted assays), and in tumor-only settings it is reliable only if the segments 
-were called with a matched control. The score is intended for research use only, and PCGR 
+(i.e. _not_ targeted assays) that were called with a matched normal sample. This applies even 
+when PCGR runs with `--tumor_only`, which concerns only the SNV/InDel calls. Without a matched 
+normal, germline runs of homozygosity can be mistaken for somatic LOH and inflate the score. The score is intended for research use only, and PCGR 
 does not apply a threshold to it - an HRD status is thus reported only for external results. 

@@ -195,6 +195,21 @@ key_findings_doc_note <- function() {
 }
 
 
+#' Get the medical disclaimer shown in PCGR and CPSR reports
+#'
+#' @return The disclaimer text, as a markdown string
+#'
+#' @export
+#'
+medical_disclaimer_note <- function() {
+
+  doc_md_file <- system.file(
+    "templates", "doc_notes_md", "medical_disclaimer.md", package = "pcgrr")
+  paste0(readLines(doc_md_file, warn = FALSE), collapse = "\n")
+
+}
+
+
 #' Get documentation string for RNA fusion analysis
 #'
 #' @return A documentation string

@@ -273,7 +273,9 @@ load_reference_data <- function(
       genename = "name"
     ) |>
     dplyr::mutate(
-      entrezgene = as.character(.data$entrezgene)
+      entrezgene = as.character(.data$entrezgene),
+      cancergene_evidence = strip_na_from_gene_evidence(
+        .data$cancergene_evidence)
     ) |>
     dplyr::distinct() |>
     dplyr::mutate(
@@ -700,4 +702,33 @@ load_reference_data <- function(
   return(pcgr_ref_data)
 
 
+}
+
+#' Remove missing-value placeholders from gene evidence strings
+#'
+#' Entries in the bundle's cancer gene evidence strings can be literal "NA"
+#' tokens (e.g. CancerMine citations that lack a link). These are removed,
+#' along with any evidence label left with no entries. Text inside citation
+#' links is left untouched.
+#'
+#' @param evidence character vector of evidence strings
+#' @return character vector of cleaned strings (NA if nothing remains)
+#'
+#' @keywords internal
+#'
+strip_na_from_gene_evidence <- function(evidence = NULL) {
+
+  label <- "[^,:<>]+: "
+
+  ## labels where all entries are NA
+  cleaned <- gsub(
+    paste0("(^|, )", label, "NA(, NA)*(?=, [^,:<>]+: |$)"),
+    "\\1", as.character(evidence), perl = TRUE)
+  ## NA entries that lead or follow other entries of a label
+  cleaned <- gsub("(?<=: )(NA, )+", "", cleaned, perl = TRUE)
+  cleaned <- gsub("(?<=</a>)(, NA)+(?=, |$)", "", cleaned, perl = TRUE)
+  ## separators left behind by removed labels
+  cleaned <- gsub("^, |, $", "", gsub("(, ){2,}", ", ", cleaned))
+
+  dplyr::if_else(cleaned %in% c("", "NA"), NA_character_, cleaned)
 }
