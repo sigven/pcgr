@@ -1,0 +1,180 @@
+```{=typst}
+#pagebreak(weak: true)
+```
+
+# Somatic copy number aberrations {#pcgr-cna}
+
+```{r cna_pdf_setup}
+#| echo: false
+#| eval: true
+
+cna_pdf <- pcg_report$content$cna$callset$variant
+cna_classes_pdf <- c("amplification", "homdel", "hemdel")
+cna_key_pdf <- if ("VARIANT_CLASS" %in% colnames(cna_pdf)) {
+  cna_pdf |>
+    dplyr::filter(.data$VARIANT_CLASS %in% cna_classes_pdf)
+} else cna_pdf[0, , drop = FALSE]
+## potentially oncogenic events (as for AMP/ASCO/CAP Tier 3): amplified
+## proto-oncogenes and deep deletions of tumor suppressor genes - not, e.g.,
+## amplified tumor suppressors
+is_onc_amp <- cna_key_pdf$VARIANT_CLASS == "amplification" &
+  if ("ONCOGENE" %in% colnames(cna_key_pdf)) cna_key_pdf$ONCOGENE %in% TRUE else FALSE
+is_tsg_del <- cna_key_pdf$VARIANT_CLASS %in% c("homdel", "hemdel") &
+  if ("TUMOR_SUPPRESSOR" %in% colnames(cna_key_pdf))
+    cna_key_pdf$TUMOR_SUPPRESSOR %in% TRUE else FALSE
+## OncoKB-curated oncogenic / likely oncogenic events (when OncoKB is
+## enabled), as in the HTML report
+is_okb_onc <- if ("ONCOGENICITY_OKB" %in% colnames(cna_key_pdf))
+  cna_key_pdf$ONCOGENICITY_OKB %in% c("Oncogenic", "Likely Oncogenic") else FALSE
+cna_key_pdf <- cna_key_pdf[is_onc_amp | is_tsg_del | is_okb_onc, , drop = FALSE]
+## ranked by actionability tier (1-3), then amplifications by copy number
+## (highest first) before deep deletions, then gene symbol
+if (NROW(cna_key_pdf) > 0) {
+  tier_rank <- suppressWarnings(as.integer(cna_key_pdf$ACTIONABILITY_TIER))
+  cn <- suppressWarnings(as.numeric(cna_key_pdf$CN_TOTAL))
+  cna_key_pdf <- cna_key_pdf[order(
+    dplyr::coalesce(tier_rank, 99L),
+    cna_key_pdf$VARIANT_CLASS != "amplification",
+    -dplyr::coalesce(cn, 0),
+    cna_key_pdf$SYMBOL), , drop = FALSE]
+}
+n_cna_key_pdf <- NROW(cna_key_pdf)
+```
+
+Listed below are potentially oncogenic copy number events: amplifications of known proto-oncogenes, deep deletions of tumor suppressor genes, and - when OncoKB annotation is enabled - events classified as oncogenic or likely oncogenic by OncoKB [@Chakravarty2017-rd]. Events are ranked by clinical actionability tier (therapeutic), then by copy number.
+
+## Amplified proto-oncogenes and deleted tumor suppressors
+
+```{r cna_key_table}
+#| echo: false
+#| eval: !expr n_cna_key_pdf > 0
+
+cna_key_pdf |>
+  utils::head(max_variants_pdf) |>
+  dplyr::select(dplyr::any_of(c(
+    "SYMBOL", "ENSEMBL_GENE_ID", "VARIANT_CLASS", "CN_TOTAL", "CYTOBAND",
+    "ACTIONABILITY_TIER", "ONCOGENICITY_OKB"))) |>
+  pcgrr:::pdf_table_variants(color = report_color, oncokb = TRUE)
+```
+
+```{r cna_key_none_msg}
+#| echo: false
+#| output: asis
+#| eval: !expr n_cna_key_pdf == 0
+cat(pcgrr:::pdf_note(kind = "empty", paste0(
+  "No amplifications of proto-oncogenes or deep deletions of tumor ",
+  "suppressor genes were found in this tumor sample.")))
+```
+
+## Copy number profile
+
+```{r cna_profile_setup}
+#| echo: false
+#| eval: true
+
+cna_conf_pdf <- pcg_report$settings$conf$somatic_cna
+sp_pdf <- pcg_report$settings$conf$sample_properties
+cna_plot_pdf <- pcgrr:::pdf_cna_plot_settings(pcg_report)
+cna_segments_pdf <- pcg_report$content$cna$callset$segment
+has_profile_pdf <- NROW(cna_segments_pdf) > 0 &&
+  NROW(pcg_report$settings$chrom_coordinates) > 0
+genome_doubled_pdf <- isTRUE(as.logical(cna_conf_pdf$genome_doubled))
+na_or <- function(x, f = identity) {
+  if (is.null(x) || length(x) == 0 || is.na(x) || x %in% "NA") "N/A" else f(x)
+}
+
+ploidy_source_pdf <- na_or(sp_pdf$tumor_ploidy_source)
+cna_absolute_caption_pdf <- paste0(
+  "Absolute copy number profile: total copy number per segment. Dotted ",
+  "lines (see legend) indicate the tumor ploidy (",
+  cna_plot_pdf$tumor_ploidy, ") and the effective thresholds for ",
+  "gain, deletion and amplification (threshold mode: ",
+  cna_plot_pdf$threshold_mode, "). Segments too short to render as a bar ",
+  "at whole-genome scale are drawn as a point at their midpoint; triangles ",
+  "mark amplifications/gains of proto-oncogenes (up) and deep deletions of ",
+  "tumor suppressor genes (down).")
+cna_relative_caption_pdf <- paste0(
+  "Relative copy number profile: copy number per segment relative to the ",
+  "tumor ploidy, with the corresponding thresholds as dotted lines.")
+```
+
+```{r cna_profile_kpis}
+#| echo: false
+#| output: asis
+#| eval: true
+
+cat(pcgrr:::pdf_kpi_row(list(
+  list(title = "Tumor ploidy",
+       value = as.character(cna_plot_pdf$tumor_ploidy),
+       sub = if (ploidy_source_pdf == "N/A")
+         "Not available - diploid assumed" else
+           paste0("Source: ", ploidy_source_pdf)),
+  list(title = "Fraction of genome altered",
+       value = na_or(cna_conf_pdf$fraction_genome_altered,
+                     function(x) paste0(round(100 * as.numeric(x), 1), "%"))),
+  list(title = "Whole-genome doubling",
+       value = if (is.null(cna_conf_pdf$genome_doubled)) "N/A" else
+         if (genome_doubled_pdf) "Yes" else "No",
+       sub = na_or(cna_conf_pdf$wgd_fraction, function(x) paste0(
+         round(100 * as.numeric(x)), "% of genome with major CN >= 2")),
+       color = if (genome_doubled_pdf) pcgrr::color_palette$warning else NULL))))
+```
+
+```{r cna_profile_absolute}
+#| echo: false
+#| eval: !expr has_profile_pdf
+#| fig-width: 7
+#| fig-height: 3.4
+#| fig-cap: !expr cna_absolute_caption_pdf
+
+pcgrr::plot_cna_segments_absolute(
+  chrom_coordinates = pcg_report$settings$chrom_coordinates,
+  cna_segment = cna_segments_pdf,
+  cna_gene = pcg_report$content$cna$callset$variant,
+  tumor_ploidy = cna_plot_pdf$tumor_ploidy,
+  amp_threshold_effective = cna_plot_pdf$amp_threshold_effective,
+  threshold_mode = cna_plot_pdf$threshold_mode,
+  gain_threshold_effective = cna_plot_pdf$gain_threshold_effective,
+  del_threshold_effective = cna_plot_pdf$del_threshold_effective) |>
+  pcgrr:::pdf_plot_theme(base_size = 7) +
+  ggplot2::theme(
+    axis.title.y = ggplot2::element_text(family = "sans", size = 7),
+    legend.key.size = grid::unit(0.3, "cm"),
+    legend.text = ggplot2::element_text(family = "sans", size = 6)) +
+  ggplot2::guides(colour = ggplot2::guide_legend(nrow = 2),
+                  fill = ggplot2::guide_legend(nrow = 2))
+```
+
+```{r cna_profile_relative}
+#| echo: false
+#| eval: !expr has_profile_pdf
+#| fig-width: 7
+#| fig-height: 3
+#| fig-cap: !expr cna_relative_caption_pdf
+
+pcgrr::plot_cna_segments_relative(
+  chrom_coordinates = pcg_report$settings$chrom_coordinates,
+  cna_segment = cna_segments_pdf,
+  cna_gene = pcg_report$content$cna$callset$variant,
+  tumor_ploidy = cna_plot_pdf$tumor_ploidy,
+  amp_threshold_effective = cna_plot_pdf$amp_threshold_effective,
+  threshold_mode = cna_plot_pdf$threshold_mode,
+  gain_threshold_effective = cna_plot_pdf$gain_threshold_effective,
+  del_threshold_effective = cna_plot_pdf$del_threshold_effective) |>
+  pcgrr:::pdf_plot_theme(base_size = 7) +
+  ggplot2::theme(
+    axis.title.y = ggplot2::element_text(family = "sans", size = 7),
+    legend.key.size = grid::unit(0.3, "cm"),
+    legend.text = ggplot2::element_text(family = "sans", size = 6)) +
+  ggplot2::guides(colour = ggplot2::guide_legend(nrow = 2),
+                  fill = ggplot2::guide_legend(nrow = 2))
+```
+
+```{r cna_profile_missing}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(has_profile_pdf)
+cat(pcgrr:::pdf_note(kind = "empty", 
+  "No copy number segments available for a genome-wide profile.",
+  title = "Not available"))
+```

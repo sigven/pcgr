@@ -25,6 +25,7 @@ def get_args():
     parser._action_groups.pop()
     required = parser.add_argument_group('Required arguments')
     optional_panel = parser.add_argument_group("Panel options")
+    optional_sample = parser.add_argument_group("Subject options")
     optional_classification = parser.add_argument_group("Variant classification options")
     optional_vep = parser.add_argument_group('VEP options')
     optional_vcfanno = parser.add_argument_group('vcfanno options')
@@ -33,23 +34,31 @@ def get_args():
     optional_panel.add_argument('--panel_id',dest = "virtual_panel_id",type = str, default = "-1", help="Comma-separated string with identifier(s) of predefined virtual cancer predisposition gene panels,\nchoose any combination of the following identifiers (GEP = Genomics England PanelApp):\n" + str(pcgr_vars.panels_help_display))
     optional_panel.add_argument('--custom_list',dest = "custom_list",help="Provide custom list of genes from virtual panel 0 (single-column .txt/.tsv file with Ensembl gene identifiers),\n alternative to predefined panels provided with --panel_id)")
     optional_panel.add_argument('--custom_list_name',dest = "custom_list_name", default="None", help="Set name for custom made panel/list (single word - no whitespace), will be displayed in the report")
-    optional_panel.add_argument('--diagnostic_grade_only', action="store_true",help="For panel_id's 1-44 (Genomics England PanelApp) - consider genes with a GREEN status only, default: %(default)s")
+    optional_panel.add_argument('--diagnostic_grade_only', action="store_true",help="For panel_id's 1-43 (Genomics England PanelApp) - consider genes with a GREEN status only, default: %(default)s")
 
     optional_other.add_argument('--force_overwrite', action = "store_true", help='By default, the script will fail with an error if any output file already exists.\n You can force the overwrite of existing result files by using this flag, default: %(default)s')
     optional_other.add_argument('--version', action='version', version=str(utils.get_cpsr_version()))
     optional_other.add_argument('--no_reporting',action="store_true",help="Run functional variant annotation on VCF through VEP/vcfanno, omit classification/report generation (STEP 4), default: %(default)s")
     optional_other.add_argument("--no_html", action="store_true", help="Do not generate HTML report (default: %(default)s)")
+    optional_other.add_argument("--no_pdf", action="store_true", help="Do not generate PDF report (Quarto/Typst) (default: %(default)s)")
     optional_other.add_argument('--retained_info_tags', dest ='retained_info_tags', default='None', help='Comma-separated string of VCF INFO tags from query VCF that should be kept in CPSR output TSV')
     optional_other.add_argument('--ignore_noncoding', action='store_true',dest='ignore_noncoding',default=False,help='Ignore non-coding (i.e. non protein-altering) variants in report, default: %(default)s')
     optional_other.add_argument("--debug", action="store_true", help="Print full commands to log")
     optional_other.add_argument("--pcgrr_conda", default="pcgrr", help="pcgrr conda env name (default: %(default)s)")
     
+    optional_sample.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN",
+                                 help="Sex of sample - used for interpretation of X-linked pharmacogenomic findings (G6PD),\n" + \
+                                     "i.e. hemizygous (MALE) vs. diploid (FEMALE) genotypes (default: %(default)s)")
+    optional_sample.add_argument("--age", dest="age", type=int,
+                                 help="Age of the subject (whole years) at the time of testing (default: %(default)s)")
+
     optional_classification.add_argument('--secondary_findings', action='store_true',dest='secondary_findings',default=False, help='Include variants found in ACMG-recommended list for secondary findings (v3.2), default: %(default)s')
     optional_classification.add_argument('--pgx_findings', action='store_true',dest='pgx_findings',default=False, help='Report overlap with variants associated with chemotherapy toxicity (PgX findings, CPIC), default: %(default)s')
     optional_classification.add_argument('--gwas_findings', action='store_true',dest='gwas_findings',default=False, help='Report overlap with low to moderate cancer risk variants (tag SNPs) identified from genome-wide association studies, default: %(default)s')    
     optional_classification.add_argument('--max_af_gnomad', type = float, default = 0.9, dest = 'max_af_gnomad', help='Ignore reporting novel variants with gnomAD maximum allele frequency (AF) across populations greater than this value, default: %(default)s')
     optional_classification.add_argument('--clinvar_trust_level', type=int, choices=[0,1,2,3,4], default=0, dest='clinvar_trust_level',help='Level of trust/authority assigned to CPSR-based variant classification relative to existing ClinVar records: \n' + pcgr_vars.clinvar_trust_levels_help_display + '\n(default: %(default)s)')
-    optional_classification.add_argument('--clinvar_report_noncancer', action='store_true', help='Report also ClinVar-classified variants attributed to phenotypes/conditions NOT directly related to tumor development, default: %(default)s')
+    optional_classification.add_argument('--clinvar_cancer_only', action='store_true', help='Exclude ClinVar-classified variants attributed only to phenotypes/conditions NOT related to cancer\n(variants with unspecified ClinVar phenotypes, e.g. \'not provided\', are retained), default: %(default)s')
+    optional_classification.add_argument('--clinvar_report_noncancer', action='store_true', help=argparse.SUPPRESS)
     
     optional_vcfanno.add_argument('--vcfanno_n_proc', default = 4, type = int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
 
@@ -170,6 +179,7 @@ def run_cpsr(conf_options, input_data, output_data):
         logger = getlogger("cpsr-settings")
         logger.info("--- Cancer Predisposition Sequencing Reporter workflow ----")
         logger.info(f"Sample name: {conf_options['sample_id']}")
+        logger.info(f"Subject sex / age: {conf_options['subject_properties']['sex']} / {conf_options['subject_properties']['age']}")
         if not input_customlist == 'None':
             logger.info(f"Virtual gene panel: custom-made list from panel 0: {input_customlist}")
         else:
@@ -179,7 +189,7 @@ def run_cpsr(conf_options, input_data, output_data):
                     f"{'ON' if conf_options['variant_classification']['secondary_findings'] else 'OFF'}")
         logger.info("Include low to moderate cancer risk variants from genome-wide association studies: " + \
                     f"{'ON' if conf_options['variant_classification']['gwas_findings'] else 'OFF'}")
-        logger.info("Include pharmacogenetic findings (PgX - variants related to potential toxicity to chemotherapy): " + \
+        logger.info("Include pharmacogenomic findings (PgX - variants related to potential toxicity to chemotherapy): " + \
                     f"{'ON' if conf_options['variant_classification']['pgx_findings'] else 'OFF'}")
 
         #logger.info(f"Reference population, germline variant frequencies (gnomAD - non-cancer subset): " + \

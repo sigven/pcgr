@@ -246,7 +246,7 @@ for (c in c("pathogenicity",
     color_palette[[c]] <- "#868686"
   }
   if (c == "success") {
-    color_palette[[c]] <- "#00a65a"
+    color_palette[[c]] <- "#35814a"
   }
   if (c == 'expression_outlier_high'){
     color_palette[[c]][["breaks"]] <- c(96,97,98,99)
@@ -429,7 +429,8 @@ data_coltype_defs[['cna_somatic_segment_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
   SEGMENT_START = readr::col_double(),
   SEGMENT_END = readr::col_double(),
-  SEGMENT_NAME = readr::col_character()
+  SEGMENT_NAME = readr::col_character(),
+  CN_MAJOR_MINOR_IMPUTED = readr::col_logical()
 )
 
 ####----CNA genes ----####
@@ -441,6 +442,7 @@ data_coltype_defs[['cna_somatic_gene_raw']] <- readr::cols_only(
   VARIANT_CLASS = readr::col_character(),
   CN_MAJOR = readr::col_integer(),
   CN_MINOR = readr::col_integer(),
+  CN_MAJOR_MINOR_IMPUTED = readr::col_logical(),
   CHROMOSOME_ARM = readr::col_character(),
   CYTOBAND = readr::col_character(),
   EVENT_TYPE = readr::col_character(),
@@ -739,7 +741,7 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   DBNSFP_MUTATIONASSESSOR = readr::col_character(),
   DBNSFP_MUTATIONTASTER = readr::col_character(),
   DBNSFP_MUTFORMER = readr::col_character(),
-  DBNSFP_MUTPRED = readr::col_character(),
+  DBNSFP_MUTPRED2 = readr::col_character(),
   DBNSFP_M_CAP = readr::col_character(),
   DBNSFP_PHACTBOOST = readr::col_character(),
   DBNSFP_POLYPHEN2_HVAR = readr::col_character(),
@@ -816,6 +818,9 @@ data_coltype_defs[['snv_indel_germline_cpsr']] <- readr::cols_only(
   CLINVAR_GOLD_STARS = readr::col_integer(),
   CLINVAR_VARIANT_ORIGIN = readr::col_character(),
   DBSNP_RSID = readr::col_character(),
+  gnomADe_AF = readr::col_number(),
+  gnomADg_AF = readr::col_number(),
+  CPG_MOI = readr::col_character(),
   ASSERTION_AUTHORITY = readr::col_character(),
   ASSERTION_RATIONALE = readr::col_character(),
   CPSR_CLASSIFICATION = readr::col_character(),
@@ -854,6 +859,7 @@ tsv_cols[['cna']] <-
     'GENOME_VERSION',
     'CN_MAJOR',
     'CN_MINOR',
+    'CN_MAJOR_MINOR_IMPUTED',
     'LOH',
     "TWOHIT_CANDIDATE_SOMATIC",
     "TWOHIT_CANDIDATE_GERMLINE",
@@ -1097,7 +1103,14 @@ table_display_cols[['cna_other_oncogenic']] <-
     "LOH",
     "CN_MAJOR",
     "CN_MINOR",
+    "CN_MAJOR_MINOR_IMPUTED",
     "TARGETED_INHIBITORS_ALL",
+    "MUTATION_EFFECT_OKB",
+    "MUTATION_EFFECT_DESCRIPTION_OKB",
+    "MUTATION_EFFECT_CITATIONS_OKB",
+    "ONCOGENICITY_OKB",
+    "TUMOR_TYPE_SUMMARY_OKB",
+    "VARIANT_SUMMARY_OKB",
     "GENOME_VERSION")
 
 ####----SNV/Indel - germline filtered-----#####
@@ -1267,30 +1280,7 @@ effect_prediction_algos <- as.data.frame(
              show_col_types = F))
 usethis::use_data(effect_prediction_algos, overwrite = T)
 
-#---- cancer_phenotypes_regex ----#
-cancer_phenotypes_regex <-
-  paste0("(cancer|carcinoma|tumor|neoplasm|gangliom|lymphom|leukem|meningiom",
-         "|blastoma|melanom|chordom|adenoma|sarcom|mesotheli|ependymom|glioma",
-         "|neurofibro|keratoacan|nevus|brca|polyposis|myelodysplastic|cowden",
-         "|gardner|noonan|fanconi|carney|bullosa|schwanno|li-fraumeni|xeroderma",
-         "|leiomyom|muir-|nijmegen|neoplasia|trichoepithelioma|brooke|turcot",
-         "|exostos|lynch|drash|wilm|perlman|fibrofolliculomas|hippel|hamartom",
-         "|bloom|werner|peutz|tuberous|angiomyolipoma",
-         "|dihydropyrimidine dehydrogenase deficiency",
-         "|lymphoproliferative|stat3|teratoma|thrombocytop|tp63|weaver",
-         "|pheochromo|gorlin|telangiectasia|hemangiom|osteochondro|response",
-         "|polg-related|ras-associated|dyskeratosis",
-         "|tyrosine kinase inhibitor|fluorouracil|methotrexate|capecitabine",
-         "|imatinib|erlotinib|gefitinib|sunitinib|vemurafenib|crizotinib|cetuximab",
-         "|dabrafenib|osimertinib|afatinib|neratinib|lapatinib|ponatinib|regorafenib",
-         "|vandetanib|bosutinib|axitinib|cabozantinib|brigatinib|ripretinib|lenvatinib",
-         "|midostaurin|duvelisib|copanlisib|alpelisib|larotrectinib|entrectinib",
-         "|programmed death ligand|adp-ribose|doxorubicin|cisplatin|carboplatin",
-         "|familial adenomatous polyposis|hereditary breast and ovarian cancer",
-         "|hereditary nonpolyposis colorectal cancer|multiple endocrine neoplasia",
-         "|waardenburg|beckwidth|birt-hogg|diamond|frasier",
-         "|infantile myofibromatosis|proteus|rothmund|russel)")
-usethis::use_data(cancer_phenotypes_regex, overwrite = T)
+## cancer_phenotypes_regex moved to the cpsr package (only used by CPSR)
 
 
 tcga_cohorts <- as.data.frame(
@@ -1423,8 +1413,7 @@ exonic_filter_levels <-
 usethis::use_data(germline_filter_levels, overwrite = T)
 usethis::use_data(exonic_filter_levels, overwrite = T)
 
-rm(cancer_phenotypes_regex,
-   effect_prediction_algos,
+rm(effect_prediction_algos,
    tcga_cohorts,
    immune_celltypes2,
    artefact_signatures,

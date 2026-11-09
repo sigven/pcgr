@@ -20,6 +20,7 @@ for(cohort in names(pcg_report[['content']]$expression[['similarity_analysis']])
         pcg_report[['content']]$expression[['similarity_analysis']][[cohort]] |>
         dplyr::mutate(CORR = round(CORR, digits = 5)) |>
         dplyr::select(-c("EXT_SAMPLE_ID2","PROTEIN_CODING_ONLY")) |>
+        dplyr::mutate(EXT_SAMPLE_TYPE = pcgrr::format_sample_type(EXT_SAMPLE_TYPE)) |>
         dplyr::mutate(
           EXT_SAMPLE_NAME = 
             glue::glue(
@@ -82,6 +83,7 @@ dt_similarity_depmap <-
   pcg_report[['content']]$expression[['similarity_analysis']][['depmap']] |>
   dplyr::mutate(CORR = round(CORR, digits = 5)) |>
   dplyr::select(-c("EXT_SAMPLE_ID2","PROTEIN_CODING_ONLY")) |>
+  dplyr::mutate(EXT_SAMPLE_TYPE = pcgrr::format_sample_type(EXT_SAMPLE_TYPE)) |>
   dplyr::mutate(
     EXT_SAMPLE_NAME = 
       glue::glue(
@@ -136,6 +138,7 @@ dt_similarity_treehouse <-
   pcg_report[['content']]$expression[['similarity_analysis']][['treehouse']] |>
   dplyr::mutate(CORR = round(CORR, digits = 5)) |>
   dplyr::select(-c("EXT_SAMPLE_ID2","PROTEIN_CODING_ONLY")) |>
+  dplyr::mutate(EXT_SAMPLE_TYPE = pcgrr::format_sample_type(EXT_SAMPLE_TYPE)) |>
   dplyr::select(
     EXT_SAMPLE_ID,
     EXT_SAMPLE_NAME,

@@ -12,14 +12,14 @@ append_annotation_links <- function(
     skip = NULL) {
 
   i <- 1
-  while (i <= nrow(variant_db_url)) {
+  while (i <= nrow(pcgrr::variant_db_url)) {
 
     name <-
-      variant_db_url[i, ]$name
+      pcgrr::variant_db_url[i, ]$name
     link_display_var <-
-      variant_db_url[i, ]$link_display_var
+      pcgrr::variant_db_url[i, ]$link_display_var
     rename <-
-      variant_db_url[i, ]$rename
+      pcgrr::variant_db_url[i, ]$rename
 
     if (rename == T &
        name %in% colnames(var_data_df) &
@@ -31,17 +31,23 @@ append_annotation_links <- function(
     if (!name %in% skip) {
       group_by_var <- c("VAR_ID","ENTREZGENE")
       if (vartype == "cna") {
-        group_by_var <- c("VAR_ID",
-                          "ENTREZGENE",
-                          "TRANSCRIPT_START",
-                          "TRANSCRIPT_END")
+        ## links must be generated per transcript - transcripts sharing
+        ## coordinates would otherwise all receive each other's links
+        tx_col <- intersect(
+          c("ENSEMBL_TRANSCRIPT_ID_RAW", "ENSEMBL_TRANSCRIPT_ID"),
+          colnames(var_data_df))
+        group_by_var <- unique(c("VAR_ID",
+                                 "ENTREZGENE",
+                                 "TRANSCRIPT_START",
+                                 "TRANSCRIPT_END",
+                                 utils::head(tx_col, 1)))
       }
       if (vartype == "exp") {
         group_by_var <- "ENTREZGENE"
       }
-      url_prefix <- variant_db_url[i, ]$url_prefix
-      link_key_var <- variant_db_url[i, ]$link_key_var
-      link_display_var <- variant_db_url[i, ]$link_display_var
+      url_prefix <- pcgrr::variant_db_url[i, ]$url_prefix
+      link_key_var <- pcgrr::variant_db_url[i, ]$link_key_var
+      link_display_var <- pcgrr::variant_db_url[i, ]$link_display_var
       if (!(name %in% colnames(var_data_df)) &
           link_key_var %in% colnames(var_data_df) &
           link_display_var %in% colnames(var_data_df) &
@@ -63,9 +69,7 @@ append_annotation_links <- function(
                 dplyr::rename(
                   annotation_links,
                   !!rlang::sym(name) := "link"),
-                by = c("VAR_ID","ENTREZGENE",
-                       "TRANSCRIPT_START",
-                       "TRANSCRIPT_END"))
+                by = group_by_var)
           }else{
             if (vartype == "exp") {
               var_data_df <- var_data_df |>
@@ -304,7 +308,7 @@ append_tcga_var_link <- function(var_df,
             "affected", "cohort_size"),
           sep = "\\|", convert = TRUE) |>
         dplyr::left_join(
-          tcga_cohorts, by = "tcga_cancer_code") |>
+          pcgrr::tcga_cohorts, by = "tcga_cancer_code") |>
         dplyr::arrange(
           .data$VAR_ID,
           dplyr::desc(.data$percentage))
@@ -557,15 +561,15 @@ append_dbnsfp_var_link <- function(var_df) {
         .data$PREDICTED_EFFECT, ":PD,", ":ProbablyDamaging,"
       ))
     i <- 1
-    while (i <= nrow(effect_prediction_algos)) {
+    while (i <= nrow(pcgrr::effect_prediction_algos)) {
       str_to_replace <-
-        paste0(effect_prediction_algos[i, "algorithm"], ":")
+        paste0(pcgrr::effect_prediction_algos[i, "algorithm"], ":")
       replacement_str <-
         paste0("<a href='",
-               effect_prediction_algos[i, "url"], "' target='_blank'>",
-               effect_prediction_algos[i, "display_name"], "</a>:")
+               pcgrr::effect_prediction_algos[i, "url"], "' target='_blank'>",
+               pcgrr::effect_prediction_algos[i, "display_name"], "</a>:")
       algorithm_display <-
-        paste0(effect_prediction_algos[i, "display_name"], ":")
+        paste0(pcgrr::effect_prediction_algos[i, "display_name"], ":")
       var_df <- var_df |>
         dplyr::mutate(
           PREDICTED_EFFECT =
@@ -593,53 +597,10 @@ append_targeted_drug_annotations <- function(
     var_df,
     primary_site = "Breast",
     ref_data = NULL) {
-
-  if (any(grepl(paste0("^SYMBOL$"), names(var_df))) &
-      any(grepl(paste0("^VAR_ID$"), names(var_df))) &
-      !is.null(ref_data)) {
-    var_drug_df <- dplyr::select(
-      var_df, c("VAR_ID","SYMBOL")) |>
-      dplyr::filter(!is.na(.data$SYMBOL)) |>
-      dplyr::distinct()
-    if (nrow(var_drug_df) > 0) {
-      var_drug_df <- var_drug_df |>
-        dplyr::left_join(
-          ref_data[['drug']][['targeted_inhibition_any_label']],
-          by = c("SYMBOL")) |>
-        dplyr::left_join(
-          dplyr::filter(
-            ref_data[['drug']][['targeted_inhibition_on_label']],
-            .data$QUERY_SITE == primary_site),
-          by = c("SYMBOL")) |>
-        dplyr::select(-c("QUERY_SITE")) |>
-        dplyr::distinct() |>
-        dplyr::filter(
-          !is.na(.data$TARGETED_INHIBITORS_ALL2)) |>
-        dplyr::distinct()
-      if (NROW(var_drug_df) > 0) {
-        var_df <-
-          dplyr::left_join(
-            var_df,
-            var_drug_df,
-            by = c("VAR_ID","SYMBOL")
-          ) |>
-          dplyr::select(
-            -c("TARGETED_INHIBITORS",
-               "TARGETED_INHIBITORS_ALL")
-          )
-      }else{
-        #vcf_data_df$TARGETED_INHIBITORS_OFF_LABEL <- NA
-        var_df$TARGETED_INHIBITORS2 <- NA
-        var_df$TARGETED_INHIBITORS_ALL2 <- NA
-      }
-    }
-    else{
-      var_df$TARGETED_INHIBITORS2 <- NA
-      var_df$TARGETED_INHIBITORS_ALL2 <- NA
-    }
-  }
-
-  return(var_df)
+  join_targeted_drugs(
+    var_df, primary_site = primary_site, ref_data = ref_data,
+    drop_cols = c("TARGETED_INHIBITORS", "TARGETED_INHIBITORS_ALL"),
+    empty_cols = c("TARGETED_INHIBITORS2", "TARGETED_INHIBITORS_ALL2"))
 }
 
 #' Function that adds protein domain annotations (PFAM)
@@ -791,6 +752,28 @@ append_drug_var_link <- function(
     var_df,
     primary_site = "Breast",
     ref_data = NULL) {
+  join_targeted_drugs(
+    var_df, primary_site = primary_site, ref_data = ref_data,
+    drop_cols = NULL,
+    empty_cols = c("TARGETED_INHIBITORS", "TARGETED_INHIBITORS_ALL"))
+}
+
+#' Function that joins targeted drugs (any label, and on-label for the
+#' primary site) to a list of variants, by gene (SYMBOL)
+#'
+#' @param var_df data frame with variants (columns VAR_ID and SYMBOL)
+#' @param primary_site primary tumor sample site
+#' @param ref_data PCGR/CPSR reference data object
+#' @param drop_cols drug columns removed after the join
+#' @param empty_cols drug columns set to NA when no variant has targeted drugs
+#'
+#' @keywords internal
+join_targeted_drugs <- function(
+    var_df,
+    primary_site = "Breast",
+    ref_data = NULL,
+    drop_cols = NULL,
+    empty_cols = NULL) {
 
   if (any(grepl(paste0("^SYMBOL$"), names(var_df))) &
       any(grepl(paste0("^VAR_ID$"), names(var_df))) &
@@ -802,7 +785,7 @@ append_drug_var_link <- function(
     if (nrow(var_drug_df) > 0) {
       var_drug_df <- var_drug_df |>
         dplyr::left_join(
-            ref_data[['drug']][['targeted_inhibition_any_label']],
+          ref_data[['drug']][['targeted_inhibition_any_label']],
           by = c("SYMBOL")) |>
         dplyr::left_join(
           dplyr::filter(
@@ -814,22 +797,21 @@ append_drug_var_link <- function(
         dplyr::filter(
           !is.na(.data$TARGETED_INHIBITORS_ALL2)) |>
         dplyr::distinct()
-      if (NROW(var_drug_df) > 0) {
-        var_df <-
-          dplyr::left_join(
-            var_df,
-            var_drug_df,
-            by = c("VAR_ID","SYMBOL")
-          )
-      }else{
-        #vcf_data_df$TARGETED_INHIBITORS_OFF_LABEL <- NA
-        var_df$TARGETED_INHIBITORS <- NA
-        var_df$TARGETED_INHIBITORS_ALL <- NA
-      }
     }
-    else{
-      var_df$TARGETED_INHIBITORS <- NA
-      var_df$TARGETED_INHIBITORS_ALL <- NA
+    if (NROW(var_drug_df) > 0) {
+      var_df <-
+        dplyr::left_join(
+          var_df,
+          var_drug_df,
+          by = c("VAR_ID","SYMBOL")
+        )
+      if (!is.null(drop_cols)) {
+        var_df <- dplyr::select(var_df, -dplyr::all_of(drop_cols))
+      }
+    } else {
+      for (col in empty_cols) {
+        var_df[[col]] <- NA
+      }
     }
   }
 
@@ -1217,7 +1199,8 @@ generate_annotation_link <- function(
                               link_display_var))
     tmp_df <- var_df[, selected_vars]
     tmp_df <- tmp_df[!is.na(tmp_df[, link_key_var]) &
-                       !is.na(tmp_df[, link_display_var]), ] |>
+                       !is.na(tmp_df[, link_display_var]) &
+                       as.character(tmp_df[[link_key_var]]) != "", ] |>
       dplyr::distinct()
 
 
@@ -1242,10 +1225,7 @@ generate_annotation_link <- function(
           df_annotation_links <- as.data.frame(
             df_annotation_links |>
               dplyr::group_by(
-                .data$VAR_ID,
-                .data$ENTREZGENE,
-                .data$TRANSCRIPT_START,
-                .data$TRANSCRIPT_END) |>
+                dplyr::across(dplyr::all_of(group_by_var))) |>
               dplyr::summarise(
                 link = unlist(
                   paste(

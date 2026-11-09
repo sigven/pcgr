@@ -1,9 +1,12 @@
 Clinical actionability assessment of somatic SNVs/InDels, gene copy number aberrations, and
 RNA fusions found in the tumor sample implements recommendation guidelines by AMP/ASCO/CAP [@Li2017-ew].
+Tiers are assigned from _therapeutic_ evidence only (treatment sensitivity), as intended by the
+guidelines. Prognostic, diagnostic and resistance evidence does not influence the tier of an alteration -
+it is listed separately, without tiers (see the sections on prognostic and diagnostic biomarkers).
 Specifically, different levels of actionability are implemented in the following manner:
 
 - **Tier I: Variants of strong clinical significance** — aberrations linked to
-  predictive, prognostic, or diagnostic biomarkers in the
+  predictive (therapeutic) biomarkers in the
   [CIViC database]({civic_url}) and the [Cancer Biomarkers Database]({cgi_url})
   (and optionally [OncoKB]({oncokb_url})) that show
     - Strong clinical evidence (approved therapies, guidelines, late-phase trials;
@@ -14,7 +17,7 @@ Specifically, different levels of actionability are implemented in the following
       equivalent to a matching-site strong item)
 
 - **Tier II: Variants of potential clinical significance** — aberrations linked
-  to predictive, prognostic, or diagnostic biomarkers in the
+  to predictive (therapeutic) biomarkers in the
   [CIViC database]({civic_url}) and the [Cancer Biomarkers Database]({cgi_url})
   (and optionally [OncoKB]({oncokb_url})) that show either
     - Strong clinical evidence ([CIViC A/B]({civic_docs_url}model/evidence/level.html);

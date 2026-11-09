@@ -10,7 +10,7 @@ tumor_site <- pcg_report$settings$conf$sample_properties$site
 cs <- pcgrr::color_palette$bm_callout
 ```
 
-Acquired SNVs and InDels in the tumor sample have been classified into tiers of _clinical actionability_ - adopting the AMP/ASCO/CAP guidelines [@Li2017-ew]. We use `r bm_db_label` `r bm_db_citation` as the underlying sources for actionable variants (versions indicated [below](#documentation)).
+Acquired SNVs and InDels in the tumor sample have been classified into tiers of _clinical actionability_ - adopting the AMP/ASCO/CAP guidelines [@Li2017-ew]. We use `r bm_db_label` `r bm_db_citation` as the underlying sources for actionable variants (versions indicated [below](#documentation)). `r bm_db_tier_note`
 
 
 ```{r}
@@ -104,7 +104,7 @@ result_table
 #| echo: false
 #| output: asis
 #| eval: !expr isTRUE(vstats$therapeutic_sensitivity$tier1$n_var == 0) && isTRUE(vstats$therapeutic_sensitivity$tier2$n_var == 0) && isTRUE(vstats$therapeutic_sensitivity$tier3$n_var == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_sensitivity$border, "; background:", cs$therapeutic_sensitivity$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_sensitivity$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic sensitivity biomarkers (Tier 1&ndash;3) were identified among SNVs/InDels in this tumor sample.</div>"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_sensitivity$border, "; background:", cs$therapeutic_sensitivity$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_sensitivity$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no therapeutic sensitivity biomarkers (Tier 1&ndash;3) were identified among SNVs/InDels in this tumor sample.</div>"))
 ```
 
 
@@ -128,7 +128,7 @@ result_table <-
   )
 
 if (is.null(result_table)) {
-  cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among SNVs/InDels in this tumor sample.</div>"))
+  cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among SNVs/InDels in this tumor sample.</div>"))
 } else {
   result_table
 }
@@ -139,18 +139,21 @@ if (is.null(result_table)) {
 #| echo: false
 #| output: asis
 #| eval: !expr isTRUE(vstats$therapeutic_resistance$tier1$n_var == 0) && isTRUE(vstats$therapeutic_resistance$tier2$n_var == 0) && isTRUE(vstats$therapeutic_resistance$tier3$n_var == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among SNVs/InDels in this tumor sample.</div>"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among SNVs/InDels in this tumor sample.</div>"))
 ```
 
 #### Prognostic biomarkers
 
+`r pcgrr::progn_diagn_tier_note(pcg_report)`
+
 ```{r tier1_2_poor_prognosis_variants_snv}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$prognostic_poor$tier1$n_var > 0) || isTRUE(vstats$prognostic_poor$tier2$n_var > 0)
+#| eval: !expr pcgrr::has_progn_diagn_evidence(pcg_report, "snv_indel", "prognostic_poor")
 
 rctbl_recs <- pcgrr::prep_progn_display_tbl(
   rep = pcg_report,
+tier = pcgrr::progn_diagn_tiers(pcg_report),
   etype_for_tiering = c("prognostic"),
   variant_category = 'snv_indel',
   clnsig = "prognostic_poor")
@@ -169,8 +172,8 @@ result_table
 ```{r}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$prognostic_poor$tier1$n_var == 0) && isTRUE(vstats$prognostic_poor$tier2$n_var == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_poor$border, "; background:", cs$prognostic_poor$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_poor$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no poor outcome biomarkers for ", tumor_site, " cancers were identified among SNVs/InDels in this tumor sample.</div>"))
+#| eval: !expr isFALSE(pcgrr::has_progn_diagn_evidence(pcg_report, "snv_indel", "prognostic_poor"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_poor$border, "; background:", cs$prognostic_poor$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_poor$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no poor outcome biomarkers for ", tumor_site, " cancers were identified among SNVs/InDels in this tumor sample.</div>"))
 ```
 
 <br>
@@ -178,10 +181,11 @@ cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic
 ```{r tier1_2_better_prognosis_variants_snv}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$prognostic_better$tier1$n_var > 0) || isTRUE(vstats$prognostic_better$tier2$n_var > 0)
+#| eval: !expr pcgrr::has_progn_diagn_evidence(pcg_report, "snv_indel", "prognostic_better")
 
 rctbl_recs <- pcgrr::prep_progn_display_tbl(
   rep = pcg_report,
+tier = pcgrr::progn_diagn_tiers(pcg_report),
   etype_for_tiering = c("prognostic"),
   variant_category = 'snv_indel',
   clnsig = "prognostic_better")
@@ -200,20 +204,23 @@ result_table
 ```{r}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$prognostic_better$tier1$n_var == 0) && isTRUE(vstats$prognostic_better$tier2$n_var == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_better$border, "; background:", cs$prognostic_better$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_better$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no better outcome biomarkers for ", tumor_site, " cancers were identified among SNVs/InDels in this tumor sample.</div>"))
+#| eval: !expr isFALSE(pcgrr::has_progn_diagn_evidence(pcg_report, "snv_indel", "prognostic_better"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_better$border, "; background:", cs$prognostic_better$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_better$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no better outcome biomarkers for ", tumor_site, " cancers were identified among SNVs/InDels in this tumor sample.</div>"))
 ```
 
 #### Diagnostic biomarkers
+
+`r pcgrr::progn_diagn_tier_note(pcg_report)`
 
 
 ```{r tier1_2_positive_diagnosis_variants_snv}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$diagnostic_positive$tier1$n_var > 0) || isTRUE(vstats$diagnostic_positive$tier2$n_var > 0)
+#| eval: !expr pcgrr::has_progn_diagn_evidence(pcg_report, "snv_indel", "diagnostic_positive")
 
 rctbl_recs <- pcgrr::prep_diagn_display_tbl(
   rep = pcg_report,
+tier = pcgrr::progn_diagn_tiers(pcg_report),
   etype_for_tiering = c("diagnostic"),
   variant_category = 'snv_indel',
   clnsig = "diagnostic_positive")
@@ -232,8 +239,8 @@ result_table
 ```{r}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$diagnostic_positive$tier1$n_var == 0) && isTRUE(vstats$diagnostic_positive$tier2$n_var == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$diagnostic_positive$border, "; background:", cs$diagnostic_positive$bg, "; border-radius:0 4px 4px 0; color:", cs$diagnostic_positive$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no diagnostic biomarkers for ", tumor_site, " cancers were identified among SNVs/InDels in this tumor sample.</div>"))
+#| eval: !expr isFALSE(pcgrr::has_progn_diagn_evidence(pcg_report, "snv_indel", "diagnostic_positive"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$diagnostic_positive$border, "; background:", cs$diagnostic_positive$bg, "; border-radius:0 4px 4px 0; color:", cs$diagnostic_positive$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no diagnostic biomarkers for ", tumor_site, " cancers were identified among SNVs/InDels in this tumor sample.</div>"))
 ```
 
 

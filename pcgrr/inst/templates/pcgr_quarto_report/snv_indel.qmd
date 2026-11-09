@@ -1,6 +1,5 @@
 ## Somatic SNVs/InDels
 
-<br>
 
 ```{r key_snv_indel_numbers}
 #| echo: false
@@ -65,7 +64,7 @@ bslib::page_fillable(
 
 
 ```{r section_variant_filtering}
-#| eval: !expr isTRUE(as.logical(assay_properties$vcf_tumor_only))
+#| eval: true
 #| output: asis
 #| child: pcgr_quarto_report/snv_indel/variant_filtering.qmd 
 

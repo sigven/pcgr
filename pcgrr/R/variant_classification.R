@@ -9,7 +9,7 @@
 #' tumor suppressor genes (e.g. low MAF, coding status), which are used to
 #' assign tier 3 status to variants with uncertain clinical significance.
 #'
-#' @param vartype variant type ('snv_indel', 'cna', 'fusion')
+#' @param vartype variant type ('snv_indel', 'cna', 'fusion', 'msi', 'tmb')
 #' @param clinical_significance character indicate the clinical significance
 #' types of evidence used for tiering of predictive evidence. Possible values:
 #' "therapeutic_sensitivity", "therapeutic_resistance", "prognostic_poor",
@@ -24,6 +24,11 @@
 #' relationship
 #' @param var_df data frame with variants (SNVs/InDels, CNAs, fusions)
 #' @param biomarker_items data frame with biomarker evidence items
+#' @param oncotree_lineage OncoTree names of the OncoTree code used for OncoKB
+#' queries and its ancestors (OncoKB evidence for these cancer types is
+#' considered evidence for the primary site of the query tumor)
+#' @param sources_not_tiered biomarker sources (BM_SOURCE_DB, e.g. 'cgi') whose
+#' evidence items are shown for tiered variants, but not used for tier assignment
 #'
 #' @export
 assign_amp_asco_cap_tiers <- function(
@@ -32,16 +37,18 @@ assign_amp_asco_cap_tiers <- function(
     primary_site = "Any",
     biomarker_mapping_confidence = "medium",
     var_df = NULL,
-    biomarker_items = NULL) {
+    biomarker_items = NULL,
+    oncotree_lineage = NULL,
+    sources_not_tiered = NULL) {
 
   invisible(assertthat::assert_that(
     !is.null(var_df) & is.data.frame(var_df),
     msg = paste0("Argument var_df needs be of type data.frame")))
   invisible(
     assertthat::assert_that(
-      vartype %in% c("snv_indel", "cna", "fusion"),
+      vartype %in% c("snv_indel", "cna", "fusion", "msi", "tmb"),
       msg = paste0("Argument 'vartype' needs to be one of
-                   'snv_indel', 'cna' or 'fusion'"))
+                   'snv_indel', 'cna', 'fusion', 'msi' or 'tmb'"))
   )
 
   ## check that clinical_significance is a character of length 1
@@ -52,22 +59,22 @@ assign_amp_asco_cap_tiers <- function(
   )
 
   invisible(assertthat::assert_that(
-    clinical_significance %in% names(bm_categories),
+    clinical_significance %in% names(pcgrr::bm_categories),
     msg = paste0("Argument 'clinical_significance' needs to be one of: ",
-                 paste0(names(bm_categories), collapse = ", '")))
+                 paste0(names(pcgrr::bm_categories), collapse = ", '")))
   )
 
   etype_for_tiering <-
-    bm_categories[[clinical_significance]]$etype
+    pcgrr::bm_categories[[clinical_significance]]$etype
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(tumor_sites, collapse = ", ")))
+                 paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   clnsig_categories_for_tiering <-
-    bm_categories[[clinical_significance]]$clnsig
+    pcgrr::bm_categories[[clinical_significance]]$clnsig
 
   if (!is.null(biomarker_items)) {
 
@@ -131,6 +138,27 @@ assign_amp_asco_cap_tiers <- function(
     }
   }
 
+  ## OncoKB catch-all cancer types for liquid (solid) tumors only are not
+  ## pan-cancer evidence for a solid (liquid) query tumor
+  biomarker_items <- oncokb_resolve_catchall_sites(
+    biomarker_items = biomarker_items,
+    primary_site = primary_site)
+
+  ## OncoKB evidence for the queried OncoTree code (and its ancestors) is
+  ## evidence for the query tumor's site, also when the code's site differs
+  biomarker_items <- oncokb_resolve_lineage_sites(
+    biomarker_items = biomarker_items,
+    primary_site = primary_site,
+    oncotree_lineage = oncotree_lineage)
+
+  ## Evidence items from sources not used for tier assignment (e.g. CGI when
+  ## OncoKB is run) are shown for tiered variants, but do not define tiers
+  tiering_items <- biomarker_items
+  if (NROW(biomarker_items) > 0 && length(sources_not_tiered) > 0) {
+    tiering_items <- biomarker_items |>
+      dplyr::filter(!(.data$BM_SOURCE_DB %in% sources_not_tiered))
+  }
+
   if (NROW(biomarker_items) == 0) {
     log4r_debug(
       paste0("No biomarker evidence items with specified confidence ",
@@ -141,7 +169,7 @@ assign_amp_asco_cap_tiers <- function(
   if (vartype == "snv_indel") {
 
     variants_tier_classified <- assign_variant_tiers_snv_indel(
-      biomarker_items = biomarker_items,
+      biomarker_items = tiering_items,
       biomarker_mapping_confidence = biomarker_mapping_confidence,
       var_df = var_df,
       etype_for_tiering = etype_for_tiering,
@@ -150,7 +178,7 @@ assign_amp_asco_cap_tiers <- function(
   }else{
     if (vartype == "cna") {
       variants_tier_classified <- assign_variant_tiers_cna(
-        biomarker_items = biomarker_items,
+        biomarker_items = tiering_items,
         biomarker_mapping_confidence = biomarker_mapping_confidence,
         var_df = var_df,
         etype_for_tiering = etype_for_tiering,
@@ -159,7 +187,16 @@ assign_amp_asco_cap_tiers <- function(
     }else{
       if (vartype == "fusion") {
         variants_tier_classified <- assign_variant_tiers_fusion(
-          biomarker_items = biomarker_items,
+          biomarker_items = tiering_items,
+          biomarker_mapping_confidence = biomarker_mapping_confidence,
+          var_df = var_df,
+          etype_for_tiering = etype_for_tiering,
+          primary_site = primary_site
+        )
+      }
+      if (vartype %in% c("msi", "tmb")) {
+        variants_tier_classified <- assign_variant_tiers_complex_biomarker(
+          biomarker_items = tiering_items,
           biomarker_mapping_confidence = biomarker_mapping_confidence,
           var_df = var_df,
           etype_for_tiering = etype_for_tiering,
@@ -210,6 +247,10 @@ assign_amp_asco_cap_tiers <- function(
     )
   }
 
+  biomarker_items <- set_bm_support_sources_not_tiered(
+    biomarker_items = biomarker_items,
+    sources_not_tiered = sources_not_tiered)
+
   results_amp_asco <- list()
   results_amp_asco[['bm_evidence']] <- list()
   #results_amp_asco[[]]
@@ -250,12 +291,22 @@ assign_amp_asco_cap_tiers <- function(
 
     if(NROW(biomarker_items) > 0 &
        NROW(variants_tier_classified) > 0){
+      ## variants need a matching-site item from a source used for tier
+      ## assignment - items from sources not used for tiering (e.g. CGI when
+      ## OncoKB is run) cannot keep a variant whose tier was set by evidence
+      ## from other sites only (which is not shown)
+      tiering_site_items <- biomarker_items |>
+        dplyr::filter(!(.data$BM_SOURCE_DB %in% sources_not_tiered))
       variants_tier_classified <- variants_tier_classified |>
         dplyr::filter(
-          .data$VAR_ID %in% biomarker_items$VAR_ID &
-            .data$ENTREZGENE %in% biomarker_items$ENTREZGENE &
-            .data$VARIANT_CLASS %in% biomarker_items$VARIANT_CLASS
+          .data$VAR_ID %in% tiering_site_items$VAR_ID &
+            .data$ENTREZGENE %in% tiering_site_items$ENTREZGENE &
+            .data$VARIANT_CLASS %in% tiering_site_items$VARIANT_CLASS
         )
+      biomarker_items <- biomarker_items |>
+        dplyr::semi_join(
+          variants_tier_classified,
+          by = c("VAR_ID", "VARIANT_CLASS"))
 
       ## log remaining rows in variants_tier_classified after filtering for primary site match
       # log4r_info(paste0(
@@ -403,10 +454,10 @@ assign_variant_tiers_cna <- function(
     only_colnames = FALSE, quiet = TRUE))
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0(
       "Argument 'primary_site' needs to be one of: ",
-      paste0(tumor_sites, collapse = ", ")))
+      paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   invisible(assertthat::assert_that(
@@ -472,15 +523,18 @@ assign_variant_tiers_cna <- function(
              "ENTREZGENE")) |>
 
     dplyr::mutate(
+      ## deleted tumor suppressors / amplified oncogenes without a tier
+      ## (both event types grouped, so that Tier 1/2 classifications are
+      ## not overridden)
       ACTIONABILITY_TIER = dplyr::if_else(
-        (!is.na(.data$TUMOR_SUPPRESSOR) &
-           .data$TUMOR_SUPPRESSOR == TRUE &
-           (.data$VARIANT_CLASS == "homdel" |
-              .data$VARIANT_CLASS == "hemdel" |
-              .data$VARIANT_CLASS == "hetdel")) |
-          (!is.na(.data$ONCOGENE) &
-             .data$ONCOGENE == TRUE &
-             .data$VARIANT_CLASS == "amplification") &
+        ((!is.na(.data$TUMOR_SUPPRESSOR) &
+            .data$TUMOR_SUPPRESSOR == TRUE &
+            (.data$VARIANT_CLASS == "homdel" |
+               .data$VARIANT_CLASS == "hemdel" |
+               .data$VARIANT_CLASS == "hetdel")) |
+           (!is.na(.data$ONCOGENE) &
+              .data$ONCOGENE == TRUE &
+              .data$VARIANT_CLASS == "amplification")) &
           is.na(.data$ACTIONABILITY_TIER),
         as.integer(3),
         as.integer(.data$ACTIONABILITY_TIER))) |>
@@ -549,9 +603,9 @@ assign_variant_tiers_fusion <- function(
     only_colnames = FALSE, quiet = TRUE))
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(tumor_sites, collapse = ", ")))
+                 paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   invisible(assertthat::assert_that(
@@ -613,18 +667,118 @@ assign_variant_tiers_fusion <- function(
       by = c("VAR_ID",
              "VARIANT_CLASS",
              "ENTREZGENE")) |>
+    ## fusions without a tier, with a proto-oncogene partner (5' or 3') and
+    ## recorded in the Mitelman DB
     dplyr::mutate(ACTIONABILITY_TIER = dplyr::if_else(
       is.na(.data$ACTIONABILITY_TIER) &
         ((!is.na(.data$ONCOGENE_3P) &
             .data$ONCOGENE_3P == TRUE) |
            (!is.na(.data$ONCOGENE_5P) &
-              .data$ONCOGENE_5P == TRUE) &
-           (!is.na(MITDB_NUM_EVIDENCE) &
-              .data$MITDB_NUM_EVIDENCE > 0)
-        ),
+              .data$ONCOGENE_5P == TRUE)) &
+        (!is.na(.data$MITDB_NUM_EVIDENCE) &
+           .data$MITDB_NUM_EVIDENCE > 0),
       as.integer(3),
       as.integer(.data$ACTIONABILITY_TIER)
     )) |>
+    dplyr::mutate(ACTIONABILITY_TIER = dplyr::if_else(
+      is.na(.data$ACTIONABILITY_TIER),
+      as.integer(5),
+      as.integer(.data$ACTIONABILITY_TIER))) |>
+    dplyr::arrange(.data$ACTIONABILITY_TIER) |>
+    dplyr::distinct() |>
+    dplyr::mutate(
+      ACTIONABILITY = dplyr::case_when(
+        ACTIONABILITY_TIER == 1 ~ "Strong significance",
+        ACTIONABILITY_TIER == 2 ~ "Potential significance",
+        ACTIONABILITY_TIER == 3 ~ "Uncertain significance",
+        TRUE ~ as.character(NA)
+      )
+    ) |>
+    dplyr::select(
+      c("VAR_ID",
+        "VARIANT_CLASS",
+        "ENTREZGENE",
+        "ACTIONABILITY_TIER",
+        "ACTIONABILITY")
+    )
+
+  return(variants_tier_classified)
+
+}
+
+#' AMP/ASCO/CAP tier classification for complex biomarkers (MSI-H, TMB-H)
+#'
+#' Assigns a tier of clinical significance to a complex biomarker (MSI-high
+#' or TMB-high), based exclusively on the strength and tumor type specificity
+#' of the biomarker evidence items (CIViC, OncoKB). The biomarker is not tied to
+#' a gene, and there are no variant properties to consider (as for e.g.
+#' oncogenes in fusion partners) - biomarkers without matching evidence are
+#' assigned tier 5.
+#'
+#' @param primary_site primary tumor site
+#' @param biomarker_mapping_confidence confidence level of biomarker mapping
+#' (e.g. 'high' or 'medium')
+#' @param var_df data frame with the biomarker record (VAR_ID, VARIANT_CLASS,
+#' ENTREZGENE)
+#' @param etype_for_tiering evidence type(s) used for tiering (e.g. 'predictive')
+#' @param biomarker_items data frame with biomarker evidence items
+#'
+#' @export
+assign_variant_tiers_complex_biomarker <- function(
+    primary_site = "Any",
+    biomarker_mapping_confidence = "medium",
+    var_df = NULL,
+    etype_for_tiering = c("predictive"),
+    biomarker_items = NULL) {
+
+  invisible(assertthat::assert_that(
+    !is.null(var_df) & is.data.frame(var_df),
+    msg = paste0("Argument var_df needs be of type data.frame")))
+
+  invisible(assertable::assert_colnames(
+    var_df, c("VAR_ID",
+              "VARIANT_CLASS",
+              "ENTREZGENE"),
+    only_colnames = FALSE, quiet = TRUE))
+
+  invisible(assertthat::assert_that(
+    primary_site %in% pcgrr::tumor_sites,
+    msg = paste0("Argument 'primary_site' needs to be one of: ",
+                 paste0(pcgrr::tumor_sites, collapse = ", ")))
+  )
+
+  invisible(assertthat::assert_that(
+    !is.null(biomarker_items) & is.data.frame(biomarker_items),
+    msg = paste0("Argument 'biomarker_items' needs be of type data.frame")))
+
+  variants_tier_classified <- data.frame()
+
+  if (primary_site != "Any") {
+    variants_tier_classified <- assign_variant_top_tiers_ttspecific(
+      biomarker_items = biomarker_items,
+      biomarker_mapping_confidence = biomarker_mapping_confidence,
+      var_df = var_df,
+      etype_for_tiering = etype_for_tiering,
+      primary_site = primary_site
+    )
+  }else{
+    variants_tier_classified <- assign_variant_top_tiers_ttagnostic(
+      biomarker_items = biomarker_items,
+      biomarker_mapping_confidence = biomarker_mapping_confidence,
+      var_df = var_df,
+      etype_for_tiering = etype_for_tiering
+    )
+  }
+
+  invisible(assertable::assert_colnames(
+    variants_tier_classified,
+    c("VAR_ID",
+      "VARIANT_CLASS",
+      "ENTREZGENE",
+      "ACTIONABILITY_TIER"),
+    only_colnames = TRUE, quiet = TRUE))
+
+  variants_tier_classified <- variants_tier_classified |>
     dplyr::mutate(ACTIONABILITY_TIER = dplyr::if_else(
       is.na(.data$ACTIONABILITY_TIER),
       as.integer(5),
@@ -698,9 +852,9 @@ assign_variant_tiers_snv_indel <- function(
     only_colnames = FALSE, quiet = TRUE))
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(tumor_sites, collapse = ", ")))
+                 paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   invisible(assertthat::assert_that(
@@ -856,8 +1010,8 @@ assign_variant_top_tiers_ttagnostic <- function(
     etype_for_tiering = c("predictive")) {
 
   valid_etypes <-
-    bm_evidence$types[
-      !bm_evidence$types %in% c("oncogenic","functional")]
+    pcgrr::bm_evidence$types[
+      !pcgrr::bm_evidence$types %in% c("oncogenic","functional")]
 
   invisible(assertthat::assert_that(
     is.character(etype_for_tiering),
@@ -952,7 +1106,7 @@ assign_variant_top_tiers_ttagnostic <- function(
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL,
-            bm_evidence$strong_regex
+            pcgrr::bm_evidence$strong_regex
           ) ~ as.integer(1),
 
         ## A) Biomarker site is _NOT_ pan-cancer ('Any')
@@ -963,7 +1117,7 @@ assign_variant_top_tiers_ttagnostic <- function(
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL,
-            bm_evidence$strong_regex
+            pcgrr::bm_evidence$strong_regex
           ) ~ as.integer(2),
 
         ## A) weak evidence - evidence levels (C/D/E)
@@ -973,7 +1127,7 @@ assign_variant_top_tiers_ttagnostic <- function(
         tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL,
-            bm_evidence$weak_regex
+            pcgrr::bm_evidence$weak_regex
           ) ~ as.integer(3),
         TRUE ~ as.integer(100)
 
@@ -1062,9 +1216,9 @@ assign_variant_top_tiers_ttspecific <- function(
     primary_site = "Lung") {
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(tumor_sites, collapse = ", ")))
+                 paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   ## check that primary_site is not 'Any' for tumor-specific tiering function
@@ -1075,8 +1229,8 @@ assign_variant_top_tiers_ttspecific <- function(
 
 
   valid_etypes <-
-    bm_evidence$types[
-      !bm_evidence$types %in% c("oncogenic","functional")]
+    pcgrr::bm_evidence$types[
+      !pcgrr::bm_evidence$types %in% c("oncogenic","functional")]
 
   invisible(assertthat::assert_that(
     is.character(etype_for_tiering),
@@ -1173,7 +1327,7 @@ assign_variant_top_tiers_ttspecific <- function(
            .data$BM_PRIMARY_SITE == 'Any') &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, bm_evidence$strong_regex
+            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$strong_regex
           ) ~ as.integer(1),
 
         ## A) Biomarker site _does not_ match primary site of query tumor
@@ -1184,7 +1338,7 @@ assign_variant_top_tiers_ttspecific <- function(
            .data$BM_PRIMARY_SITE != "Any") &
            tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
            stringr::str_detect(
-             .data$BM_EVIDENCE_LEVEL, bm_evidence$strong_regex
+             .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$strong_regex
            ) ~ as.integer(2),
 
         ## A) Biomarker site _matches_ primary site of query tumor
@@ -1193,7 +1347,7 @@ assign_variant_top_tiers_ttspecific <- function(
         .data$BM_PRIMARY_SITE == primary_site &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex
+            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex
           ) ~ as.integer(2),
 
         ## A) Biomarker site _does not_ match primary site of query tumor
@@ -1204,7 +1358,7 @@ assign_variant_top_tiers_ttspecific <- function(
            .data$BM_PRIMARY_SITE != "Any" &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex
+            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex
           ) ~ as.integer(3),
 
         ## A) Pan-cancer biomarker (BM_PRIMARY_SITE = 'Any')
@@ -1214,7 +1368,7 @@ assign_variant_top_tiers_ttspecific <- function(
         .data$BM_PRIMARY_SITE == "Any" &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex
+            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex
           ) ~ as.integer(3),
 
         TRUE ~ as.integer(100)
@@ -1318,15 +1472,15 @@ assign_bm_tier_support_ttspecific <- function(
   invisible(
     assertthat::assert_that(
       !is.null(vartype) & is.character(vartype),
-      vartype %in% c("snv_indel", "cna", "fusion"),
+      vartype %in% c("snv_indel", "cna", "fusion", "msi", "tmb"),
       msg = paste0("Argument 'vartype' needs to be one of
-                   'snv_indel', 'cna' or 'fusion'"))
+                   'snv_indel', 'cna', 'fusion', 'msi' or 'tmb'"))
   )
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(tumor_sites, collapse = ", ")))
+                 paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   ## check that primary_site is not 'Any' for tumor-specific tiering function
@@ -1550,9 +1704,9 @@ assign_bm_tier_support_ttagnostic <- function(
   invisible(
     assertthat::assert_that(
       !is.null(vartype) & is.character(vartype),
-      vartype %in% c("snv_indel", "cna", "fusion"),
+      vartype %in% c("snv_indel", "cna", "fusion", "msi", "tmb"),
       msg = paste0("Argument 'vartype' needs to be one of
-                   'snv_indel', 'cna' or 'fusion'"))
+                   'snv_indel', 'cna', 'fusion', 'msi' or 'tmb'"))
   )
 
   invisible(assertthat::assert_that(
@@ -1666,4 +1820,43 @@ assign_bm_tier_support_ttagnostic <- function(
 
   return(biomarker_items)
 
+}
+
+
+#' Evidence items from sources that are not used for tier assignment
+#'
+#' Evidence items from sources not used for tier assignment (e.g. CGI when
+#' OncoKB is run) are kept as additional support for variants with a tier
+#' (assigned from the other sources), and dropped for variants without a tier.
+#'
+#' @param biomarker_items data frame with biomarker evidence items, with
+#' ACTIONABILITY_TIER and BM_ACTIONABILITY_SUPPORT assigned
+#' @param sources_not_tiered biomarker sources (BM_SOURCE_DB) not used for
+#' tier assignment
+#' @return data frame with biomarker evidence items
+#'
+#' @export
+#'
+set_bm_support_sources_not_tiered <- function(
+    biomarker_items = NULL,
+    sources_not_tiered = NULL) {
+
+  if (NROW(biomarker_items) == 0 ||
+      length(sources_not_tiered) == 0 ||
+      !all(c("BM_SOURCE_DB", "ACTIONABILITY_TIER", "BM_ACTIONABILITY_SUPPORT") %in%
+           colnames(biomarker_items))) {
+    return(biomarker_items)
+  }
+
+  not_tiered <- biomarker_items$BM_SOURCE_DB %in% sources_not_tiered
+  biomarker_items <- biomarker_items[
+    !(not_tiered & is.na(biomarker_items$ACTIONABILITY_TIER)), , drop = FALSE]
+  not_tiered <- biomarker_items$BM_SOURCE_DB %in% sources_not_tiered
+  ## 'other': e.g. strong pan-cancer evidence for a variant with a tier 2
+  ## from the other sources, which the support rules do not cover
+  not_additional <- !is.na(biomarker_items$BM_ACTIONABILITY_SUPPORT) &
+    biomarker_items$BM_ACTIONABILITY_SUPPORT %in% c("tier-defining", "other")
+  biomarker_items$BM_ACTIONABILITY_SUPPORT[not_tiered & not_additional] <- "additional"
+
+  biomarker_items
 }

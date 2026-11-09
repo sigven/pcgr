@@ -1,0 +1,105 @@
+## HRD status {#pcgr-hrd}
+
+Homologous recombination deficiency (HRD) is the result of impaired repair of DNA double-strand breaks by homologous recombination (e.g. through biallelic inactivation of *BRCA1* or *BRCA2*), and leaves characteristic scars and mutational patterns in the tumor genome. HRD is of clinical significance particularly in ovarian, breast, prostate and pancreatic cancers, where it is associated with sensitivity to PARP inhibitors and platinum-based chemotherapy.
+
+```{r hrd_pdf_external}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(pcg_report$content$hrd$external$eval)
+
+hrd_ext_pdf <- pcgrr::hrd_external_display(pcg_report$content$hrd)
+cat("### HRD status from external assay/tool\n\n")
+cat("The HRD status below was determined by an external HRD assay/tool (**",
+    hrd_ext_pdf$caller, "**), and provided as input to PCGR. Type of score: **",
+    hrd_ext_pdf$score_type_label, "**.\n\n", sep = "")
+
+col_status_hrd <- if (hrd_ext_pdf$status == "Indeterminate")
+  pcgrr::color_palette$warning else if (hrd_ext_pdf$status == "HR-deficient")
+  pcgrr::color_palette$oncogenicity$values[1] else NULL
+cat(pcgrr:::pdf_kpi_row(list(
+  list(title = "HRD status", value = hrd_ext_pdf$status, color = col_status_hrd),
+  list(title = hrd_ext_pdf$score_title, value = hrd_ext_pdf$score_value),
+  list(title = "HRD assay/tool", value = hrd_ext_pdf$caller))))
+if (length(hrd_ext_pdf$components) > 0) {
+  cat(pcgrr:::pdf_kpi_row(lapply(names(hrd_ext_pdf$components), function(nm) {
+    list(title = nm, value = as.character(hrd_ext_pdf$components[[nm]]),
+         color = "#868e96")
+  })))
+}
+
+cat("\n\n", hrd_ext_pdf$basis_note, "\n\n", sep = "")
+if (!is.na(hrd_ext_pdf$internal_note)) {
+  cat(pcgrr:::pdf_note(paste0(hrd_ext_pdf$internal_note, " See below for details."),
+    title = "PCGR genomic scar score"))
+}
+```
+
+```{r hrd_pdf_internal}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(pcg_report$content$hrd$internal_eval)
+
+cna_conf_pdf <- pcg_report$settings$conf$somatic_cna
+site_pdf <- pcg_report$settings$conf$sample_properties$site
+genome_doubled_pdf <- isTRUE(as.logical(cna_conf_pdf$genome_doubled))
+cat("### Genomic scar (HRD) score\n\n")
+cat("The genomic scar score estimated by PCGR (the HRD score) is the **sum of three genomic scar measures** derived ",
+    "from the allele-specific copy number segments (autosomes only, ",
+    "following the scarHRD algorithm): **HRD-LOH** (loss-of-heterozygosity ",
+    "regions > 15 Mb not spanning a whole chromosome), **LST** (large-scale ",
+    "state transitions between adjacent regions of at least 10 Mb) ",
+    "[@Popova2012-yi], and ",
+    "**TAI** (telomeric allelic imbalance).\n\n", sep = "")
+cat(pcgrr:::pdf_kpi_row(list(
+  list(title = "HRD-LOH", value = as.character(cna_conf_pdf$hrd_loh),
+       color = "#868e96"),
+  list(title = "LST", value = as.character(cna_conf_pdf$hrd_lst),
+       color = "#868e96"),
+  list(title = "TAI", value = as.character(cna_conf_pdf$hrd_tai),
+       color = "#868e96"),
+  list(title = "HRD score (sum)", value = as.character(cna_conf_pdf$hrd_sum)))))
+cat("A higher score means more genomic scarring and a higher likelihood of ",
+    "HRD; scores typically range from 0 to about 100 in TCGA tumors. A score ",
+    "of 42 or above is the established cutoff for HRD-positive tumors in ",
+    "ovarian cancer only [@Lenz2023-sp]; no cutoff has been validated in ",
+    "other cancer types [@Marquard2015-pg].",
+    "\n\n", sep = "")
+interp <- if (site_pdf == "Ovary/Fallopian Tube") {
+  list(title = "Interpretation (ovarian cancer)", kind = "note", text = paste0(
+    "In ovarian cancer, a score of 42 or above is the threshold of the ",
+    "Myriad myChoice CDx assay (FDA-approved companion diagnostic) for ",
+    "HRD-positive tumors [@Lenz2023-sp]. Thresholds have not been formally ",
+    "established for sequencing-derived scores [@Rempel2022-xk]. **For research use only - not a validated ",
+    "diagnostic measure.**"))
+} else if (site_pdf == "Breast") {
+  list(title = "Interpretation (breast cancer)", kind = "note", text = paste0(
+    "In triple-negative breast cancer, HRD (score >= 42 or BRCA1/2 ",
+    "mutation) was associated with response to platinum-based neoadjuvant ",
+    "therapy [@Telli2016-hr]; in ER-positive breast cancer, the ovarian ",
+    "cancer thresholds do not appear appropriate [@Lenz2023-sp]. The breast cancer subtype is not taken into ",
+    "account here. **For research use only - not a validated diagnostic ",
+    "measure.**"))
+} else {
+  list(title = paste0("Caution - interpretation (", site_pdf, ")"),
+       kind = "warning", text = paste0(
+    "Genomic scar scores have not been validated as markers of HRD outside ",
+    "ovarian cancer and triple-negative breast cancer [@Marquard2015-pg]. ",
+    "The score separates tumors with biallelic BRCA1/2 inactivation well, ",
+    "but tumors with monoallelic alterations poorly, and should be ",
+    "interpreted together with the mutational status of HRR genes ",
+    "[@Rempel2022-xk]. Scar measures are also influenced by ploidy ",
+    "[@Popova2012-yi]. A high score should not, on its own, be ",
+    "interpreted as evidence of HRD or of sensitivity to PARP inhibitors. ",
+    "**For research use only.**"))
+}
+cat(pcgrr:::pdf_note(interp$text, title = interp$title, kind = interp$kind))
+if (genome_doubled_pdf) {
+  cat(pcgrr:::pdf_note(paste0(
+    "This tumor is classified as having undergone whole-genome doubling (",
+    round(100 * as.numeric(cna_conf_pdf$wgd_fraction)), "% of the autosomal ",
+    "genome has a major allele copy number of two or more) ",
+    "[@Bielski2018-pz]. Ploidy ",
+    "influences the scar measures - interpret the HRD score with caution."),
+    title = "Caution - genome doubling", kind = "warning"))
+}
+```

@@ -12,15 +12,15 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software workflow fo
 - Multi-omic data interpretation
 - Variant classification
   - according to *oncogenicity*: evaluating the oncogenic potential of somatic DNA aberrations ([ClinGen/CGC/VICC guidelines](https://pubmed.ncbi.nlm.nih.gov/35101336/))
-  - according to *actionability*: mapping the therapeutic, diagnostic, and prognostic implications of somatic DNA aberrations ([AMP/ASCO/CAP guidelines](https://pubmed.ncbi.nlm.nih.gov/27993330/))
+  - according to *actionability*: prioritizing therapeutic options related to somatic DNA aberrations ([AMP/ASCO/CAP guidelines](https://pubmed.ncbi.nlm.nih.gov/27993330/))
 - Tumor mutational burden (TMB) estimation
 - Mutational signature analysis
-- Microsatellite instability (MSI) classification
+- Microsatellite instability (MSI) and homologous recombination deficiency (HRD) assessment
 - RNA-seq support - gene expression outlier detection, sample similarity analysis, and immune contexture profiling
 
 PCGR supports both of the most recent human genome assemblies (GRCh37/GRCh38), and accepts variant calls from both tumor-control and tumor-only sequencing assays. Much of the functionality is intended for whole-exome/whole-genome sequencing assays, but you can also apply PCGR to output from targeted sequencing panels. If you are interested in the interrogation of germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).
 
-Seven snapshots of sections in the [quarto](https://quarto.org)-based cancer genome report by PCGR (artificial sample, with more findings than usual):
+Snapshots of sections in the [quarto](https://quarto.org)-based HTML report by PCGR, followed by pages from the accompanying PDF report (artificial colorectal tumor sample, with more findings than usual):
 
 <br><br>
 
@@ -28,20 +28,28 @@ Seven snapshots of sections in the [quarto](https://quarto.org)-based cancer gen
 <div class="carousel-inner">
 <div class="carousel-item active"><img src="img/pcgr_oncogenicity.png" class="d-block w-100" alt="Variant classification - oncogenicity"></div>
 <div class="carousel-item"><img src="img/pcgr_actionability.png" class="d-block w-100" alt="Clinical actionability classification"></div>
-<div class="carousel-item"><img src="img/pcgr_cna.png" class="d-block w-100" alt="Somatic CNAs"></div>
-<div class="carousel-item"><img src="img/pcgr_tmb.png" class="d-block w-100" alt="Tumor mutational burden"></div>
-<div class="carousel-item"><img src="img/pcgr_expression_outliers.png" class="d-block w-100" alt="Gene expression outliers"></div>
 <div class="carousel-item"><img src="img/pcgr_variant_stats.png" class="d-block w-100" alt="Variant statistics"></div>
+<div class="carousel-item"><img src="img/pcgr_cna.png" class="d-block w-100" alt="Somatic CNAs"></div>
 <div class="carousel-item"><img src="img/pcgr_rna_fusions.png" class="d-block w-100" alt="Somatic RNA fusions"></div>
+<div class="carousel-item"><img src="img/pcgr_mutational_signatures.png" class="d-block w-100" alt="Mutational signatures"></div>
+<div class="carousel-item"><img src="img/pcgr_msi.png" class="d-block w-100" alt="MSI status"></div>
+<div class="carousel-item"><img src="img/pcgr_tmb.png" class="d-block w-100" alt="Tumor mutational burden"></div>
+<div class="carousel-item"><img src="img/pcgr_expression_similarity.png" class="d-block w-100" alt="Gene expression - similarity to other tumor samples"></div>
+<div class="carousel-item"><img src="img/pcgr_expression_outliers.png" class="d-block w-100" alt="Gene expression outliers"></div>
+<div class="carousel-item"><img src="img/pcgr_pdf_report.png" class="d-block w-100" alt="PDF report - key findings, clinical actionability, composite biomarkers"></div>
 </div>
 <div class="carousel-indicators">
 <button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Variant classification - oncogenicity"></button>
 <button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="1" aria-label="Clinical actionability classification"></button>
-<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="2" aria-label="Somatic CNAs"></button>
-<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="3" aria-label="Tumor mutational burden"></button>
-<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="4" aria-label="Gene expression outliers"></button>
-<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="5" aria-label="Variant statistics"></button>
-<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="6" aria-label="Somatic RNA fusions"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="2" aria-label="Variant statistics"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="3" aria-label="Somatic CNAs"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="4" aria-label="Somatic RNA fusions"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="5" aria-label="Mutational signatures"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="6" aria-label="MSI status"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="7" aria-label="Tumor mutational burden"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="8" aria-label="Gene expression - similarity to other tumor samples"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="9" aria-label="Gene expression outliers"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="10" aria-label="PDF report"></button>
 </div>
 </div>
 <script>
@@ -52,9 +60,33 @@ bootstrap.Carousel.getOrCreateInstance(document.getElementById('pcgrCarousel')).
 
 <br><br>
 
-PCGR originates from the [Institute for Cancer Research, Oslo University Hospital, Norway](https://radium.no).
+<hr>
+
+<table>
+<tr>
+<td valign="middle" style="padding:16px">
+<b>PCGR originates from</b> the <a href="https://ous-research.no/tumorbiology/">Department of Tumor Biology</a>, <a href="https://radium.no">Institute for Cancer Research</a>, Oslo University Hospital, Norway.
+</td>
+<td align="center" valign="middle" width="240" style="padding:16px">
+<a href="https://ous-research.no/tumorbiology/"><img src="img/ous_logo.png" width="200" alt="Oslo University Hospital"/></a>
+</td>
+</tr>
+</table>
 
 ### Top News
+
+- *November 10th 2026*: **2.4.0 release**
+  - Data/software updates:
+    - Ensembl VEP `v116.3` / GENCODE v50
+    - ClinVar (2026-11)
+    - CIViC (2026-11-05)
+    - and more
+  - Focused PDF report generated by default (opt out with `--no_pdf`)
+  - Key findings highlighted (HTML and PDF)
+  - Results from external MSI callers (`--input_msi`) and HRD assays/tools (`--input_hrd`) can be provided
+  - Optional HRD genomic scar score (`--estimate_hrd`, research use only)
+  - TMB-high threshold (`--tmb_high_threshold`), with biomarker evidence for MSI-high and TMB-high tumors
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
 - *August 10th 2026*: **2.3.2 release**
   - patch to fix [issue #300](https://github.com/sigven/pcgr/issues/300) and
@@ -136,7 +168,7 @@ PCGR originates from the [Institute for Cancer Research, Oslo University Hospita
 
 ## Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20795653.svg)](https://doi.org/10.5281/zenodo.20795653)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4022111.svg)](https://doi.org/10.5281/zenodo.4022111)
 
 ## Why use PCGR?
 
@@ -172,6 +204,40 @@ If you use PCGR or CPSR, please cite our publications:
 Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Myklebost, and Eivind Hovig. **Personal Cancer Genome Reporter: variant interpretation report for precision oncology** (2017). *Bioinformatics*. 34(10):1778--1780. [doi.org/10.1093/bioinformatics/btx817](https://doi.org/10.1093/bioinformatics/btx817)
 
 Sigve Nakken, Vladislav Saveliev, Oliver Hofmann, Pål Møller, Ola Myklebost, and Eivind Hovig. **Cancer Predisposition Sequencing Reporter (CPSR): a flexible variant report engine for high-throughput germline screening in cancer** (2021). *Int J Cancer*. [doi:[10.1002/ijc.33749](doi:%5B10.1002/ijc.33749)](https://doi.org/10.1002/ijc.33749)
+
+
+## Acknowledgements
+
+The development of PCGR benefits from ongoing collaborations with the following research groups:
+
+<table>
+<tr>
+<td valign="middle" style="padding:16px">
+<b>Hofmann group</b> (<a href="https://genomic-cancer-medicine.unimelb.edu.au/">Collaborative Centre for Genomic Cancer Medicine</a>, University of Melbourne and Peter MacCallum Cancer Centre)<br>
+<i>Peter Diakumis, Oliver Hofmann</i>
+<ul>
+<li>Software structure and design, Conda environment setup, containerised deployment (Docker, Singularity), GH workflows</li>
+</ul>
+</td>
+<td align="center" valign="middle" width="150" style="padding:16px">
+<a href="https://www.unimelb.edu.au/"><img src="img/unimelb_logo.svg" width="60" alt="University of Melbourne"/></a><br><br>
+<a href="https://www.petermac.org/"><img src="img/petermac_logo.png" width="120" alt="Peter MacCallum Cancer Centre"/></a>
+</td>
+</tr>
+<tr>
+<td valign="middle" style="padding:16px">
+<b>Pietiäinen group</b> (<a href="https://www.fimm.fi/">Institute for Molecular Medicine Finland (FIMM)</a>, University of Helsinki, and the <a href="https://ican.fi/">iCAN Digital Precision Cancer Medicine Flagship</a>)<br>
+<i>Tamara Luck, Romika Kumari, Vilja Pietiäinen</i>
+<ul>
+<li>RNA fusion handling, CNA analysis, general feature improvements</li>
+</ul>
+</td>
+<td align="center" valign="middle" width="150" style="padding:16px">
+<a href="https://www.fimm.fi/"><img src="img/FiMM_HiLIFE_UNIT_rgb_black.png" width="90" alt="FIMM"/></a><br><br>
+<a href="https://ican.fi/"><img src="img/iCAN-LOGO-HORIZONTAL-BLUE.png" width="120" alt="iCAN"/></a>
+</td>
+</tr>
+</table>
 
 
 ## Contact

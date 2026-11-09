@@ -21,7 +21,7 @@ extract_prognostic_evidence(
 
 \item{alteration}{Alteration description}
 
-\item{vartype}{Variant type (e.g., "snv_indel", "fusion", "cna")
+\item{vartype}{Variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb")
 (e.g., HGVSp short format for SNVs/InDels)}
 
 \item{oncotree_code}{OncoTree code for tumor type

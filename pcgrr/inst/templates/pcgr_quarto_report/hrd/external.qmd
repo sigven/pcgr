@@ -1,0 +1,73 @@
+```{r hrd_external_prep}
+#| echo: false
+#| output: asis
+
+hrd_ext <- pcgrr::hrd_external_display(pcg_report$content$hrd)
+
+cat("The HRD status below was determined by an external HRD assay/tool (__",
+    hrd_ext$caller, "__), and provided as input to PCGR. Type of score: __",
+    hrd_ext$score_type_label, "__.\n\n", sep = "")
+
+hrd_status_theme <- "dark"
+if (hrd_ext$status == "Indeterminate") {
+  hrd_status_theme <-
+    bslib::value_box_theme(bg = pcgrr::color_palette$warning, fg = "#000000")
+}
+```
+
+```{r hrd_external_boxes}
+#| echo: false
+
+bslib::layout_columns(
+  col_widths = c(4, 4, 4),
+  height = "110px",
+  bslib::value_box(
+    title = "HRD status",
+    value = hrd_ext$status,
+    showcase = NULL,
+    theme = hrd_status_theme
+  ),
+  bslib::value_box(
+    title = hrd_ext$score_title,
+    value = hrd_ext$score_value,
+    showcase = NULL,
+    theme = "dark"
+  ),
+  bslib::value_box(
+    title = "HRD assay/tool",
+    value = hrd_ext$caller,
+    showcase = NULL,
+    theme = "dark"
+  )
+)
+```
+
+```{r hrd_external_components}
+#| echo: false
+#| eval: !expr length(hrd_ext$components) > 0
+
+## genomic scar components (if given), in a toned-down style
+component_theme <- bslib::value_box_theme(bg = "#ced4da", fg = "#212529")
+do.call(
+  bslib::layout_columns,
+  c(list(col_widths = rep(4, length(hrd_ext$components)), height = "90px"),
+    lapply(names(hrd_ext$components), function(nm) {
+      bslib::value_box(
+        title = nm, value = hrd_ext$components[[nm]],
+        showcase = NULL, theme = component_theme)
+    })))
+```
+
+```{r hrd_external_notes}
+#| echo: false
+#| output: asis
+
+cat("\n\n", hrd_ext$basis_note, "\n\n", sep = "")
+
+if (!is.na(hrd_ext$internal_note)) {
+  cat("::: {.callout-note}\n**PCGR genomic scar score**\n\n",
+      hrd_ext$internal_note, " See the tab \"", hrd_tab_int, "\" for details.",
+      "\n:::\n\n", sep = "")
+}
+cat("<br>\n\n")
+```

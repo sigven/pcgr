@@ -40,7 +40,7 @@ load_somatic_cna <- function(
   )
 
   compulsary_cols <-
-    names(data_coltype_defs$cna_somatic_segment_raw$cols)
+    names(pcgrr::data_coltype_defs$cna_somatic_segment_raw$cols)
 
   raw_col_check <-
     rlang::has_name(segments_raw, compulsary_cols)
@@ -58,7 +58,7 @@ load_somatic_cna <- function(
       readr::read_tsv(
         file = fname_cna_segment,
         col_types =
-          data_coltype_defs$cna_somatic_segment_raw$cols,
+          pcgrr::data_coltype_defs$cna_somatic_segment_raw$cols,
         na = c(".","NA"),
         progress = F
       )
@@ -90,7 +90,7 @@ load_somatic_cna <- function(
 
   callset_cna <- load_dna_variants(
     fname = fname_cna_gene,
-    cols = data_coltype_defs$cna_somatic_gene_raw,
+    cols = pcgrr::data_coltype_defs$cna_somatic_gene_raw,
     ref_data = ref_data,
     settings = settings,
     vartype = 'cna',
@@ -154,6 +154,10 @@ load_somatic_cna <- function(
       append_annotation_links(
         vartype = "cna"
       ) |>
+      dplyr::mutate(
+        dplyr::across(
+          dplyr::any_of(c("ENSEMBL_TRANSCRIPT_ID", "REFSEQ_TRANSCRIPT_ID")),
+          ~ dplyr::if_else(is.na(.x), "", as.character(.x)))) |>
       tidyr::unite(
         "TRANSCRIPT_OVERLAP",
         c("ENSEMBL_TRANSCRIPT_ID",
@@ -213,7 +217,7 @@ load_somatic_snv_indel <- function(
 
   callset <- load_dna_variants(
     fname = fname,
-    cols = data_coltype_defs$snv_indel_somatic_raw,
+    cols = pcgrr::data_coltype_defs$snv_indel_somatic_raw,
     ref_data = ref_data,
     settings = settings,
     vartype = 'snv_indel',
@@ -263,6 +267,14 @@ load_somatic_snv_indel <- function(
     exclude_non_chrom_variants() |>
     filter_read_support(config = settings$conf)
 
+  ## filtering summaries for the variant filtering section of the reports:
+  ## depth/allelic support filtering (all assays), and - for tumor-only
+  ## input - actionable variants filtered as likely germline (below)
+  callset[['filtering']] <- list(
+    read_support = attr(callset[['variant']], "read_support_filtering"),
+    actionable_germline = data.frame())
+  attr(callset[['variant']], "read_support_filtering") <- NULL
+
 
   ## Tumor-only input
   if (as.logical(settings$conf$assay_properties$vcf_tumor_only) == TRUE) {
@@ -299,6 +311,13 @@ load_somatic_snv_indel <- function(
               .data$SOMATIC_CLASSIFICATION != "SOMATIC")
 
         if (NROW(actionable_filtered) > 0) {
+          callset[['filtering']][['actionable_germline']] <-
+            actionable_filtered |>
+            dplyr::select(dplyr::any_of(
+              c("VAR_ID", "SYMBOL", "ALTERATION", "CONSEQUENCE", "HGVSP",
+                "ACTIONABILITY_TIER", "SOMATIC_CLASSIFICATION",
+                "VAF_TUMOR", "DP_TUMOR", "gnomADe_AF"))) |>
+            dplyr::distinct()
           log4r_warn(
             paste0(
               "A total of n = ", NROW(actionable_filtered),
@@ -561,10 +580,11 @@ load_cpsr_classified_variants <- function(
 
   if (NROW(callset[['variant_display']]) > 0) {
     callset[['variant_display']] <- callset[['variant_display']] |>
-      dplyr::filter((.data$CLINICAL_SIGNIFICANCE == "Pathogenic" |
-                      .data$CLINICAL_SIGNIFICANCE == "Likely Pathogenic" |
-                      .data$CLINICAL_SIGNIFICANCE == "VUS") &
-                      .data$CODING_STATUS == "coding")|>
+      dplyr::filter(
+        .data$CLINICAL_SIGNIFICANCE == "Pathogenic" |
+        .data$CLINICAL_SIGNIFICANCE == "Likely Pathogenic" |
+        (.data$CLINICAL_SIGNIFICANCE == "VUS" &
+           .data$CODING_STATUS == "coding")) |>
       dplyr::distinct()
     if (ignore_vus == TRUE) {
       callset[['variant_display']] <- callset[['variant_display']] |>
@@ -916,6 +936,8 @@ load_dna_variants <- function(
               settings$conf$oncokb$api_token,
             oncotree_code =
               settings$conf$oncokb$oncotree_code,
+            all_tumor_types =
+              isTRUE(settings$conf$oncokb$all_tumor_types == 1),
             var_calls = results[['variant']])
 
         if(NROW(oncokb_results$eitems) > 0){
@@ -957,6 +979,8 @@ load_dna_variants <- function(
               settings$conf$oncokb$api_token,
             oncotree_code =
               settings$conf$oncokb$oncotree_code,
+            all_tumor_types =
+              isTRUE(settings$conf$oncokb$all_tumor_types == 1),
             var_calls = results[['variant']])
 
         if(NROW(oncokb_results$eitems) > 0){
@@ -979,7 +1003,7 @@ load_dna_variants <- function(
                " - somatic actionability guidelines (AMP/ASCO/CAP)"))
 
       amp_asco_cap_classified_variant <- list()
-      for (clnsig in names(bm_categories)) {
+      for (clnsig in names(pcgrr::bm_categories)) {
         amp_asco_cap_classified_variant[[clnsig]] <-
           assign_amp_asco_cap_tiers(
             vartype = vartype,
@@ -988,11 +1012,15 @@ load_dna_variants <- function(
             clinical_significance = clnsig,
             biomarker_mapping_confidence = "medium",
             biomarker_items =
-              results$bm_evidence$eitems
+              results$bm_evidence$eitems,
+            oncotree_lineage =
+              settings$conf$oncokb$oncotree_lineage,
+            sources_not_tiered =
+              biomarker_sources_not_tiered(settings)
           )
       }
 
-      for (clnsig in names(bm_categories)) {
+      for (clnsig in names(pcgrr::bm_categories)) {
         for (elem in c("classification",
                        "eitems")) {
           if(!is.null(amp_asco_cap_classified_variant[[clnsig]]$bm_evidence[[elem]])){
@@ -1334,7 +1362,7 @@ load_rna_fusions <- function(
   ## check that all columns are present among columns
   ## read from file
   compulsary_cols <-
-    names(data_coltype_defs$rna_fusion_raw$cols)
+    names(pcgrr::data_coltype_defs$rna_fusion_raw$cols)
 
   raw_col_check <-
     rlang::has_name(rna_fusion_calls_raw, compulsary_cols)
@@ -1347,7 +1375,7 @@ load_rna_fusions <- function(
              paste(missing_cols, collapse=", ")))
   }
 
-  cols_including_optional <- data_coltype_defs$rna_fusion_raw
+  cols_including_optional <- pcgrr::data_coltype_defs$rna_fusion_raw
   if ("FUSION_SCORE" %in% colnames(rna_fusion_calls_raw)) {
     score_col <- readr::cols_only(
       FUSION_SCORE = readr::col_number())
@@ -1379,7 +1407,7 @@ load_rna_fusions <- function(
         "VAR_ID",
         "VARIANT_CLASS",
         dplyr::any_of(
-          oncokb_annotations
+          pcgrr::oncokb_annotations
         )
       )
     }
@@ -1907,7 +1935,18 @@ load_rna_fusions <- function(
       dplyr::mutate(num_sort = as.numeric(
         stringr::str_extract(.data$VAR_ID, "\\d+"))) |>
       dplyr::arrange(.data$num_sort) |>
-      dplyr::select(-c("num_sort"))
+      dplyr::select(-c("num_sort")) |>
+      ## fusion name with partners revealed from the breakpoints
+      ## (e.g. '--ALK' -> 'EML4::ALK')
+      dplyr::mutate(
+        FUSION_GENE2 = paste0(
+          dplyr::coalesce(
+            as.character(.data$FUSION_GENE_5P),
+            stringr::str_extract(.data$FUSION_GENE2, "^[^:]*")),
+          "::",
+          dplyr::coalesce(
+            as.character(.data$FUSION_GENE_3P),
+            stringr::str_extract(.data$FUSION_GENE2, "[^:]*$"))))
 
 
     if (NROW(results[['variant']]) == 0) {
@@ -2112,6 +2151,8 @@ load_rna_fusions <- function(
               settings$conf$oncokb$api_token,
             oncotree_code =
               settings$conf$oncokb$oncotree_code,
+            all_tumor_types =
+              isTRUE(settings$conf$oncokb$all_tumor_types == 1),
             var_calls = results[['variant']])
 
         if(NROW(oncokb_results$eitems) > 0){
@@ -2131,8 +2172,8 @@ load_rna_fusions <- function(
              " - somatic actionability guidelines (AMP/ASCO/CAP)"))
 
     amp_asco_cap_classified_variant <- list()
-    for (clnsig in names(bm_categories)) {
-      etype_for_tiering <- bm_categories[[clnsig]]$etype
+    for (clnsig in names(pcgrr::bm_categories)) {
+      etype_for_tiering <- pcgrr::bm_categories[[clnsig]]$etype
       amp_asco_cap_classified_variant[[clnsig]] <-
         assign_amp_asco_cap_tiers(
           vartype = "fusion",
@@ -2141,11 +2182,15 @@ load_rna_fusions <- function(
           clinical_significance = clnsig,
           biomarker_mapping_confidence = "medium",
           biomarker_items =
-            results$bm_evidence$eitems
+            results$bm_evidence$eitems,
+          oncotree_lineage =
+            settings$conf$oncokb$oncotree_lineage,
+          sources_not_tiered =
+            biomarker_sources_not_tiered(settings)
         )
     }
 
-    for (clnsig in names(bm_categories)) {
+    for (clnsig in names(pcgrr::bm_categories)) {
       for (elem in c("classification",
                     "eitems")) {
         results$bm_evidence[[clnsig]][[elem]] <-
@@ -2168,11 +2213,11 @@ load_rna_fusions <- function(
       }
     }
 
-    OTP_GENE_URL <- variant_db_url[
-      which(variant_db_url[,"name"] == "GENENAME"),"url_prefix"]
+    OTP_GENE_URL <- pcgrr::variant_db_url[
+      which(pcgrr::variant_db_url[,"name"] == "GENENAME"),"url_prefix"]
 
-    ENSEMBL_GENE_URL <- variant_db_url[
-      which(variant_db_url[,"name"] == "ENSEMBL_GENE_ID"),"url_prefix"]
+    ENSEMBL_GENE_URL <- pcgrr::variant_db_url[
+      which(pcgrr::variant_db_url[,"name"] == "ENSEMBL_GENE_ID"),"url_prefix"]
 
     results[['variant_display']] <- results[['variant']] |>
       dplyr::select(
@@ -2227,7 +2272,7 @@ load_rna_fusions <- function(
         )) |>
       dplyr::select(
         dplyr::any_of(
-          tsv_cols$fusion)) |>
+          pcgrr::tsv_cols$fusion)) |>
       dplyr::distinct()
 
   }else{
@@ -2253,4 +2298,93 @@ load_rna_fusions <- function(
 
   return(results)
 
+}
+
+#' Function that loads the normalised result of an external assay/tool
+#'
+#' Reads a (single-row) tab-separated file with the result of an external
+#' assay/tool (e.g. MSI, HRD), as written by the PCGR Python workflow. All
+#' columns are read as character, and the given numeric/integer columns are
+#' converted. Missing values are given as '.', 'NA' or empty.
+#'
+#' @param fname name of the file with the normalised external result
+#' @param required_cols columns that must be present
+#' @param num_cols columns converted to numeric
+#' @param int_cols columns converted to integer
+#' @param label type of result, used in error messages (e.g. "MSI", "HRD")
+#' @return data frame with one row
+#'
+#' @export
+load_external_result <- function(fname = NULL,
+                                 required_cols = NULL,
+                                 num_cols = NULL,
+                                 int_cols = NULL,
+                                 label = "external") {
+  check_file_exists(fname)
+  result <- as.data.frame(readr::read_tsv(
+    file = fname,
+    col_types = readr::cols(.default = readr::col_character()),
+    na = c(".", "NA", ""),
+    progress = FALSE))
+
+  if (!all(required_cols %in% colnames(result)) ||
+      NROW(result) != 1) {
+    log4r_fatal(paste0(
+      "External ", label, " result (", fname,
+      ") must have one data row and the columns: ",
+      paste(required_cols, collapse = ", ")))
+  }
+  for (num_col in num_cols) {
+    result[[num_col]] <- suppressWarnings(as.numeric(result[[num_col]]))
+  }
+  for (int_col in int_cols) {
+    result[[int_col]] <- suppressWarnings(as.integer(result[[int_col]]))
+  }
+  return(result)
+}
+
+#' Function that initiates the report element of an external result
+#'
+#' @return list with elements 'eval' (FALSE), 'result' (empty data frame) and
+#' 'threshold_user_defined' (FALSE)
+#'
+#' @export
+init_external_result <- function() {
+  list(eval = FALSE, result = data.frame(), threshold_user_defined = FALSE)
+}
+
+#' Function that generates report data for the result of an external
+#' assay/tool (MSI or HRD)
+#'
+#' @param settings PCGR run/configuration settings (the normalised external
+#' result is given by \code{settings$molecular_data$fname_<type>_tsv})
+#' @param type type of result, 'msi' or 'hrd'
+#' @return list with elements 'eval', 'result' (one-row data frame) and
+#' 'threshold_user_defined' (logical: the threshold on the score used for
+#' deriving the status was set by the user, \code{--input_<type>_threshold})
+#'
+#' @export
+generate_report_data_external <- function(settings = NULL,
+                                          type = c("msi", "hrd")) {
+  type <- match.arg(type)
+  external <- init_external_result()
+  fname <- settings$molecular_data[[paste0("fname_", type, "_tsv")]]
+  if (is.null(fname) || identical(fname, "None") || !file.exists(fname)) {
+    return(external)
+  }
+  label <- toupper(type)
+  log4r_info("------")
+  log4r_info(paste0(
+    "Loading ", label, " result from external ",
+    if (type == "msi") "caller" else "assay/tool"))
+  external[["result"]] <-
+    if (type == "msi") load_external_msi(fname) else load_external_hrd(fname)
+  external[["threshold_user_defined"]] <- isTRUE(as.logical(
+    settings$conf[[paste0(type, "_external")]][["threshold_user_defined"]]))
+  external[["eval"]] <- TRUE
+  log4r_info(paste0(
+    "External ", label, " result (",
+    external$result[[paste0(label, "_CALLER")]], "): ",
+    external$result[[paste0(label, "_STATUS")]]))
+  return(external)
 }

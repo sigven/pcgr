@@ -71,7 +71,7 @@ generate_report <-
           fname_cpsr_tsv = settings$molecular_data$fname_germline_tsv,
           fname_cpsr_yaml = settings$molecular_data$fname_germline_yaml,
           ignore_vus = as.logical(settings$conf$germline$ignore_vus),
-          cols = data_coltype_defs$snv_indel_germline_cpsr,
+          cols = pcgrr::data_coltype_defs$snv_indel_germline_cpsr,
           ref_data = ref_data,
           settings = settings
         )
@@ -171,6 +171,7 @@ generate_report <-
             rep,
             pcg_report_msi,
             a_elem = "msi")
+
       }
 
       ## Generate report contents for analysis of
@@ -186,12 +187,87 @@ generate_report <-
           pcg_report_tmb[["eval"]]
         rep[["content"]][["tmb"]][["sample_estimate"]] <-
           pcg_report_tmb[["sample_estimate"]]
+        rep[["content"]][["tmb"]][["tmb_high_threshold"]] <-
+          pcg_report_tmb[["tmb_high_threshold"]]
+        rep[["content"]][["tmb"]][["tmb_high"]] <-
+          pcg_report_tmb[["tmb_high"]]
+
+        ## If TMB-high, map biomarker evidence (CIViC, OncoKB) for the biomarker
+        if (isTRUE(pcg_report_tmb[["tmb_high"]])) {
+          rep[["content"]][["tmb"]][["callset"]] <-
+            generate_report_data_complex_biomarker(
+              biomarker = "TMB-H",
+              ref_data = ref_data,
+              settings = settings)
+        }
 
       }
     }else if (!is.null(callset_snv)) {
       rep[["content"]][["snv_indel"]][["zero"]] <- TRUE
       rep[["metadata"]][["config"]][["other"]][["list_noncoding"]] <- FALSE
     }
+
+    ## Load MSI result from an external MSI caller (e.g. MSIsensor-pro) if
+    ## available - this takes precedence over the PCGR MSI classifier
+    if (!is.null(settings$molecular_data$fname_msi_tsv) &&
+        settings$molecular_data$fname_msi_tsv != "None" &&
+        file.exists(settings$molecular_data$fname_msi_tsv)) {
+      rep[["content"]][["msi"]][["external"]] <-
+        generate_report_data_msi_external(settings = settings)
+      if (isTRUE(rep[["content"]][["msi"]][["external"]][["eval"]])) {
+        ## the MSI section is shown also when no classifier prediction exists
+        ## (missing_data refers to the classifier prediction only)
+        if (!isTRUE(rep[["content"]][["msi"]][["eval"]])) {
+          rep[["content"]][["msi"]][["missing_data"]] <- TRUE
+        }
+        rep[["content"]][["msi"]][["eval"]] <- TRUE
+      }
+    }
+
+    ## Map biomarker evidence (CIViC, OncoKB) for MSI-H if
+    ##  1) the classifier predicts MSI-H with high confidence, and no external
+    ##     MSI call is provided (or the external call is indeterminate)
+    ##  2) the external MSI call is MSI-H (irrespective of the classifier
+    ##     prediction/confidence, which is shown for comparison)
+    ## No evidence is shown for uncertain MSI-H predictions of the classifier
+    ## alone, or if the external MSI call is MSS (flagged as discordant if the
+    ## classifier predicts MSI-H)
+    if (isTRUE(rep[["content"]][["msi"]][["eval"]])) {
+      if (msi_status_is_high(
+        rep[["content"]][["msi"]], high_confidence_only = TRUE)) {
+        rep[["content"]][["msi"]][["callset"]] <-
+          generate_report_data_complex_biomarker(
+            biomarker = "MSI-H",
+            ref_data = ref_data,
+            settings = settings)
+      } else if (isTRUE(msi_concordance(rep[["content"]][["msi"]]) == "discordant") &&
+                 identical(rep[["content"]][["msi"]][["external"]][["result"]][["MSI_STATUS"]], "MSS") &&
+                 isTRUE(stringr::str_detect(
+                   as.character(rep[["content"]][["msi"]][["prediction"]][["msi_stats"]][["predicted_class"]]),
+                   "^MSI"))) {
+        log4r_warn(paste0(
+          "External MSI caller reports MSS, but the PCGR MSI classifier predicts MSI-H - ",
+          "skipping biomarker evidence for MSI-H"))
+      } else if (!isTRUE(rep[["content"]][["msi"]][["external"]][["result"]][["MSI_STATUS"]] %in%
+                         c("MSI-H", "MSS")) &&
+                 msi_status_is_high(rep[["content"]][["msi"]])) {
+        log4r_info(paste0(
+          "MSI-H prediction is uncertain (0.1 < P(MSI-H) < 0.9) - ",
+          "skipping biomarker evidence for MSI-H"))
+      }
+    }
+
+    ## HRD - result from an external HRD assay/tool (if available), and the
+    ## genomic scar score estimated by PCGR from the CNA segments (if
+    ## '--estimate_hrd' was used and the estimation succeeded)
+    rep[["content"]][["hrd"]][["internal_eval"]] <-
+      isTRUE(as.numeric(settings$conf$somatic_cna$estimate_hrd) == 1) &&
+      !is.null(settings$conf$somatic_cna$hrd_sum)
+    rep[["content"]][["hrd"]][["external"]] <-
+      generate_report_data_hrd_external(settings = settings)
+    rep[["content"]][["hrd"]][["eval"]] <-
+      isTRUE(rep[["content"]][["hrd"]][["internal_eval"]]) ||
+      isTRUE(rep[["content"]][["hrd"]][["external"]][["eval"]])
 
     ## Load somatic CNA data if available
     callset_cna <- NULL
@@ -841,7 +917,7 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
       if (is.data.frame(report$content$cna$callset$variant)) {
         output_data <- as.data.frame(
           report$content$cna$callset$variant |>
-            dplyr::select(dplyr::any_of(tsv_cols$cna))
+            dplyr::select(dplyr::any_of(pcgrr::tsv_cols$cna))
         )
       }
     }
@@ -855,7 +931,7 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
       if (is.data.frame(report$content$fusion$callset$variant)) {
         output_data <- as.data.frame(
           report$content$fusion$callset$variant |>
-            dplyr::select(dplyr::any_of(tsv_cols$fusion))
+            dplyr::select(dplyr::any_of(pcgrr::tsv_cols$fusion))
         )
       }
     }
@@ -867,7 +943,7 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
      !is.null(report$content$snv_indel) &
      report$content$snv_indel$eval == TRUE) {
 
-    snv_indel_cols <- tsv_cols$snv_indel
+    snv_indel_cols <- pcgrr::tsv_cols$snv_indel
     if (report$settings$conf$other$retained_vcf_info_tags != "None") {
       snv_indel_cols <- c(
         snv_indel_cols,
@@ -892,7 +968,7 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
      !is.null(report$content$snv_indel) &
      report$content$snv_indel$eval == TRUE) {
 
-    snv_indel_cols <- tsv_cols$snv_indel_unfiltered
+    snv_indel_cols <- pcgrr::tsv_cols$snv_indel_unfiltered
     if (report$settings$conf$other$retained_vcf_info_tags != "None") {
       snv_indel_cols <- c(
         snv_indel_cols, report$settings$conf$other$retained_vcf_info_tags)
@@ -1027,10 +1103,17 @@ write_report_html <- function(
           isTRUE(report$content$snv_indel$eval) ||
           isTRUE(report$content$cna$eval)
 
+        ## assay mode worded as on the PDF cover (pcgrr:::pdf_cover_values)
+        assay_mode_display <-
+          if (isTRUE(as.logical(settings$conf$assay_properties$vcf_tumor_only)))
+            "Tumor-only" else "Tumor-control"
+
         assay_build_badges <- if (dna_data_present) {
           paste0(
             "<span class='pcgr-assay-badge'>",
             settings$conf$assay_properties$type,
+            "</span><span class='pcgr-assay-badge'>",
+            assay_mode_display,
             "</span><span class='pcgr-assay-badge'>",
             genome_assembly_display,
             "</span>")
@@ -1098,6 +1181,157 @@ write_report_html <- function(
 
 }
 
+#' Function that writes contents of PCGR object to a PDF report
+#' (Quarto/Typst-based), focused on key findings
+#'
+#' @param report List object with all report data, settings etc.
+#' @param color_palette PCGR color palette
+#' @export
+write_report_pdf <- function(
+    report = NULL, color_palette = pcgrr::color_palette) {
+
+  settings <- report[['settings']]
+  output_dir <- settings[['output_dir']]
+  output_prefix <- settings[['output_prefix']]
+  fname_pdf <- paste0(output_prefix, ".pdf")
+
+  ## Path to PCGR reporting templates
+  templates_dir <- "templates"
+  pcgr_rep_template_path <-
+    system.file(templates_dir, package = "pcgrr")
+  quarto_input_pdf <- file.path(
+    pcgr_rep_template_path, "pcgr_report_pdf.qmd")
+
+  if (!file.exists(quarto_input_pdf)) {
+    log4r_warn(
+      paste0("PDF template not found at: ", quarto_input_pdf,
+             " - skipping PDF generation"))
+    return(invisible(NULL))
+  }
+
+  ## make temporary directory for quarto report rendering
+  tmp_quarto_dir1 <- file.path(
+    output_dir,
+    paste0('quarto_', stringi::stri_rand_strings(1, 15))
+  )
+  mkdir(tmp_quarto_dir1)
+  system2("cp", args = c("-r", shQuote(pcgr_rep_template_path), shQuote(tmp_quarto_dir1)))
+  tmp_quarto_dir <- file.path(tmp_quarto_dir1, templates_dir)
+
+  quarto_main_template_pdf <-
+    file.path(tmp_quarto_dir, "pcgr_report_pdf.qmd")
+  quarto_main_template_pdf_sample <-
+    file.path(tmp_quarto_dir, "pcgr_report_pdf_sample.qmd")
+  quarto_pdf <-
+    file.path(tmp_quarto_dir, "pcgr_report_pdf_sample.pdf")
+
+  ## Save sample PCGR report object (without ref_data) in temporary
+  ## quarto rendering directory
+  rds_report_path <- file.path(tmp_quarto_dir, "pcgr_report.rds")
+  report$ref_data <- NULL
+  saveRDS(report, file = rds_report_path)
+
+  readLines(quarto_main_template_pdf) |>
+    stringr::str_replace(
+      pattern = "<PCGR_REPORT_OBJECT.rds>",
+      replacement = rds_report_path) |>
+    writeLines(con = quarto_main_template_pdf_sample)
+
+  ## Main report color (tumor-control vs. tumor-only) for the Typst theme
+  writeLines(
+    c("// Generated by pcgrr::write_report_pdf()",
+      paste0('#let pcgr-main = rgb("',
+             pdf_report_color(report, color_palette), '")')),
+    con = file.path(tmp_quarto_dir, "typst", "_theme.typ"))
+
+  log4r_info("------")
+  log4r_info(
+    paste0("Generating Typst-based focused PDF report ",
+           "(.pdf) with variant findings"))
+
+  ## Fonts for Typst: Source Sans Pro (shipped with rmarkdown) and
+  ## fonts of the conda environment, in addition to system fonts
+  font_paths <- c(
+    system.file("rmd", "h", "bootstrap", "css", "fonts",
+                package = "rmarkdown"),
+    file.path(Sys.getenv("CONDA_PREFIX"), "fonts"),
+    Sys.getenv("TYPST_FONT_PATHS"))
+  font_paths <- font_paths[nzchar(font_paths) & dir.exists(font_paths)]
+  typst_font_paths_orig <- Sys.getenv("TYPST_FONT_PATHS", unset = NA)
+  Sys.setenv(TYPST_FONT_PATHS = paste(unique(font_paths), collapse = ":"))
+  on.exit({
+    if (is.na(typst_font_paths_orig)) {
+      Sys.unsetenv("TYPST_FONT_PATHS")
+    } else {
+      Sys.setenv(TYPST_FONT_PATHS = typst_font_paths_orig)
+    }
+  }, add = TRUE)
+
+  ## PDF report is generated by default - a rendering failure is reported,
+  ## but does not stop the analysis (other outputs are already written)
+  render_ok <- tryCatch({
+    with_utf8_locale(
+      quarto::quarto_render(
+        input = quarto_main_template_pdf_sample,
+        output_format = "typst",
+        execute_dir = tmp_quarto_dir,
+        quiet = !settings$conf$debug))
+    TRUE
+  }, error = function(e) {
+    log4r_warn(paste0(
+      "PDF report generation failed - skipping PDF output (",
+      sub("^! ", "", strsplit(conditionMessage(e), "\n")[[1]][1]),
+      "). Re-run with '--debug' for details, ",
+      "or use '--no_pdf' to skip PDF generation"))
+    FALSE
+  })
+
+  ## Copy rendered PDF to the designated output path
+  if (render_ok && file.exists(quarto_pdf)) {
+    file.copy(quarto_pdf, fname_pdf, overwrite = TRUE)
+  } else if (render_ok) {
+    log4r_warn(
+      paste0("PDF rendering appeared to complete but output file ",
+             "was not found: ", quarto_pdf))
+  }
+
+  ## remove temporary quarto directory (if debugging is switched off)
+  if (!(settings$conf$debug)) {
+    unlink(c(tmp_quarto_dir, tmp_quarto_dir1), force = TRUE, recursive = TRUE)
+  }
+  log4r_info("------")
+}
+
+#' Evaluate an expression (report rendering) with a UTF-8 locale
+#'
+#' Quarto/knitr run R in a subprocess that inherits the locale; with a
+#' non-UTF-8 locale (e.g. 'C', as in a conda environment without LANG set),
+#' non-ASCII characters of the report text (e.g. dashes, middle dots) are
+#' written as escape codes ('<U+00B7>'). If the current locale is not UTF-8,
+#' LC_ALL is temporarily set to an available UTF-8 locale.
+#'
+#' @param expr expression to evaluate
+#' @keywords internal
+with_utf8_locale <- function(expr) {
+  if (isTRUE(l10n_info()[["UTF-8"]])) {
+    return(expr)
+  }
+  lc_all_orig <- Sys.getenv("LC_ALL", unset = NA)
+  lc_ctype_orig <- Sys.getlocale("LC_CTYPE")
+  for (loc in c("C.UTF-8", "en_US.UTF-8", "C.utf8", "en_US.utf8")) {
+    if (nzchar(suppressWarnings(Sys.setlocale("LC_CTYPE", loc)))) {
+      Sys.setenv(LC_ALL = loc)
+      break
+    }
+  }
+  on.exit({
+    suppressWarnings(Sys.setlocale("LC_CTYPE", lc_ctype_orig))
+    if (is.na(lc_all_orig)) Sys.unsetenv("LC_ALL") else
+      Sys.setenv(LC_ALL = lc_all_orig)
+  }, add = TRUE)
+  expr
+}
+
 #' Function that writes key datasets of PCGR object to an Excel workbook
 #'
 #' @param report List object with all PCGR report data, settings etc.
@@ -1122,11 +1356,16 @@ write_report_excel <- function(report = NULL) {
                 'SOMATIC_SNV_INDEL_BIOMARKER',
                 'SOMATIC_CNA',
                 'SOMATIC_CNA_BIOMARKER',
+                'CNA_SUMMARY',
                 'RNA_FUSION',
                 'RNA_FUSION_BIOMARKER',
                 'GERMLINE_SNV_INDEL',
                 'TMB',
+                'TMB_BIOMARKER',
                 'MSI',
+                'MSI_INTERNAL',
+                'MSI_BIOMARKER',
+                'HRD',
                 'MUTATIONAL_SIGNATURE',
                 'KATAEGIS_EVENTS',
                 'RNA_EXPRESSION_OUTLIERS',

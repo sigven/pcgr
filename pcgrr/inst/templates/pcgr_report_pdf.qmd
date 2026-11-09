@@ -1,0 +1,119 @@
+---
+format:
+  typst:
+    include-before-body: typst/_preamble.typ
+    toc: false
+    toc-depth: 2
+    toc-title: "Contents"
+    papersize: a4
+    margin:
+      top: 1.9cm
+      bottom: 2.7cm
+      left: 1.5cm
+      right: 1.5cm
+    section-numbering: ""
+    citeproc: true
+bibliography: pcgr_bibliography.bib
+## all references of the HTML report (also when not cited in the PDF text)
+nocite: |
+  @Tamborero2018-aj, @Poti2019-qr, @Alexandrov2020-gj, 
+  @Alexandrov2013-gs, @Griffith2017-do, @Ma2018-to, 
+  @Cortes-Ciriano2017-vl, @Li2017-ew,
+  @Blokzijl2018-nc, @Lever2019-xp, 
+  @Repana2019-dd, @Chalmers2017-cz, @Yin2020-or, 
+  @Bailey2018-os, @Fernandez2019-mk,
+  @Nakken2018-lb, @Brady2022-hr,
+  @Levatic2022-hk, @Horak2022-uh,
+  @Antonello2024-ri, @Bielski2018-pz,
+  @Popova2012-yi, @Marquard2015-pg,
+  @Telli2016-hr, @Rempel2022-xk,
+  @Lenz2023-sp
+csl: bioinformatics.csl
+link-citations: true
+---
+
+```{r global_options}
+#| include: false
+#| eval: true
+
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  error = FALSE,
+  eval = TRUE,
+  ## static figures (PNG, high resolution) for Typst
+  dev = "png",
+  dpi = 200)
+options(scipen = 999)
+## tables may break across pages (tinytable sets non-breakable figures by
+## default)
+options(tinytable_typst_multipage = TRUE)
+pcg_report <- readRDS(file = "<PCGR_REPORT_OBJECT.rds>")
+
+## main report color (tumor-control: purple, tumor-only: blue) - used for
+## table headers; page chrome colors are set in typst/_theme.typ
+report_color <- pcgrr:::pdf_report_color(pcg_report)
+max_variants_pdf <- 25
+```
+
+```{r cover_page}
+#| output: asis
+#| echo: false
+#| eval: true
+
+## Cover + summary of findings - values resolved in R
+## (pcgrr:::pdf_cover_values), layout in typst/_preamble.typ (pcgr-cover)
+cat(pcgrr:::pdf_cover_typst(pcg_report))
+```
+
+```{r actionability_pdf}
+#| child: 'pcgr_quarto_report/pdf/actionability_pdf.qmd'
+#| eval: !expr isTRUE(pcg_report$content$snv_indel$eval) || isTRUE(pcg_report$content$cna$eval) || isTRUE(pcg_report$content$fusion$eval)
+```
+
+```{r diagn_progn_pdf}
+#| child: 'pcgr_quarto_report/pdf/diagn_progn_pdf.qmd'
+#| eval: !expr isTRUE(pcg_report$content$snv_indel$eval) || isTRUE(pcg_report$content$cna$eval) || isTRUE(pcg_report$content$fusion$eval)
+```
+
+```{r snv_indel_pdf}
+#| child: 'pcgr_quarto_report/pdf/snv_indel_pdf.qmd'
+#| eval: !expr isTRUE(pcg_report$content$snv_indel$eval)
+```
+
+```{r cna_pdf}
+#| child: 'pcgr_quarto_report/pdf/cna_pdf.qmd'
+#| eval: !expr isTRUE(pcg_report$content$cna$eval)
+```
+
+```{r composite_biomarkers_pdf}
+#| child: 'pcgr_quarto_report/pdf/composite_biomarkers_pdf.qmd'
+#| eval: !expr isTRUE(pcg_report$content$tmb$eval) || isTRUE(pcg_report$content$msi$eval) || isTRUE(pcg_report$content$hrd$eval)
+```
+
+```{r mutational_features_pdf}
+#| child: 'pcgr_quarto_report/pdf/mutational_features_pdf.qmd'
+#| eval: !expr isTRUE(pcg_report$content$mutational_signatures$eval) || isTRUE(pcg_report$content$kataegis$eval)
+```
+
+```{r rna_pdf}
+#| child: 'pcgr_quarto_report/pdf/rna_pdf.qmd'
+#| eval: !expr isTRUE(pcg_report$content$fusion$eval) || isTRUE(pcg_report$content$expression$eval)
+```
+
+```{r germline_pdf}
+#| child: 'pcgr_quarto_report/pdf/germline_pdf.qmd'
+#| eval: !expr isTRUE(pcg_report$content$germline_classified$eval)
+```
+
+```{r settings_pdf}
+#| child: 'pcgr_quarto_report/pdf/settings_pdf.qmd'
+#| eval: true
+```
+
+*This report was generated with [PCGR](https://github.com/sigven/pcgr) v`r pcg_report$settings$software$pcgr_version` on `r strftime(Sys.time(), format = "%B %d, %Y")`. For research use only. Documentation: [sigven.github.io/pcgr](https://sigven.github.io/pcgr) - source code: [github.com/sigven/pcgr](https://github.com/sigven/pcgr).*
+
+```{r documentation_pdf}
+#| child: 'pcgr_quarto_report/pdf/documentation_pdf.qmd'
+#| eval: true
+```

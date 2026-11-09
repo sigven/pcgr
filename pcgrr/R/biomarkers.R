@@ -1,32 +1,50 @@
-#' Function that gathers data tables on actionable variants
-#' for display in report (tier 1 + tier 2)
+#' Function that gathers data tables on biomarker variants
+#' (predictive, prognostic or diagnostic) for display in report
+#'
+#' Shared implementation behind \code{prep_actble_display_tbl},
+#' \code{prep_progn_display_tbl} and \code{prep_diagn_display_tbl}.
 #'
 #' @param rep report object
 #' @param tier tier level(s) to consider for display (e.g. 1, 2)
 #' @param etype_for_tiering evidence type(s) to consider for
 #' tiering (e.g. 'predictive', 'prognostic', 'diagnostic')
 #' @param clnsig clinical significance to consider for tiering
-#' (e.g. 'therapeutic_sensitivity', 'therapeutic_resistance')
+#' (e.g. 'therapeutic_sensitivity', 'prognostic_poor', 'diagnostic_positive')
 #' @param tier_defining_eitems_only consider only evidence items
 #' that were used for tiering (e.g. for tier 1: only evidence items with
 #' A-level evidence, for tier 2: only evidence items with B-level evidence).
 #' If FALSE, all evidence items associated with each variant, not only
 #' the tier-defining evidence items, will be considered for display in the report.
-#' @param variant_category cna, snv_indel, or fusion
+#' @param variant_category cna, snv_indel, fusion, msi, or tmb
+#' (msi and tmb for predictive biomarkers only)
+#' @param evidence_type type of biomarker table to prepare, one of
+#' 'predictive', 'prognostic' or 'diagnostic'
+#'
+#' @return list with 'main' (one row per variant) and 'nested'
+#' (one row per evidence item) data frames
 #'
 #' @export
 #'
-prep_actble_display_tbl <- function(
+prep_bm_display_tbl <- function(
     rep = NULL,
     tier = c(1,2),
     etype_for_tiering = c("predictive"),
     clnsig = "therapeutic_sensitivity",
     tier_defining_eitems_only = TRUE,
-    variant_category = 'snv_indel') {
+    variant_category = 'snv_indel',
+    evidence_type = 'predictive') {
+
+  if (!evidence_type %in% c("predictive", "prognostic", "diagnostic")) {
+    log4r_fatal(
+      "evidence_type must be one of 'predictive', 'prognostic', or 'diagnostic'")
+  }
+  is_predictive <- evidence_type == "predictive"
 
   if (is.null(rep)) {
     log4r_fatal("report object is NULL")
   }
+  ## (internal) tier 3 (weak evidence) is included for prognostic/diagnostic
+  ## biomarkers when no primary site is set - see progn_diagn_tiers()
   if (!is.numeric(tier) || !all(tier %in% c(1, 2, 3)) || length(tier) == 0) {
     log4r_fatal("tier must be a non-empty integer vector with values in {1, 2, 3}")
   }
@@ -36,10 +54,14 @@ prep_actble_display_tbl <- function(
       "rep$content object does not contain '", variant_category,"'"))
   }
 
-  ## check variant_category is valid
-  if (!variant_category %in% c("snv_indel", "cna", "fusion")) {
-    log4r_fatal(
-      "variant_category must be one of 'snv_indel', 'cna', or 'fusion'")
+  ## check variant_category is valid (complex biomarkers - MSI-H, TMB-H -
+  ## are so far only predictive)
+  valid_categories <- c("snv_indel", "cna", "fusion",
+                        if (is_predictive) c("msi", "tmb"))
+  if (!variant_category %in% valid_categories) {
+    log4r_fatal(paste0(
+      "variant_category must be one of ",
+      paste0("'", valid_categories, "'", collapse = ", ")))
   }
 
   if (!"callset" %in% names(rep$content[[variant_category]])) {
@@ -48,32 +70,47 @@ prep_actble_display_tbl <- function(
 
   callset <- rep$content[[variant_category]]$callset
 
-  ## check that clinical_significance is one of ",therapeutic_sensitivity", "therapeutic_resistance",
+  ## check that clinical_significance is valid for the evidence type,
   ## and make sure this is an element in the "bm_evidence" list object, which
   ## in turn should be a member of the "callset" list object for the variant class
   ## of interest (e.g. snv_indel, cna)
-  if (!clnsig %in% c("therapeutic_sensitivity",
-                     "therapeutic_resistance")) {
+  valid_clnsig <- switch(
+    evidence_type,
+    predictive = c("therapeutic_sensitivity", "therapeutic_resistance"),
+    prognostic = c("prognostic_better", "prognostic_poor"),
+    diagnostic = c("diagnostic_positive", "diagnostic_negative")
+  )
+  if (!clnsig %in% valid_clnsig) {
     log4r_fatal(
       paste0("clnsig must be one of ",
-      "'therapeutic_resistance', 'therapeutic_sensitivity'"))
+             paste0("'", valid_clnsig, "'", collapse = ", ")))
   }
   invisible(assertthat::assert_that(
     "bm_evidence" %in% names(callset),
     msg = paste0("rep$content$", variant_category,
                  "$callset object does not contain 'bm_evidence'"))
   )
-   invisible(assertthat::assert_that(
-     clnsig %in% names(callset$bm_evidence),
-     msg = paste0("rep$content$", variant_category,
-                  "$callset$bm_evidence object does not contain '",
-                  clnsig,"'"))
-   )
+  invisible(assertthat::assert_that(
+    clnsig %in% names(callset$bm_evidence),
+    msg = paste0("rep$content$", variant_category,
+                 "$callset$bm_evidence object does not contain '",
+                 clnsig,"'"))
+  )
 
   eitems <-
     callset$bm_evidence[[clnsig]]$eitems
   var_classification <-
     callset$bm_evidence[[clnsig]]$classification
+
+  ## therapeutic sensitivity variants are taken from variant_display,
+  ## all others from the (possibly empty, column-less) classification
+  uses_classification <- clnsig != "therapeutic_sensitivity"
+  if (NROW(eitems) == 0 |
+      (uses_classification & NROW(var_classification) == 0)) {
+    log4r_info(
+      paste0("No tier ", paste(tier, collapse = "/"), " variants found."))
+    return(list(main = data.frame(), nested = data.frame()))
+  }
 
   ## For fusions the ENTREZGENE in biomarker evidence items (eitems) holds the
   ## single-gene DB value (e.g. "238" for ALK), whereas variant_display carries
@@ -136,7 +173,7 @@ prep_actble_display_tbl <- function(
   oncogenicity_col <- switch(
     variant_category,
     snv_indel = c("ONCOGENICITY",
-                  "ONCOGENICITY_CODE"),
+                  if (is_predictive) "ONCOGENICITY_CODE"),
     NULL
   )
 
@@ -146,12 +183,26 @@ prep_actble_display_tbl <- function(
     NULL
   )
 
+  ## per-variant summary column in the main table, and the evidence item
+  ## column it is built from (therapy for predictive, clinical
+  ## significance (outcome) for prognostic/diagnostic)
+  context_col <- if (is_predictive) {
+    "BM_THERAPEUTIC_CONTEXT"
+  } else {
+    "BM_CLINICAL_SIGNIFICANCE"
+  }
+  summary_col <- switch(
+    evidence_type,
+    predictive = "THERAPY_MATCH",
+    prognostic = "PROGNOSTIC_OUTCOME",
+    diagnostic = "DIAGNOSTIC_EVIDENCE"
+  )
+
   rctbl_recs <- list()
   rctbl_recs[['main']] <- data.frame()
   rctbl_recs[['nested']] <- data.frame()
 
   if (NROW(vars) > 0 & NROW(eitems) > 0) {
-    ## debug: print colnames of vars and eitems
 
     log4r_debug(paste0(
       "Variant category: ", variant_category,
@@ -190,7 +241,7 @@ prep_actble_display_tbl <- function(
           "BM_EVIDENCE_DESCRIPTION",
           "BM_EVIDENCE_TYPE",
           "BM_EVIDENCE_LEVEL",
-          "BM_THERAPEUTIC_CONTEXT",
+          if (is_predictive) "BM_THERAPEUTIC_CONTEXT",
           "BM_CLINICAL_SIGNIFICANCE",
           "BM_PRIMARY_SITE",
           "BM_MAPPING_CONFIDENCE",
@@ -226,6 +277,15 @@ prep_actble_display_tbl <- function(
             .data$ONCOGENICITY, "_", " "))
     }
 
+    ## therapeutic contexts are comma-separated lists of drugs
+    if (is_predictive & NROW(biomarker_var_eitems) > 0) {
+      biomarker_var_eitems <- biomarker_var_eitems |>
+        dplyr::mutate(
+          BM_THERAPEUTIC_CONTEXT = stringr::str_replace_all(
+            .data$BM_THERAPEUTIC_CONTEXT, ",", ", "
+          ))
+    }
+
     if (NROW(biomarker_var_eitems) > 0) {
 
       ## get the highest confidence level and resolution for
@@ -278,8 +338,9 @@ prep_actble_display_tbl <- function(
 
       ## for the main report table, we want to aggregate evidence items
       ## for each variant, and show the unique therapeutic contexts
-      ## and primary sites associated with the variant, as well as the
-      ## highest mapping confidence and resolution across all evidence items.
+      ## (or clinical significances) and primary sites associated with
+      ## the variant, as well as the highest mapping confidence and
+      ## resolution across all evidence items.
       ## For the nested table, we want to show all evidence items for each variant.
       ##
       rctbl_recs[['main']] <-
@@ -307,13 +368,8 @@ prep_actble_display_tbl <- function(
             dplyr::any_of(abundance_col),
             dplyr::any_of(hotspot_col),
             "BM_TOP_MAPPING_CONFIDENCE",
-            "BM_THERAPEUTIC_CONTEXT",
+            dplyr::all_of(context_col),
             "BM_PRIMARY_SITE")
-        ) |>
-        dplyr::mutate(
-          BM_THERAPEUTIC_CONTEXT = stringr::str_replace_all(
-            .data$BM_THERAPEUTIC_CONTEXT, ",", ", "
-          )
         ) |>
         dplyr::distinct() |>
         dplyr::group_by(
@@ -331,9 +387,9 @@ prep_actble_display_tbl <- function(
             "Any",
             "Multiple tumor types"
           )) |>
-        dplyr::mutate(THERAPY_MATCH = paste0(
+        dplyr::mutate(!!summary_col := paste0(
           "<b>",
-          .data$BM_THERAPEUTIC_CONTEXT, "</b> (",
+          .data[[context_col]], "</b> (",
           .data$BM_PRIMARY_SITE, ")")) |>
 
         dplyr::group_by(
@@ -350,13 +406,13 @@ prep_actble_display_tbl <- function(
           ))
         ) |>
         dplyr::summarise(
-          THERAPY_MATCH = paste(
-            .data$THERAPY_MATCH, collapse=" | "),
+          !!summary_col := paste(
+            .data[[summary_col]], collapse=" | "),
           .groups = "drop"
         ) |>
         dplyr::mutate(
-          THERAPY_MATCH = paste0(
-            " - ", .data$THERAPY_MATCH)
+          !!summary_col := paste0(
+            " - ", .data[[summary_col]])
         ) |>
         dplyr::arrange(
           .data$ACTIONABILITY_TIER,
@@ -368,7 +424,7 @@ prep_actble_display_tbl <- function(
           c("VAR_ID",
             "ENTREZGENE",
             "ACTIONABILITY_TIER",
-            "BM_THERAPEUTIC_CONTEXT",
+            dplyr::all_of(context_col),
             "BM_REFERENCE",
             "BM_MOLECULAR_PROFILE",
             "BM_EVIDENCE_LEVEL",
@@ -379,11 +435,6 @@ prep_actble_display_tbl <- function(
         dplyr::arrange(
           .data$BM_EVIDENCE_LEVEL
         ) |>
-        dplyr::mutate(
-          BM_THERAPEUTIC_CONTEXT = stringr::str_replace_all(
-            .data$BM_THERAPEUTIC_CONTEXT, ",", ", "
-          )
-        ) |>
         dplyr::distinct()
     }
   }
@@ -393,21 +444,43 @@ prep_actble_display_tbl <- function(
 }
 
 
+#' Function that gathers data tables on actionable variants
+#' for display in report (tier 1 + tier 2)
+#'
+#' @inheritParams prep_bm_display_tbl
+#' @param etype_for_tiering evidence type(s) to consider for
+#' tiering (e.g. 'predictive', 'prognostic', 'diagnostic')
+#' @param clnsig clinical significance to consider for tiering
+#' (e.g. 'therapeutic_sensitivity', 'therapeutic_resistance')
+#'
+#' @export
+#'
+prep_actble_display_tbl <- function(
+    rep = NULL,
+    tier = c(1,2),
+    etype_for_tiering = c("predictive"),
+    clnsig = "therapeutic_sensitivity",
+    tier_defining_eitems_only = TRUE,
+    variant_category = 'snv_indel') {
+  prep_bm_display_tbl(
+    rep = rep,
+    tier = tier,
+    etype_for_tiering = etype_for_tiering,
+    clnsig = clnsig,
+    tier_defining_eitems_only = tier_defining_eitems_only,
+    variant_category = variant_category,
+    evidence_type = "predictive")
+}
+
+
 #' Function that gathers data tables on prognostic variants
 #' for display in report
 #'
-#' @param rep report object
-#' @param tier tier level(s) to consider for display (e.g. 1, 2)
+#' @inheritParams prep_bm_display_tbl
 #' @param etype_for_tiering evidence type(s) to consider for
 #' tiering (e.g. 'prognostic')
 #' @param clnsig clinical significance to consider for tiering
 #' (e.g. 'prognostic_better', 'prognostic_poor')
-#' @param tier_defining_eitems_only consider only evidence items
-#' that were used for tiering (e.g. for tier 1: only evidence items with
-#' A-level evidence, for tier 2: only evidence items with B-level evidence).
-#' If FALSE, all evidence items associated with each variant, not only
-#' the tier-defining evidence items, will be considered for display in the report.
-#' @param variant_category cna, snv_indel, or fusion
 #'
 #' @export
 #'
@@ -418,337 +491,24 @@ prep_progn_display_tbl <- function(
     clnsig = "prognostic_better",
     tier_defining_eitems_only = TRUE,
     variant_category = 'snv_indel') {
-
-  if (is.null(rep)) {
-    log4r_fatal("report object is NULL")
-  }
-  if (!is.numeric(tier) || !all(tier %in% c(1, 2)) || length(tier) == 0) {
-    log4r_fatal("tier must be a non-empty integer vector with values in {1, 2}")
-  }
-  tier <- as.integer(unique(tier))
-  if (!variant_category %in% names(rep$content)) {
-    log4r_fatal(paste0(
-      "rep$content object does not contain '", variant_category,"'"))
-  }
-
-  ## check variant_category is valid
-  if (!variant_category %in% c("snv_indel", "cna", "fusion")) {
-    log4r_fatal(
-      "variant_category must be one of 'snv_indel', 'cna', or 'fusion'")
-  }
-
-  if (!"callset" %in% names(rep$content[[variant_category]])) {
-    log4r_fatal("rep$content$variant_category object does not contain 'callset'")
-  }
-
-  callset <- rep$content[[variant_category]]$callset
-
-  ## check that clinical_significance is one of "prognostic_better", "prognostic_poor",
-  ## and make sure this is an element in the "bm_evidence" list object, which
-  ## in turn should be a member of the "callset" list object for the variant class
-  ## of interest (e.g. snv_indel, cna)
-  if (!clnsig %in% c("prognostic_better", "prognostic_poor")) {
-    log4r_fatal(
-      paste0("clnsig must be one of ",
-             "'prognostic_better', 'prognostic_poor'"))
-  }
-  invisible(assertthat::assert_that(
-    "bm_evidence" %in% names(callset),
-    msg = paste0("rep$content$", variant_category,
-                 "$callset object does not contain 'bm_evidence'"))
-  )
-  invisible(assertthat::assert_that(
-    clnsig %in% names(callset$bm_evidence),
-    msg = paste0("rep$content$", variant_category,
-                 "$callset$bm_evidence object does not contain '",
-                 clnsig,"'"))
-  )
-
-  eitems <-
-    callset$bm_evidence[[clnsig]]$eitems
-  var_classification <-
-    callset$bm_evidence[[clnsig]]$classification
-
-  vars <-
-    var_classification |>
-    dplyr::filter(
-      !is.na(.data$ACTIONABILITY_TIER) &
-        .data$ACTIONABILITY_TIER %in% tier) |>
-    dplyr::inner_join(
-      dplyr::select(
-        callset$variant_display,
-        -c("ACTIONABILITY_TIER")),
-      by = c("VAR_ID",
-             "VARIANT_CLASS",
-             "ENTREZGENE")
-    )
-
-
-  if (NROW(vars) == 0) {
-    log4r_info(
-      paste0("No tier ", paste(tier, collapse = "/"), " variants found."))
-    return(list(main = data.frame(), nested = data.frame()))
-  }
-
-  ## abundance column varies by variant category
-  abundance_col <- switch(
-    variant_category,
-    snv_indel = "VAF_TUMOR",
-    cna       = "CN_TOTAL",
-    NULL
-  )
-
-  oncogenicity_col <- switch(
-    variant_category,
-    snv_indel = "ONCOGENICITY",
-    NULL
-  )
-
-  hotspot_col <- switch(
-    variant_category,
-    snv_indel = "MUTATION_HOTSPOT",
-    NULL
-  )
-
-  rctbl_recs <- list()
-  rctbl_recs[['main']] <- data.frame()
-  rctbl_recs[['nested']] <- data.frame()
-
-  if (NROW(vars) > 0 & NROW(eitems) > 0) {
-    biomarker_var_eitems <- eitems |>
-      dplyr::inner_join(
-        vars,
-        by = c("VAR_ID",
-               "ACTIONABILITY_TIER",
-               "VARIANT_CLASS",
-               "ENTREZGENE")
-      ) |>
-      dplyr::distinct() |>
-      dplyr::select(
-        c("VAR_ID",
-          "SAMPLE_ALTERATION",
-          dplyr::any_of(oncogenicity_col),
-          dplyr::any_of(abundance_col),
-          dplyr::any_of(hotspot_col),
-          "VARIANT_CLASS",
-          "ENTREZGENE",
-          "ACTIONABILITY_TIER",
-          "BM_SOURCE_DB",
-          "BM_REFERENCE",
-          "BM_RATING",
-          "BM_MOLECULAR_PROFILE",
-          "BM_CANCER_TYPE",
-          "BM_EVIDENCE_DESCRIPTION",
-          "BM_EVIDENCE_TYPE",
-          "BM_EVIDENCE_LEVEL",
-          "BM_CLINICAL_SIGNIFICANCE",
-          "BM_PRIMARY_SITE",
-          "BM_MAPPING_CONFIDENCE",
-          "BM_RESOLUTION",
-          "BM_ACTIONABILITY_SUPPORT")
-      )
-
-    ## only consider the evidence type that was used for tiering (e.g. predictive only,
-    ## or all (predictive, prognostic, diagnostic)) also for display in the report
-    if ("BM_EVIDENCE_TYPE" %in% colnames(biomarker_var_eitems) &
-        NROW(biomarker_var_eitems) > 0) {
-      biomarker_var_eitems <- biomarker_var_eitems |>
-        dplyr::filter(
-          tolower(.data$BM_EVIDENCE_TYPE) %in%
-            etype_for_tiering)
-    }
-
-    if ("BM_ACTIONABILITY_SUPPORT" %in% colnames(biomarker_var_eitems) &
-        NROW(biomarker_var_eitems) > 0 &
-        tier_defining_eitems_only == TRUE &
-        clnsig == "therapeutic_sensitivity") {
-      biomarker_var_eitems <-
-        biomarker_var_eitems |>
-        dplyr::filter(
-          .data$BM_ACTIONABILITY_SUPPORT == "tier-defining")
-    }
-
-    if ("ONCOGENICITY" %in% colnames(biomarker_var_eitems) &
-        NROW(biomarker_var_eitems) > 0) {
-      biomarker_var_eitems <- biomarker_var_eitems |>
-        dplyr::mutate(
-          ONCOGENICITY = stringr::str_replace_all(
-            .data$ONCOGENICITY, "_", " "))
-    }
-
-    if (NROW(biomarker_var_eitems) > 0) {
-
-      ## get the highest confidence level and resolution for
-      ## each variant, based on all evidence items associated
-      ## with the variant
-      biomarker_top_resolution <-
-        biomarker_var_eitems |>
-        dplyr::select(
-          c("VAR_ID",
-            "ENTREZGENE",
-            "BM_MAPPING_CONFIDENCE")
-        ) |>
-        dplyr::group_by(
-          .data$ENTREZGENE,
-          .data$VAR_ID,
-        ) |>
-        dplyr::summarise(
-          BM_MAPPING_CONFIDENCE = paste(
-            unique(sort(.data$BM_MAPPING_CONFIDENCE)),
-            collapse = ","),
-          .groups = "drop"
-        ) |>
-        dplyr::mutate(
-          BM_TOP_MAPPING_CONFIDENCE = dplyr::case_when(
-            stringr::str_detect(
-              .data$BM_MAPPING_CONFIDENCE, "high") ~ "high",
-            stringr::str_detect(
-              .data$BM_MAPPING_CONFIDENCE, "medium") ~ "medium",
-            TRUE ~ "low"
-          )
-        ) |>
-        dplyr::select(
-          -c("BM_MAPPING_CONFIDENCE")) |>
-        dplyr::distinct()
-
-
-      ## across all evidence items, get the unique sources
-      ## supporting actionability for each variant
-      biomarker_source_support <-
-        biomarker_var_eitems |>
-        dplyr::group_by(
-          .data$VAR_ID, .data$ENTREZGENE,
-          .data$ACTIONABILITY_TIER
-        ) |>
-        dplyr::summarise(
-          BM_SOURCES = paste(
-            unique(sort(.data$BM_SOURCE_DB)),
-            collapse = "|"),
-          .groups = "drop") |>
-        dplyr::distinct()
-
-      ## for the main report table, we want to aggregate evidence items
-      ## for each variant, and show the unique therapeutic contexts
-      ## and primary sites associated with the variant, as well as the
-      ## highest mapping confidence and resolution across all evidence items.
-      ## For the nested table, we want to show all evidence items for each variant.
-      ##
-      rctbl_recs[['main']] <-
-        biomarker_var_eitems |>
-        dplyr::left_join(
-          biomarker_top_resolution,
-          by = c("VAR_ID","ENTREZGENE")
-        ) |>
-        dplyr::left_join(
-          biomarker_source_support,
-          by = c("VAR_ID","ENTREZGENE",
-                 "ACTIONABILITY_TIER")
-        ) |>
-        dplyr::arrange(
-          .data$BM_TOP_MAPPING_CONFIDENCE,
-          dplyr::desc(.data$BM_RATING)
-        ) |>
-        dplyr::select(
-          c("VAR_ID",
-            "ENTREZGENE",
-            "ACTIONABILITY_TIER",
-            "SAMPLE_ALTERATION",
-            "BM_SOURCES",
-            dplyr::any_of(oncogenicity_col),
-            dplyr::any_of(abundance_col),
-            dplyr::any_of(hotspot_col),
-            "BM_TOP_MAPPING_CONFIDENCE",
-            "BM_CLINICAL_SIGNIFICANCE",
-            "BM_PRIMARY_SITE")
-        ) |>
-        dplyr::distinct() |>
-        dplyr::group_by(
-          dplyr::across(-c("BM_PRIMARY_SITE"))
-        ) |>
-        dplyr::summarise(
-          BM_PRIMARY_SITE = paste(
-            sort(.data$BM_PRIMARY_SITE),
-            collapse = ", "),
-          .groups = "drop") |>
-        dplyr::ungroup() |>
-        dplyr::mutate(
-          BM_PRIMARY_SITE = stringr::str_replace_all(
-            .data$BM_PRIMARY_SITE,
-            "Any",
-            "Multiple tumor types"
-          )) |>
-
-        dplyr::mutate(PROGNOSTIC_OUTCOME = paste0(
-          "<b>",
-          .data$BM_CLINICAL_SIGNIFICANCE, "</b> (",
-          .data$BM_PRIMARY_SITE, ")")) |>
-
-        dplyr::group_by(
-          dplyr::across(dplyr::all_of(
-            c("VAR_ID",
-              "ENTREZGENE",
-              "ACTIONABILITY_TIER",
-              "SAMPLE_ALTERATION",
-              "BM_SOURCES",
-              oncogenicity_col,
-              abundance_col,
-              hotspot_col,
-              "BM_TOP_MAPPING_CONFIDENCE")
-          ))
-        ) |>
-        dplyr::summarise(
-          PROGNOSTIC_OUTCOME = paste(
-            .data$PROGNOSTIC_OUTCOME, collapse=" | "),
-          .groups = "drop"
-        ) |>
-        dplyr::mutate(
-          PROGNOSTIC_OUTCOME = paste0(
-            " - ", .data$PROGNOSTIC_OUTCOME)
-        ) |>
-        dplyr::arrange(
-          .data$ACTIONABILITY_TIER,
-          .data$BM_TOP_MAPPING_CONFIDENCE,
-        )
-
-      rctbl_recs[['nested']] <- biomarker_var_eitems |>
-        dplyr::select(
-          c("VAR_ID",
-            "ENTREZGENE",
-            "BM_CLINICAL_SIGNIFICANCE",
-            "ACTIONABILITY_TIER",
-            "BM_REFERENCE",
-            "BM_MOLECULAR_PROFILE",
-            "BM_EVIDENCE_LEVEL",
-            "BM_SOURCE_DB",
-            "BM_CANCER_TYPE",
-            "BM_EVIDENCE_DESCRIPTION")
-        ) |>
-        dplyr::arrange(
-          .data$BM_EVIDENCE_LEVEL
-        ) |>
-        dplyr::distinct()
-    }
-  }
-
-  return(rctbl_recs)
-
+  prep_bm_display_tbl(
+    rep = rep,
+    tier = tier,
+    etype_for_tiering = etype_for_tiering,
+    clnsig = clnsig,
+    tier_defining_eitems_only = tier_defining_eitems_only,
+    variant_category = variant_category,
+    evidence_type = "prognostic")
 }
 
 
 #' Function that gathers data tables on diagnostic variants
 #'
-#' @param rep report object
-#' @param tier tier level(s) to consider for display (e.g. 1, 2)
+#' @inheritParams prep_bm_display_tbl
 #' @param etype_for_tiering evidence type(s) to consider for
 #' tiering (e.g. 'diagnostic')
 #' @param clnsig clinical significance to consider for tiering
 #' (e.g. 'diagnostic_positive', 'diagnostic_negative')
-#' @param tier_defining_eitems_only consider only evidence items
-#' that were used for tiering (e.g. for tier 1: only evidence items with
-#' A-level evidence, for tier 2: only evidence items with B-level evidence).
-#' If FALSE, all evidence items associated with each variant, not only
-#' the tier-defining evidence items, will be considered for display in the report.
-#' @param variant_category cna, snv_indel, or fusion
 #'
 #' @export
 #'
@@ -759,321 +519,14 @@ prep_diagn_display_tbl <- function(
     clnsig = "diagnostic_positive",
     tier_defining_eitems_only = TRUE,
     variant_category = 'snv_indel') {
-
-  if (is.null(rep)) {
-    log4r_fatal("report object is NULL")
-  }
-  if (!is.numeric(tier) || !all(tier %in% c(1, 2)) || length(tier) == 0) {
-    log4r_fatal("tier must be a non-empty integer vector with values in {1, 2}")
-  }
-  tier <- as.integer(unique(tier))
-  if (!variant_category %in% names(rep$content)) {
-    log4r_fatal(paste0(
-      "rep$content object does not contain '", variant_category,"'"))
-  }
-
-  ## check variant_category is valid
-  if (!variant_category %in% c("snv_indel", "cna", "fusion")) {
-    log4r_fatal(
-      "variant_category must be one of 'snv_indel', 'cna', or 'fusion'")
-  }
-
-  if (!"callset" %in% names(rep$content[[variant_category]])) {
-    log4r_fatal("rep$content$variant_category object does not contain 'callset'")
-  }
-
-  callset <- rep$content[[variant_category]]$callset
-
-  ## check that clinical_significance is one of "prognostic_better", "prognostic_poor",
-  ## and make sure this is an element in the "bm_evidence" list object, which
-  ## in turn should be a member of the "callset" list object for the variant class
-  ## of interest (e.g. snv_indel, cna)
-  if (!clnsig %in% c("diagnostic_positive",
-                     "diagnostic_negative")) {
-    log4r_fatal(
-      paste0("clnsig must be one of ",
-             "'diagnostic_positive', 'diagnostic_negative'"))
-  }
-  invisible(assertthat::assert_that(
-    "bm_evidence" %in% names(callset),
-    msg = paste0("rep$content$", variant_category,
-                 "$callset object does not contain 'bm_evidence'"))
-  )
-  invisible(assertthat::assert_that(
-    clnsig %in% names(callset$bm_evidence),
-    msg = paste0("rep$content$", variant_category,
-                 "$callset$bm_evidence object does not contain '",
-                 clnsig,"'"))
-  )
-
-  eitems <-
-    callset$bm_evidence[[clnsig]]$eitems
-  var_classification <-
-    callset$bm_evidence[[clnsig]]$classification
-
-  if (NROW(eitems) == 0 |
-      NROW(var_classification) == 0) {
-    log4r_info(
-      paste0("No tier ", paste(tier, collapse = "/"), " variants found."))
-    return(list(main = data.frame(), nested = data.frame()))
-  }
-
-  vars <-
-    var_classification |>
-    dplyr::filter(
-      !is.na(.data$ACTIONABILITY_TIER) &
-        .data$ACTIONABILITY_TIER %in% tier) |>
-    dplyr::inner_join(
-      dplyr::select(
-        callset$variant_display,
-        -c("ACTIONABILITY_TIER")),
-      by = c("VAR_ID",
-             "VARIANT_CLASS",
-             "ENTREZGENE")
-    )
-
-
-  if (NROW(vars) == 0) {
-    log4r_info(
-      paste0("No tier ", paste(tier, collapse = "/"), " variants found."))
-    return(list(main = data.frame(), nested = data.frame()))
-  }
-
-  ## abundance column varies by variant category
-  abundance_col <- switch(
-    variant_category,
-    snv_indel = "VAF_TUMOR",
-    cna       = "CN_TOTAL",
-    NULL
-  )
-
-  oncogenicity_col <- switch(
-    variant_category,
-    snv_indel = "ONCOGENICITY",
-    NULL
-  )
-
-  hotspot_col <- switch(
-    variant_category,
-    snv_indel = "MUTATION_HOTSPOT",
-    NULL
-  )
-
-  rctbl_recs <- list()
-  rctbl_recs[['main']] <- data.frame()
-  rctbl_recs[['nested']] <- data.frame()
-
-  if (NROW(vars) > 0 & NROW(eitems) > 0) {
-    biomarker_var_eitems <- eitems |>
-      dplyr::inner_join(
-        vars,
-        by = c("VAR_ID",
-               "ACTIONABILITY_TIER",
-               "VARIANT_CLASS",
-               "ENTREZGENE")
-      ) |>
-      dplyr::distinct() |>
-      dplyr::select(
-        c("VAR_ID",
-          "SAMPLE_ALTERATION",
-          dplyr::any_of(oncogenicity_col),
-          dplyr::any_of(abundance_col),
-          dplyr::any_of(hotspot_col),
-          "VARIANT_CLASS",
-          "ENTREZGENE",
-          "ACTIONABILITY_TIER",
-          "BM_SOURCE_DB",
-          "BM_REFERENCE",
-          "BM_RATING",
-          "BM_MOLECULAR_PROFILE",
-          "BM_CANCER_TYPE",
-          "BM_EVIDENCE_DESCRIPTION",
-          "BM_EVIDENCE_TYPE",
-          "BM_EVIDENCE_LEVEL",
-          "BM_CLINICAL_SIGNIFICANCE",
-          "BM_PRIMARY_SITE",
-          "BM_MAPPING_CONFIDENCE",
-          "BM_RESOLUTION",
-          "BM_ACTIONABILITY_SUPPORT")
-      )
-
-    ## only consider the evidence type that was used for tiering (e.g. predictive only,
-    ## or all (predictive, prognostic, diagnostic)) also for display in the report
-    if ("BM_EVIDENCE_TYPE" %in% colnames(biomarker_var_eitems) &
-        NROW(biomarker_var_eitems) > 0) {
-      biomarker_var_eitems <- biomarker_var_eitems |>
-        dplyr::filter(
-          tolower(.data$BM_EVIDENCE_TYPE) %in%
-            etype_for_tiering)
-    }
-
-    if ("BM_ACTIONABILITY_SUPPORT" %in% colnames(biomarker_var_eitems) &
-        NROW(biomarker_var_eitems) > 0 &
-        tier_defining_eitems_only == TRUE &
-        clnsig == "therapeutic_sensitivity") {
-      biomarker_var_eitems <-
-        biomarker_var_eitems |>
-        dplyr::filter(
-          .data$BM_ACTIONABILITY_SUPPORT == "tier-defining")
-    }
-
-    if ("ONCOGENICITY" %in% colnames(biomarker_var_eitems) &
-        NROW(biomarker_var_eitems) > 0) {
-      biomarker_var_eitems <- biomarker_var_eitems |>
-        dplyr::mutate(
-          ONCOGENICITY = stringr::str_replace_all(
-            .data$ONCOGENICITY, "_", " "))
-    }
-
-    if (NROW(biomarker_var_eitems) > 0) {
-
-      ## get the highest confidence level and resolution for
-      ## each variant, based on all evidence items associated
-      ## with the variant
-      biomarker_top_resolution <-
-        biomarker_var_eitems |>
-        dplyr::select(
-          c("VAR_ID",
-            "ENTREZGENE",
-            "BM_MAPPING_CONFIDENCE")
-        ) |>
-        dplyr::group_by(
-          .data$ENTREZGENE,
-          .data$VAR_ID,
-        ) |>
-        dplyr::summarise(
-          BM_MAPPING_CONFIDENCE = paste(
-            unique(sort(.data$BM_MAPPING_CONFIDENCE)),
-            collapse = ","),
-          .groups = "drop"
-        ) |>
-        dplyr::mutate(
-          BM_TOP_MAPPING_CONFIDENCE = dplyr::case_when(
-            stringr::str_detect(
-              .data$BM_MAPPING_CONFIDENCE, "high") ~ "high",
-            stringr::str_detect(
-              .data$BM_MAPPING_CONFIDENCE, "medium") ~ "medium",
-            TRUE ~ "low"
-          )
-        ) |>
-        dplyr::select(
-          -c("BM_MAPPING_CONFIDENCE")) |>
-        dplyr::distinct()
-
-      ## across all evidence items, get the unique sources
-      ## supporting actionability for each variant
-      biomarker_source_support <-
-        biomarker_var_eitems |>
-        dplyr::group_by(
-          .data$VAR_ID, .data$ENTREZGENE,
-          .data$ACTIONABILITY_TIER
-        ) |>
-        dplyr::summarise(
-          BM_SOURCES = paste(
-            unique(sort(.data$BM_SOURCE_DB)),
-            collapse = "|"),
-          .groups = "drop") |>
-        dplyr::distinct()
-
-      rctbl_recs[['main']] <-
-        biomarker_var_eitems |>
-        dplyr::left_join(
-          biomarker_top_resolution,
-          by = c("VAR_ID","ENTREZGENE")
-        ) |>
-        dplyr::left_join(
-          biomarker_source_support,
-          by = c("VAR_ID","ENTREZGENE",
-                 "ACTIONABILITY_TIER")
-        ) |>
-        dplyr::arrange(
-          .data$BM_TOP_MAPPING_CONFIDENCE,
-          dplyr::desc(.data$BM_RATING)
-        ) |>
-        dplyr::select(
-          c("VAR_ID",
-            "ENTREZGENE",
-            "ACTIONABILITY_TIER",
-            "SAMPLE_ALTERATION",
-            "BM_SOURCES",
-            dplyr::any_of(oncogenicity_col),
-            dplyr::any_of(abundance_col),
-            dplyr::any_of(hotspot_col),
-            "BM_TOP_MAPPING_CONFIDENCE",
-            "BM_CLINICAL_SIGNIFICANCE",
-            "BM_PRIMARY_SITE")
-        ) |>
-        dplyr::distinct() |>
-        dplyr::group_by(
-          dplyr::across(-c("BM_PRIMARY_SITE"))
-        ) |>
-        dplyr::summarise(
-          BM_PRIMARY_SITE = paste(
-            sort(.data$BM_PRIMARY_SITE),
-            collapse = ", "),
-          .groups = "drop") |>
-        dplyr::ungroup() |>
-        dplyr::mutate(
-          BM_PRIMARY_SITE = stringr::str_replace_all(
-            .data$BM_PRIMARY_SITE,
-            "Any",
-            "Multiple tumor types"
-          )) |>
-
-        dplyr::mutate(DIAGNOSTIC_EVIDENCE = paste0(
-          "<b>",
-          .data$BM_CLINICAL_SIGNIFICANCE, "</b> (",
-          .data$BM_PRIMARY_SITE, ")")) |>
-
-        dplyr::group_by(
-          dplyr::across(dplyr::all_of(
-            c("VAR_ID",
-              "ENTREZGENE",
-              "ACTIONABILITY_TIER",
-              "SAMPLE_ALTERATION",
-              "BM_SOURCES",
-              oncogenicity_col,
-              abundance_col,
-              hotspot_col,
-              "BM_TOP_MAPPING_CONFIDENCE")
-          ))
-        ) |>
-        dplyr::summarise(
-          DIAGNOSTIC_EVIDENCE = paste(
-            .data$DIAGNOSTIC_EVIDENCE, collapse=" | "),
-          .groups = "drop"
-        ) |>
-        dplyr::mutate(
-          DIAGNOSTIC_EVIDENCE = paste0(
-            " - ", .data$DIAGNOSTIC_EVIDENCE)
-        ) |>
-        dplyr::arrange(
-          .data$ACTIONABILITY_TIER,
-          .data$BM_TOP_MAPPING_CONFIDENCE,
-        )
-
-      rctbl_recs[['nested']] <- biomarker_var_eitems |>
-        dplyr::select(
-          c("VAR_ID",
-            "ENTREZGENE",
-            "ACTIONABILITY_TIER",
-            "BM_CLINICAL_SIGNIFICANCE",
-            "BM_REFERENCE",
-            "BM_MOLECULAR_PROFILE",
-            "BM_EVIDENCE_LEVEL",
-            "BM_SOURCE_DB",
-            "BM_CANCER_TYPE",
-            "BM_EVIDENCE_DESCRIPTION")
-        ) |>
-        dplyr::arrange(
-          .data$BM_EVIDENCE_LEVEL
-        ) |>
-        dplyr::distinct()
-    }
-  }
-
-  return(rctbl_recs)
-
+  prep_bm_display_tbl(
+    rep = rep,
+    tier = tier,
+    etype_for_tiering = etype_for_tiering,
+    clnsig = clnsig,
+    tier_defining_eitems_only = tier_defining_eitems_only,
+    variant_category = variant_category,
+    evidence_type = "diagnostic")
 }
 
 
@@ -1259,6 +712,9 @@ map_biomarker_data <- function(
               relationship = "many-to-many") |>
             dplyr::rename("BIOMARKER_MATCH" = "BIOMARKER_MATCHTYPE") |>
             dplyr::mutate(BIOMARKER_RESOLUTION = dplyr::case_when(
+              ## complex biomarkers (MSI-H, TMB-H)
+              stringr::str_detect(
+                .data$BIOMARKER_MATCH,"by_(msi|tmb)") ~ "biomarker",
               stringr::str_detect(
                 .data$BIOMARKER_MATCH,"by_fusion") ~ "fusion",
               stringr::str_detect(
@@ -1632,5 +1088,186 @@ map_biomarker_data <- function(
 
 }
 
+#' Mode of biomarker database use - 'oncokb_only' (--oncokb_exclusive),
+#' 'all' (CIViC, CGI and OncoKB) or 'no_oncokb' (CIViC and CGI)
+#'
+#' @param report PCGR report object
+#'
+#' @return character
+#' @keywords internal
+bm_db_mode <- function(report) {
+  conf <- report$settings$conf
+  ## same flag as biomarker_sources_not_tiered() - the API token is not
+  ## kept in the configuration file written to the output directory
+  oncokb_active <- isTRUE(as.numeric(conf$oncokb$run) == 1)
+  if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
+    "oncokb_only"
+  } else if (oncokb_active) {
+    "all"
+  } else {
+    "no_oncokb"
+  }
+}
 
+#' Biomarker databases used for actionability classification (as named in
+#' the HTML report)
+#'
+#' @param report PCGR report object
+#' @param fusion logical, RNA fusions (CGI evidence is never used for fusions)
+#'
+#' @return character, e.g. 'CIViC and CGI'
+#' @keywords internal
+bm_db_label <- function(report, fusion = FALSE) {
+  mode <- bm_db_mode(report)
+  if (mode == "oncokb_only") {
+    "OncoKB"
+  } else if (mode == "all") {
+    if (fusion) "CIViC and OncoKB" else "CIViC, CGI, and OncoKB"
+  } else {
+    if (fusion) "CIViC" else "CIViC and CGI"
+  }
+}
 
+#' Biomarker databases whose evidence items define actionability tiers -
+#' when OncoKB is run, CGI evidence is shown for tiered aberrations, but not
+#' used for tier assignment (cf. biomarker_sources_not_tiered()). Used in
+#' messages on the absence of biomarker evidence.
+#'
+#' @param report PCGR report object
+#' @param fusion logical, RNA fusions (CGI evidence is never used for fusions)
+#'
+#' @return character, e.g. 'CIViC and OncoKB'
+#' @keywords internal
+bm_db_tier_label <- function(report, fusion = FALSE) {
+  mode <- bm_db_mode(report)
+  if (mode == "oncokb_only") {
+    "OncoKB"
+  } else if (mode == "all") {
+    "CIViC and OncoKB"
+  } else {
+    if (fusion) "CIViC" else "CIViC and CGI"
+  }
+}
+
+#' Sentence on the biomarker databases used for tier assignment, appended
+#' to the actionability introductions (empty unless CGI is shown, but not
+#' used for tier assignment)
+#'
+#' @param report PCGR report object
+#' @param fusion logical, RNA fusions (CGI evidence is never used for fusions)
+#'
+#' @return character
+#' @keywords internal
+bm_db_tier_note <- function(report, fusion = FALSE) {
+  if (fusion || bm_db_mode(report) != "all") {
+    return("")
+  }
+  paste0(
+    "Tiers are assigned from CIViC and OncoKB evidence; CGI evidence is ",
+    "shown as additional support for tiered aberrations, but does not ",
+    "define a tier on its own.")
+}
+
+#' Sort evidence levels in the order of color_palette$elevel (A-E, then
+#' OncoKB levels)
+#'
+#' @param levels evidence level codes
+#' @keywords internal
+sort_evidence_levels <- function(levels) {
+  levels[order(match(levels, names(pcgrr::color_palette$elevel)), levels)]
+}
+
+#' Citations of the biomarker databases used for actionability
+#' classification (pandoc citation keys, cf. bm_db_label())
+#'
+#' @param report PCGR report object
+#' @param fusion logical, RNA fusions (CGI evidence is never used for fusions)
+#'
+#' @return character, e.g. `[@Griffith2017-do; @Tamborero2018-aj]`
+#' @keywords internal
+bm_db_citation <- function(report, fusion = FALSE) {
+  mode <- bm_db_mode(report)
+  if (mode == "oncokb_only") {
+    "[@Chakravarty2017-rd]"
+  } else if (mode == "all") {
+    if (fusion) {
+      "[@Griffith2017-do; @Chakravarty2017-rd]"
+    } else {
+      "[@Griffith2017-do; @Tamborero2018-aj; @Chakravarty2017-rd]"
+    }
+  } else {
+    if (fusion) "[@Griffith2017-do]" else "[@Griffith2017-do; @Tamborero2018-aj]"
+  }
+}
+
+#' Internal evidence tiers of prognostic and diagnostic biomarker evidence
+#' shown in the reports (HTML/PDF sections, key findings)
+#'
+#' Prognostic and diagnostic evidence is not tiered in the reports (AMP/ASCO/CAP
+#' tiers refer to therapeutic evidence only); the internal tiers are used to
+#' select which evidence is shown. With a primary site, evidence matching the
+#' primary site is shown (internal tiers 1/2: strong/weak evidence). Without a
+#' primary site (site 'Any'), evidence from any tumor type is considered, for
+#' which weak evidence (levels C/D/E) always gets internal tier 3 - which is
+#' then also shown.
+#'
+#' @param report PCGR report object
+#'
+#' @return integer vector of tiers
+#' @export
+progn_diagn_tiers <- function(report) {
+  site <- report$settings$conf$sample_properties$site
+  if (is.null(site) || isTRUE(site == "Any")) c(1L, 2L, 3L) else c(1L, 2L)
+}
+
+#' Whether there is prognostic or diagnostic biomarker evidence to show for
+#' a variant category (tiers as given by progn_diagn_tiers()) - based on the
+#' evidence items, as the tier classification also holds variants with a
+#' Tier 3 by gene role only (no evidence of this type)
+#'
+#' @param report PCGR report object
+#' @param variant_category 'snv_indel', 'cna' or 'fusion'
+#' @param clnsig 'prognostic_poor', 'prognostic_better',
+#' 'diagnostic_positive' or 'diagnostic_negative'
+#'
+#' @return logical
+#' @export
+has_progn_diagn_evidence <- function(report, variant_category, clnsig) {
+  bm_evidence <- report$content[[variant_category]]$callset$bm_evidence
+  if (!isTRUE(report$content[[variant_category]]$eval) ||
+      !clnsig %in% names(bm_evidence) ||
+      NROW(bm_evidence[[clnsig]]$classification) == 0) {
+    return(FALSE)
+  }
+  tiers <- progn_diagn_tiers(report)
+  if (!any(bm_evidence[[clnsig]]$classification$ACTIONABILITY_TIER %in% tiers)) {
+    return(FALSE)
+  }
+  prep <- if (startsWith(clnsig, "prognostic")) {
+    prep_progn_display_tbl
+  } else {
+    prep_diagn_display_tbl
+  }
+  recs <- prep(
+    rep = report, tier = tiers,
+    etype_for_tiering = sub("_.*$", "", clnsig),
+    clnsig = clnsig, variant_category = variant_category)
+  NROW(recs$main) > 0
+}
+
+#' Note on the tiers of prognostic/diagnostic biomarker evidence shown, for
+#' reports without a primary site (see progn_diagn_tiers())
+#'
+#' @param report PCGR report object
+#'
+#' @return character ('' when a primary site is set)
+#' @export
+progn_diagn_tier_note <- function(report) {
+  if (!3L %in% progn_diagn_tiers(report)) {
+    return("")
+  }
+  paste0(
+    "As no primary tumor site was specified, prognostic and diagnostic ",
+    "biomarker evidence from any tumor type is shown, including weak ",
+    "evidence (levels C/D/E).")
+}

@@ -1,4 +1,4 @@
-## Settings
+<hr style="margin: 0.5em 0 1em 0;">
 
 ```{r on_off_settings}
 #| echo: false
@@ -10,28 +10,28 @@ mutational_burden <- 'ON'
 
 conf <- pcg_report$settings$conf
 
-oncokb_active <- !is.null(conf$oncokb$api_token) &&
-  !is.na(conf$oncokb$api_token) &&
-  conf$oncokb$api_token != "None"
-bm_db_label <- if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
-  "OncoKB"
-} else if (oncokb_active) {
-  "CIViC, CGI, and OncoKB"
-} else {
-  "CIViC and CGI"
-}
-bm_db_citation <- if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
-  "[@Chakravarty2017-rd]"
-} else if (oncokb_active) {
-  "[@Griffith2017-do;@Tamborero2018-aj;@Chakravarty2017-rd]"
-} else {
-  "[@Griffith2017-do;@Tamborero2018-aj]"
-}
+## biomarker databases shown (bm_db_label) and used for tier assignment
+## (bm_db_tier_label - CGI is not used when OncoKB is run, nor for fusions)
+bm_db_label <- pcgrr:::bm_db_label(pcg_report)
+bm_db_citation <- pcgrr:::bm_db_citation(pcg_report)
+bm_db_tier_label <- pcgrr:::bm_db_tier_label(pcg_report)
+bm_db_tier_note <- pcgrr:::bm_db_tier_note(pcg_report)
+bm_db_label_fusion <- pcgrr:::bm_db_label(pcg_report, fusion = TRUE)
+bm_db_citation_fusion <- pcgrr:::bm_db_citation(pcg_report, fusion = TRUE)
+bm_db_tier_label_fusion <- pcgrr:::bm_db_tier_label(pcg_report, fusion = TRUE)
 
 sample_name <- pcg_report[['settings']][['sample_id']]
 assay_type <- conf$assay_properties$type
 tumor_site <- conf$sample_properties$site
-sex <- conf$sample_properties$sex
+sex <- conf$subject_properties$sex
+age <- conf$subject_properties$age
+## mirrors the PDF cover (pcgrr:::pdf_cover_values) - always 'SEX / AGE'
+if (!is.null(age) && length(age) == 1 && !is.na(age) &&
+    !age %in% c("NA", "None")) {
+  sex <- paste0(sex, " / ", age, " years")
+} else {
+  sex <- paste0(sex, " / N/A")
+}
 assay_mode <- conf$assay_properties$mode
 genome_assembly <- pcg_report[['settings']][['genome_assembly']]
 tumor_ploidy <- "N/A"
@@ -50,6 +50,12 @@ tumor_purity <- "N/A"
 if (!is.na(conf$sample_properties$tumor_purity) &
    conf$sample_properties$tumor_purity != "NA") {
   tumor_purity <- conf$sample_properties$tumor_purity
+  if (!is.null(conf$sample_properties$tumor_purity_source) &&
+      !is.na(conf$sample_properties$tumor_purity_source) &&
+      conf$sample_properties$tumor_purity_source != "NA") {
+    tumor_purity <- paste0(
+      tumor_purity, " (", conf$sample_properties$tumor_purity_source, ")")
+  }
 }
 
 target_size <- conf$assay_properties$effective_target_size_mb
@@ -70,8 +76,19 @@ include_germline_findings <- 'OFF'
 if (pcg_report$content$germline_classified$eval == TRUE) {
   include_germline_findings <- 'ON'
 }
-if (pcg_report$content$msi$eval == FALSE) {
+if (pcg_report$content$msi$eval == FALSE ||
+    isTRUE(pcg_report$content$msi$missing_data)) {
   msi_prediction <- 'OFF'
+}
+hrd_external_caller <- 'OFF'
+if (isTRUE(pcg_report$content$hrd$external$eval)) {
+  hrd_external_caller <-
+    pcgrr::hrd_external_display(pcg_report$content$hrd)$caller_label
+}
+msi_external_caller <- 'OFF'
+if (isTRUE(pcg_report$content$msi$external$eval)) {
+  msi_external_caller <-
+    pcgrr::msi_external_display(pcg_report$content$msi)$caller_label
 }
 if (pcg_report$content$mutational_signatures$eval == FALSE) {
   signatures_estimation <- 'OFF'
@@ -106,47 +123,34 @@ if (as.logical(pcg_report[["settings"]][["conf"]][["vep"]][["vep_gencode_basic"]
 }
 ```
 
-<br><br>
-
 ```{r input_data_indicators}
 #| output: asis
 #| echo: false
 #| eval: true
 
-bslib::layout_column_wrap(
-  width = 1/4,
-  height = 90,
-  bslib::value_box(
-    title = "Data input",
-    value = "Somatic SNVs/InDels",
-    showcase = NULL,
-    #showcase = bsicons::bs_icon(
-    #  if (snv_indel_eval) "check-square" else "x-square", size = "0.4em"),
-    #showcase_layout = "top right",
-    theme = bslib::value_box_theme(
-      bg = if (snv_indel_eval) success_color else none_color, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "Data input",
-    value = "Somatic CNAs",
-    showcase = NULL,
-    theme = bslib::value_box_theme(
-      bg = if (cna_eval) success_color else none_color, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "Data input",
-    value = "RNA fusions",
-    showcase = NULL,
-    theme = bslib::value_box_theme(
-      bg = if (fusion_eval) success_color else none_color, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "Data input",
-    value = "Gene expression",
-    showcase = NULL,
-    theme = bslib::value_box_theme(
-      bg = if (expression_eval) success_color else none_color, fg = "#fff")
-  )
+## compact row of data input chips - status is marked by icon and hover
+## text (not only color-coded), for print and color vision deficiencies
+input_chip <- function(label, included) {
+  included <- isTRUE(included)
+  htmltools::span(
+    class = paste0("pcgr-input-chip pcgr-input-chip--",
+                   if (included) "on" else "off"),
+    style = paste0("--chip-color: ",
+                   if (included) success_color else none_color),
+    title = paste0(label, if (included) ": included" else ": not included"),
+    htmltools::span(class = "pcgr-input-chip-icon",
+                    if (included) "✓" else "✕"),
+    label)
+}
+
+htmltools::div(
+  class = "pcgr-input-chips",
+  htmltools::span(class = "pcgr-input-chips-label", "Data input"),
+  input_chip("Somatic SNVs/InDels", snv_indel_eval),
+  input_chip("Somatic CNAs", cna_eval),
+  input_chip("Germline variants (CPSR)", include_germline_findings == 'ON'),
+  input_chip("RNA fusions", fusion_eval),
+  input_chip("Gene expression", expression_eval)
 )
 ```
 
@@ -167,7 +171,7 @@ bslib::layout_column_wrap(
       bg = report_color, fg = "#fff")
   ),
   bslib::value_box(
-    title = "Sex",
+    title = "Sex / age at sampling",
     value = sex,
     showcase = NULL,
     theme = bslib::value_box_theme(
@@ -191,6 +195,46 @@ bslib::layout_column_wrap(
 ```
 
 
+```{r key_findings}
+#| output: asis
+#| echo: false
+#| eval: true
+
+## styled as a panel, mirroring the PDF report (kf-* classes, see pcgr_quarto.css)
+hl <- pcgrr::report_highlights(pcg_report)
+cat(paste0("\n::: {.kf-panel style=\"--kf-color: ", report_color, "\"}\n\n"))
+cat("\n<div class=\"kf-title\"><span class=\"kf-title-text\">Key findings</span></div>\n\n")
+cat("::: {.kf-lead}\n\n")
+cat(hl$lead, sep = "\n\n")
+cat("\n\n")
+## positive composite biomarkers (TMB-high, MSI-high, HR-deficient) as pills -
+## none otherwise (diagnostic hits are a section of the lead, see
+## report_highlights())
+if (length(hl$pills) > 0) {
+  pill_class <- ifelse(
+    hl$pill_kinds == "diagnostic",
+    "pcgr-biomarker-pill pcgr-biomarker-pill--diagnostic",
+    "pcgr-biomarker-pill")
+  cat("<div class='pcgr-biomarker-pills'>",
+      paste0("<span class='", pill_class, "'>",
+             htmltools::htmlEscape(hl$pills), "</span>", collapse = ""),
+      "</div>\n\n", sep = "")
+}
+cat(":::\n\n")
+## actionable variants removed by variant filtering
+if (nzchar(hl$warnings)) {
+  cat("::: {.kf-warning}\n\n")
+  cat(hl$warnings, "\n\n")
+  cat(":::\n\n")
+}
+if (nzchar(hl$supporting)) {
+  cat("::: {.kf-support}\n\n")
+  cat(hl$supporting, "\n\n")
+  cat(":::\n\n")
+}
+cat(":::\n\n")
+```
+
 ::: {.callout-note collapse="true"}
 
 ## Run configuration and report settings
@@ -207,6 +251,7 @@ The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r
 * Variant actionability guidelines: __AMP/ASCO/CAP__
 * Variant oncogenicity guidelines: __ClinGen/CGC/VICC__
 * Biomarker sources: __`r bm_db_label`__
+* HRD assay/tool (external): __`r hrd_external_caller`__
 
 ```{r snv_indel_settings}
 #| output: asis
@@ -217,7 +262,8 @@ cat(glue::glue("* Sequencing assay mode: __{assay_mode}__"), "\n")
 cat(glue::glue("* Sequencing assay type: __{assay_type}__"), "\n")
 cat(glue::glue("* Coding target size: __{target_size}Mb__"), "\n")
 cat(glue::glue("* Show noncoding variants: __{conf$other$show_noncoding}__"), "\n")
-cat(glue::glue("* MSI prediction: __{msi_prediction}__"), "\n")
+cat(glue::glue("* MSI classifier (internal): __{msi_prediction}__"), "\n")
+cat(glue::glue("* MSI caller (external): __{msi_external_caller}__"), "\n")
 cat(glue::glue("* Include germline findings: __{include_germline_findings}__"), "\n")
 cat(glue::glue("* Variant Effect Predictor (VEP) settings"), "\n")
 cat(glue::glue("  * Transcript set: __{transcript_set_gencode}__"), "\n")
@@ -250,6 +296,7 @@ if (length(allelic_filter_items) > 0) {
 }
 cat(glue::glue("* Mutational burden estimation: __{mutational_burden}__"), "\n")
 cat(glue::glue("  * TMB algorithm: __TMB_{conf$somatic_snv[['tmb']][['tmb_display']]}__"), "\n")
+cat(glue::glue("  * TMB-high threshold: __{conf$somatic_snv[['tmb']][['tmb_high_threshold']]} mutations/Mb__"), "\n")
 ```
 
 :::
@@ -287,6 +334,7 @@ cat(glue::glue("* Heterozygous deletion threshold (absolute): __{conf$somatic_cn
 cat(glue::glue("* Heterozygous deletion threshold (relative): __{conf$somatic_cna$del_threshold_relative}__"), "\n")
 cat(glue::glue("* Tumor ploidy: __{tumor_ploidy}__"), "\n")
 cat(glue::glue("* Tumor purity: __{tumor_purity}__"), "\n")
+cat(glue::glue("* Genomic instability (HRD) score estimated: __{as.logical(conf$somatic_cna[['estimate_hrd']])}__"), "\n")
 ```
 
 ```{r expression_settings}
@@ -295,6 +343,10 @@ cat(glue::glue("* Tumor purity: __{tumor_purity}__"), "\n")
 #| eval: !expr as.logical(pcg_report$content$expression$eval) == TRUE
 cat("\n**Expression settings**\n\n")
 cat(glue::glue("* RNA expression similarity analysis: __{rna_expression_similarity}__"), "\n")
+sim_sources <- pcgrr::expression_similarity_sources(conf)
+if (length(sim_sources) > 0) {
+  cat(glue::glue("  * Reference sources: __{paste(sim_sources, collapse = ', ')}__"), "\n")
+}
 ```
 
 ```{r fusion_settings}

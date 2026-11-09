@@ -48,9 +48,20 @@ build_oncogenicity_col_defs <- function(
     ONCOGENICITY = reactable::colDef(
       name = "Oncogenicity",
       cell = render_oncogenicity_cell(data),
+      ## values carry a rank prefix for sorting (see
+      ## oncogenicity_sort_value()) - filter on the label only
+      filterMethod = reactable::JS(
+        "function(rows, columnId, filterValue) {",
+        "  var q = filterValue.toLowerCase();",
+        "  return rows.filter(function(row) {",
+        "    return String(row.values[columnId]).replace(/^[0-9]+\\|/, '')",
+        "      .toLowerCase().indexOf(q) !== -1;",
+        "  });",
+        "}"),
       align = "center",
       minWidth = 140
     ),
+    ACTIONABILITY_TIER = actionability_tier_col_def(data),
     VAF_TUMOR = reactable::colDef(
       name = "Allelic Fraction",
       cell = render_bar_cell(fill_color = "#5D5165"),
@@ -95,6 +106,218 @@ build_oncogenicity_col_defs <- function(
   col_defs
 }
 
+#' Keep only the therapeutically actionable tiers (1 and 2) of an
+#' actionability tier vector
+#'
+#' Used for the oncogenicity tables, where tier 1 and 2 alterations are listed
+#' first and flagged. Lower tiers (uncertain significance) are not treated as
+#' actionable here.
+#'
+#' @param x actionability tier
+#'
+#' @return integer vector with values 1, 2 or NA
+#'
+#' @export
+#'
+actionable_tier <- function(x) {
+  tier <- suppressWarnings(as.integer(x))
+  dplyr::if_else(tier %in% c(1L, 2L), tier, NA_integer_)
+}
+
+#' Column definition for the tier badge of the oncogenicity tables
+#'
+#' The column is hidden if no alteration in the table is actionable.
+#'
+#' @param data table with column ACTIONABILITY_TIER, as returned by
+#' \code{actionable_tier()}
+#' @param color_palette PCGR color palette (tier colors)
+#'
+#' @return a reactable column definition
+#'
+#' @export
+#'
+actionability_tier_col_def <- function(
+    data, color_palette = pcgrr::color_palette) {
+  tier_colors <- color_palette$tier_sensitivity$values
+  reactable::colDef(
+    name = "Tier",
+    show = any(!is.na(data$ACTIONABILITY_TIER)),
+    cell = render_tier_cell(
+      tier_letter = "T",
+      tier_colors = list(
+        t1 = tier_colors[1], t2 = tier_colors[2], t3 = tier_colors[3])),
+    align = "center",
+    maxWidth = 70
+  )
+}
+
+#' Order the variants of an oncogenicity table (SNVs/InDels)
+#'
+#' Therapeutically actionable variants (tier 1, then tier 2) are listed first,
+#' followed by all other variants. Within each of these groups, variants are
+#' ranked by oncogenicity score and cancer association ranks. VUS are further
+#' ranked by the presence of a pathogenic ClinVar classification, within the
+#' positions held by VUS. The table is limited after the actionable variants
+#' are put first, so that these are not lost for samples with many variants.
+#'
+#' @param d data frame with variants
+#' @param n_max maximum number of variants to keep
+#'
+#' @return ordered data frame, where ACTIONABILITY_TIER holds tiers 1 and 2
+#' only (see \code{actionable_tier()}), and is placed next to ONCOGENICITY
+#'
+#' @export
+#'
+order_oncogenicity_table <- function(d, n_max) {
+  d <- d |>
+    dplyr::mutate(
+      ACTIONABILITY_TIER = actionable_tier(.data$ACTIONABILITY_TIER)) |>
+    dplyr::relocate("ACTIONABILITY_TIER", .after = "ONCOGENICITY") |>
+    dplyr::arrange(
+      .data$ACTIONABILITY_TIER,
+      dplyr::desc(.data$ONCOGENICITY_SCORE),
+      dplyr::desc(.data$TISSUE_ASSOC_RANK),
+      dplyr::desc(.data$GLOBAL_ASSOC_RANK)) |>
+    utils::head(n_max)
+
+  is_vus <- !is.na(d$ONCOGENICITY) & d$ONCOGENICITY == "VUS"
+  if (any(is_vus)) {
+    ## VUS with a pathogenic ClinVar classification have a higher likelihood
+    ## of being oncogenic. The tier comes first, as the VUS positions span the
+    ## actionable and the other variants.
+    d[is_vus, ] <- d[is_vus, ] |>
+      dplyr::mutate(
+        .path_clinvar = !is.na(.data$CLINVAR_CLASSIFICATION) &
+          stringr::str_detect(
+            tolower(.data$CLINVAR_CLASSIFICATION), "pathogenic")) |>
+      dplyr::arrange(
+        .data$ACTIONABILITY_TIER,
+        dplyr::desc(.data$.path_clinvar),
+        dplyr::desc(.data$ONCOGENICITY_SCORE)) |>
+      dplyr::select(-".path_clinvar")
+  }
+  d
+}
+
+#' Build column definitions for the germline findings table with
+#' category-aware styling
+#'
+#' Generates a list of column definitions for a reactable table that
+#' displays CPSR-classified germline variants. The ALTERATION column is
+#' styled by the CPSR/ClinVar-derived CLINICAL_SIGNIFICANCE of the variant,
+#' CLINICAL_SIGNIFICANCE itself is rendered as a colored badge, GENOTYPE is
+#' flagged when backed by a low-depth control sample, and CPG_MOI (mode of
+#' inheritance of the cancer predisposition gene) is shown with a tooltip
+#' spelling out the abbreviated code(s). Other columns are hidden from the
+#' main row (and thus fall through to the expandable row details).
+#'
+#' @param data The data frame containing the germline variant annotations
+#' and styling lookup columns.
+#' @param primary_cols Character vector of column names that should be
+#' considered primary and kept visible in the table.
+#' @param has_control_depth Whether DP_CONTROL reflects a real
+#' (non-sentinel) sequencing depth for the variant set, used to enable the
+#' low-depth GENOTYPE styling (default: FALSE).
+#'
+#' @return A list of column definitions that can be passed to reactable's
+#' `columns` argument
+#'
+#' @export
+#'
+build_germline_col_defs <- function(
+    data,
+    primary_cols,
+    has_control_depth = FALSE) {
+
+  col_defs <- list(
+    SYMBOL = reactable::colDef(
+      name = "Gene",
+      minWidth = 90
+    ),
+    ALTERATION = reactable::colDef(
+      name = "Alteration",
+      style = render_alteration_classification_style(data),
+      minWidth = 140
+    ),
+    CONSEQUENCE = reactable::colDef(
+      name = "Consequence",
+      minWidth = 130
+    ),
+    GENOTYPE = reactable::colDef(
+      name = "Genotype",
+      style = if (has_control_depth) render_genotype_style(data) else NULL,
+      align = "center",
+      minWidth = 100,
+      maxWidth = 120
+    ),
+    CLINICAL_SIGNIFICANCE = reactable::colDef(
+      name = "Classification",
+      cell = render_classification_cell(),
+      align = "center",
+      minWidth = 140
+    ),
+    ACMG_CODE = reactable::colDef(
+      name = "ACMG criteria",
+      cell = render_acmg_pills_cell(),
+      minWidth = 170
+    ),
+    CPG_MOI = reactable::colDef(
+      name = "Inheritance",
+      cell = render_moi_cell(),
+      align = "center",
+      maxWidth = 110
+    ),
+    GNOMAD_AF = reactable::colDef(
+      name = "gnomAD AF",
+      cell = render_gnomad_af_cell(data),
+      align = "center",
+      minWidth = 90,
+      maxWidth = 110
+    )
+  )
+
+  actual_cols <- colnames(data)
+
+  ## Keep only col_defs for columns that exist in data
+  col_defs <- col_defs[names(col_defs) %in% actual_cols]
+
+  ## Hide any remaining columns not in primary_cols
+  for (col in actual_cols) {
+    if (!col %in% names(col_defs) && !col %in% primary_cols) {
+      col_defs[[col]] <- reactable::colDef(show = FALSE)
+    }
+  }
+
+  col_defs
+}
+
+#' Render the gnomAD allele frequency of a germline variant
+#'
+#' Renders GNOMAD_AF (exome AF, falling back to genome AF - see
+#' germline.qmd) in scientific notation, or 'absent' when the variant is
+#' not found in gnomAD (AF missing or 0), with both the exome (gnomADe_AF)
+#' and genome (gnomADg_AF) frequencies in the hover tooltip.
+#'
+#' @param data The germline variant data frame (passed via closure)
+#'
+#' @return A function that can be used as a reactable cell renderer
+#' for the GNOMAD_AF column
+#' @keywords internal
+render_gnomad_af_cell <- function(data) {
+  fmt_af <- function(x) {
+    if (is.null(x) || is.na(x) || x <= 0) "absent" else
+      formatC(x, format = "e", digits = 1)
+  }
+  function(value, index) {
+    tooltip <- paste0(
+      "gnomAD exomes: ", fmt_af(data[["gnomADe_AF"]][index]),
+      " / genomes: ", fmt_af(data[["gnomADg_AF"]][index]))
+    htmltools::span(
+      title = tooltip,
+      style = if (is.na(value)) "color:#757575;" else NULL,
+      fmt_af(value))
+  }
+}
 
 
 #' Render one or more source logos from a pipe-separated string
@@ -201,6 +424,28 @@ render_bar_cell <- function(
 }
 
 
+#' Oncogenicity classification as a sortable table value
+#'
+#' reactable sorts a column by its values, which would order the
+#' oncogenicity classes alphabetically (Benign first). Prefixes each class
+#' with its rank in \code{color_palette$oncogenicity$levels} (e.g.
+#' "1|Oncogenic", "5|Benign"), so that sorting (ascending) lists the most
+#' oncogenic variants first. The prefix is stripped for display by
+#' \code{render_oncogenicity_cell()}, and ignored by the column filter of
+#' \code{build_oncogenicity_col_defs()}.
+#'
+#' @param x oncogenicity classification (character)
+#' @param color_palette PCGR color palette (oncogenicity levels)
+#'
+#' @return character vector - values not among the levels (and NA) are
+#' returned unchanged
+#' @export
+#'
+oncogenicity_sort_value <- function(x, color_palette = pcgrr::color_palette) {
+  rank <- match(x, color_palette$oncogenicity$levels)
+  dplyr::if_else(is.na(rank), as.character(x), paste0(rank, "|", x))
+}
+
 #' Style oncogenicity cell background based on value
 #' (Generated by Claude Opus 4.6 with some manual tweaks)
 #'
@@ -215,6 +460,8 @@ render_bar_cell <- function(
 render_oncogenicity_cell <- function(data, color_palette = pcgrr::color_palette) {
   function(value, index) {
     if (is.na(value)) return(value)
+    ## strip the rank prefix used for sorting (oncogenicity_sort_value())
+    value <- sub("^[0-9]+\\|", "", value)
 
     levels <- color_palette$oncogenicity$levels
     colors <- color_palette$oncogenicity$values
@@ -278,6 +525,266 @@ render_alteration_clinvar_style <- function(data, color_palette = pcgrr::color_p
       fontWeight = if (bg != "transparent") "bold" else "normal",
       padding = "4px 8px"
     )
+  }
+}
+
+#' Style germline alteration cell background based on the
+#' CPSR/ClinVar-derived clinical significance of the variant
+#' (Generated by Claude Sonnet 5)
+#'
+#' @param data The main data frame (passed via closure)
+#' @param class_col Name of the column holding the classification
+#'   used to determine background color (default: "CLINICAL_SIGNIFICANCE")
+#' @param color_palette Named list of color palettes
+#'   (default: pcgrr::color_palette), keyed off the "pathogenicity" set
+#'   (Pathogenic/Likely Pathogenic/VUS/Likely Benign/Benign)
+#'
+#' @return A function that can be used as a reactable cell renderer
+#' for the ALTERATION column of the germline findings table
+#'
+#' @export
+#'
+render_alteration_classification_style <- function(
+    data,
+    class_col = "CLINICAL_SIGNIFICANCE",
+    color_palette = pcgrr::color_palette) {
+  levels <- color_palette$pathogenicity$levels
+  colors <- color_palette$pathogenicity$values
+  function(value, index) {
+    cls <- data[[class_col]][index]
+    bg <- if (!is.na(cls)) {
+      matched <- colors[match(cls, levels)]
+      if (!is.na(matched)) matched else "transparent"
+    } else {
+      "transparent"
+    }
+    list(
+      background = bg,
+      color = if (bg != "transparent") "white" else "inherit",
+      fontWeight = if (bg != "transparent") "bold" else "normal",
+      padding = "4px 8px"
+    )
+  }
+}
+
+#' Render germline clinical significance as a colored badge
+#' (Generated by Claude Sonnet 5)
+#'
+#' @param color_palette Named list of color palettes
+#'   (default: pcgrr::color_palette), keyed off the "pathogenicity" set
+#'
+#' @return A function that can be used as a reactable cell renderer
+#' for the CLINICAL_SIGNIFICANCE column of the germline findings table
+#'
+#' @export
+#'
+render_classification_cell <- function(color_palette = pcgrr::color_palette) {
+  function(value) {
+    if (is.na(value)) return(value)
+    levels <- color_palette$pathogenicity$levels
+    colors <- color_palette$pathogenicity$values
+    bg <- colors[match(value, levels)]
+    if (is.na(bg)) bg <- "transparent"
+    htmltools::span(
+      class = "rt-badge rt-badge--sm",
+      style = paste0("background-color:", bg, ";"),
+      value
+    )
+  }
+}
+
+#' Flag germline GENOTYPE cell when backed by a low-depth control sample
+#' (Generated by Claude Sonnet 5)
+#'
+#' Mirrors the DP_CONTROL-based flagging previously implemented via
+#' \code{DT::formatStyle}: variants with a real (non-sentinel), low control
+#' sequencing depth are marked with a colored left border and bold text, so
+#' that their genotype call is interpreted with appropriate caution. DP_CONTROL
+#' is set to -1 (sentinel) when CPSR is run without a matched control sample,
+#' in which case no styling is applied.
+#'
+#' @param data The main data frame (passed via closure)
+#' @param low_depth_threshold Sequencing depth (control sample) below
+#'   which the GENOTYPE cell is flagged (default: 10)
+#'
+#' @return A function that can be used as a reactable cell style renderer
+#' for the GENOTYPE column of the germline findings table
+#'
+#' @export
+#'
+render_genotype_style <- function(data, low_depth_threshold = 10) {
+  function(value, index) {
+    if (!"DP_CONTROL" %in% colnames(data)) {
+      return(list())
+    }
+    dp <- data$DP_CONTROL[index]
+    if (is.na(dp) || dp < 0 || dp >= low_depth_threshold) {
+      return(list())
+    }
+    list(
+      `border-left` = "4px solid #E69F00",
+      fontWeight = "bold"
+    )
+  }
+}
+
+## Full names of the CPG_MOI (mode of inheritance) codes
+moi_labels <- c(
+  "AD"  = "Autosomal dominant",
+  "AR"  = "Autosomal recessive",
+  "XL"  = "X-linked",
+  "XLD" = "X-linked dominant",
+  "XLR" = "X-linked recessive",
+  "MT"  = "Mitochondrial"
+)
+
+#' CPG_MOI (mode of inheritance) code(s) with their full names, for display
+#' in the row details of the germline findings table (e.g. 'AD/AR' ->
+#' 'AD/AR (autosomal dominant / autosomal recessive)')
+#'
+#' @param x CPG_MOI values (character)
+#'
+#' @return character vector (NA for missing/empty values)
+#' @export
+moi_display_text <- function(x) {
+  vapply(x, function(value) {
+    if (is.na(value) || value %in% c(".", "")) return(NA_character_)
+    codes <- strsplit(value, "/")[[1]]
+    full <- vapply(codes, function(code) {
+      if (code %in% names(moi_labels)) tolower(moi_labels[[code]]) else code
+    }, character(1))
+    paste0(value, " (", paste(full, collapse = " / "), ")")
+  }, character(1), USE.NAMES = FALSE)
+}
+
+#' Render CPG_MOI (cancer predisposition gene - mode of inheritance) with
+#' a tooltip spelling out the abbreviated code(s)
+#' (Generated by Claude Sonnet 5)
+#'
+#' CPG_MOI is a gene-level annotation, aggregated across the disease
+#' phenotype(s) linked to that gene in the CPSR gene panel. For most genes
+#' this is a single mode (e.g. "AD" for TP53, "AR" for MUTYH), but for a few
+#' genes (e.g. the mismatch repair genes, BRCA1) it combines two modes
+#' (e.g. "AD/AR"), reflecting that monoallelic vs. biallelic pathogenic
+#' variants in that gene cause distinct conditions with different
+#' inheritance patterns (e.g. Lynch syndrome vs. CMMRD for PMS2/MSH6). The
+#' cell keeps the short code(s) for a narrow column, with the full name(s)
+#' available as a hover tooltip.
+#'
+#' @return A function that can be used as a reactable cell renderer for
+#' the CPG_MOI column of the germline findings table
+#'
+#' @export
+#'
+render_moi_cell <- function() {
+  function(value) {
+    if (is.na(value) || value == "." || value == "") return("")
+    codes <- strsplit(value, "/")[[1]]
+    full <- vapply(codes, function(x) {
+      if (x %in% names(moi_labels)) moi_labels[[x]] else x
+    }, character(1))
+    htmltools::span(title = paste(full, collapse = " / "), value)
+  }
+}
+
+## Condensed descriptions for CPSR/ACMG evidence codes, keyed by the
+## display-form code used in the ACMG_CODE column (e.g. "PM2_supporting",
+## "PVS1_strong") - a self-contained copy of the code/description pairs
+## from cpsr::acmg$evidence_codes (pcgrr cannot import the cpsr package
+## here, since cpsr itself depends on pcgrr). Used to power the hover
+## tooltip on each ACMG criteria pill; keep in sync if the ACMG scoring
+## scheme in cpsr changes.
+acmg_evidence_descriptions <- c(
+  PM1 = "Variant located in a mutational hotspot or critical functional domain without benign variation.",
+  PM1_supporting = "Supporting evidence that a variant lies in a known functional hotspot or critical domain (supporting strength).",
+  PM2_supporting = "Supporting evidence that the variant is absent or extremely rare in population databases (supporting strength).",
+  BA1 = "Stand-alone evidence that the variant's allele frequency is too high for a pathogenic classification.",
+  BP1 = "Supporting evidence that a missense variant occurs in a gene where truncating variants are predominantly known to cause disease.",
+  BP4 = "Supporting evidence that multiple computational tools predict a benign effect on the gene or gene product.",
+  BP7 = "Supporting evidence that a silent (synonymous) variant has no predicted impact on splicing or gene function.",
+  BS1 = "Strong evidence that the variant's allele frequency is greater than expected for a disorder.",
+  BS1_supporting = "Supporting evidence that the variant's frequency is slightly higher than expected for a pathogenic variant.",
+  PVS1 = "Very strong evidence that a null (loss-of-function) variant occurs in a gene where loss of function is a known disease mechanism.",
+  PVS1_strong = "Strong evidence for a predicted loss-of-function variant (reduced strength from PVS1).",
+  PVS1_moderate = "Moderate evidence for a predicted loss-of-function variant (further reduced strength from PVS1).",
+  PS1 = "Strong evidence that the variant causes the same amino acid change as a previously established pathogenic variant but via a different nucleotide change.",
+  PP3 = "Supporting evidence that multiple computational tools predict a deleterious effect on the gene or gene product.",
+  PM5 = "Evidence that the variant causes a novel amino acid change at a residue where another pathogenic missense change has been seen.",
+  PM4 = "Evidence that the variant results in protein length changes due to in-frame deletions/insertions in a non-repeat region or stop-loss in functional protein domains.",
+  PM4_supporting = "As PM4, but for single amino acid changes (supporting strength).",
+  PP2 = "Supporting evidence that a missense variant occurs in a gene with low benign missense variation and where missense variants are a common disease mechanism."
+)
+
+## Contribution of each ACMG evidence code to the CPSR pathogenicity score
+## (path_score in cpsr/data-raw/acmg_evidence.tsv), keyed as
+## acmg_evidence_descriptions - shown in the ACMG criteria pill tooltip;
+## keep in sync if the ACMG scoring scheme in cpsr changes.
+acmg_evidence_scores <- c(
+  PM1 = 2, PM1_supporting = 1, PM2_supporting = 0, BA1 = -8, BP1 = 0,
+  BP4 = -1, BP7 = -1, BS1 = -4, BS1_supporting = -1, PVS1 = 8,
+  PVS1_strong = 4, PVS1_moderate = 2, PS1 = 4, PP3 = 1, PM5 = 2,
+  PM4 = 2, PM4_supporting = 1, PP2 = 0
+)
+
+#' Hover tooltip text of an ACMG criteria pill: description of the
+#' evidence code, and its contribution to the CPSR pathogenicity score
+#'
+#' @param code ACMG evidence code, display form (e.g. "PVS1_strong")
+#'
+#' @return tooltip text, or NULL for an unrecognized code
+#' @keywords internal
+acmg_pill_tooltip <- function(code) {
+  desc <- unname(acmg_evidence_descriptions[code])
+  score <- unname(acmg_evidence_scores[code])
+  score_txt <- if (is.na(score)) {
+    NULL
+  } else if (score == 0) {
+    "CPSR score contribution: 0 points (informative only, does not change the classification)"
+  } else {
+    paste0("CPSR score contribution: ", sprintf("%+d", as.integer(score)), " points")
+  }
+  tooltip <- c(if (!is.na(desc)) desc, score_txt)
+  if (length(tooltip) == 0) return(NULL)
+  paste(tooltip, collapse = "\n\n")
+}
+
+#' Render ACMG criteria as individual colored pills
+#' (Generated by Claude Sonnet 5)
+#'
+#' Splits a pipe-separated ACMG evidence code string (e.g.
+#' "PM2_supporting|PVS1|PP3") into one pill per code. Pathogenic evidence
+#' codes (PVS/PS/PM/PP*) are colored to match the "Pathogenic" tone of
+#' \code{color_palette$pathogenicity}, benign evidence codes (BA/BS/BP*) are
+#' colored to match its "Benign" tone, and any other/unrecognized code
+#' falls back to a neutral gray pill. Each pill carries a hover tooltip
+#' with a condensed description of the evidence code and its contribution
+#' to the CPSR pathogenicity score, sourced from
+#' \code{acmg_evidence_descriptions} and \code{acmg_evidence_scores}.
+#'
+#' @return A function that can be used as a reactable cell renderer for
+#' the ACMG_CODE column of the germline findings table
+#'
+#' @export
+#'
+render_acmg_pills_cell <- function() {
+  function(value) {
+    if (is.na(value) || value == "." || value == "") return("")
+    codes <- strsplit(value, "\\|")[[1]]
+    pills <- lapply(codes, function(code) {
+      variant_class <- if (startsWith(code, "P")) {
+        "path"
+      } else if (startsWith(code, "B")) {
+        "benign"
+      } else {
+        "other"
+      }
+      htmltools::span(
+        class = paste0("rt-acmg-pill rt-acmg-pill--", variant_class),
+        title = acmg_pill_tooltip(code),
+        code
+      )
+    })
+    htmltools::div(class = "rt-acmg-cell", pills)
   }
 }
 
@@ -424,8 +931,8 @@ render_therapy_style <- function(data, tier_colors) {
   }
 }
 
-#' Render prognostic outcome cell with background color
-#' based on actionability tier
+#' Render prognostic outcome (or diagnostic evidence) cell with
+#' background color based on actionability tier
 #' (Generated by Claude Opus 4.6 with some manual tweaks)
 #'
 #' @param data The main data frame (passed via closure)
@@ -462,20 +969,7 @@ render_prognostic_outcome <- function(data, tier_colors) {
 #' @export
 #'
 render_diagnosis <- function(data, tier_colors) {
-  function(value, index) {
-    tier <- data$ACTIONABILITY_TIER[index]
-    bg <- if (!is.na(tier) && tier == 1) {
-      tier_colors$t1
-    } else {
-      tier_colors$t2
-    }
-    list(
-      background = bg,
-      color = "white",
-      fontWeight = "bold",
-      padding = "4px 8px"
-    )
-  }
+  render_prognostic_outcome(data, tier_colors)
 }
 
 #' JS function for reactable row details with exclusions and card styling
@@ -581,40 +1075,87 @@ rt_theme <- function(color_palette = pcgrr::color_palette){
 
 
 #' Build biomarker reactable with category-aware styling
-#' Combines tier 1 and tier 2 records in one table.
-#' Header uses tier 1 color; THERAPY_MATCH cell background
-#' reflects the row's tier (1 or 2).
-#' @param rctbl_recs List with $main and $nested data frames.
+#' Combines tier 1 and tier 2 (and for predictive biomarkers, tier 3)
+#' records in one table. Header uses tier 1 color; the summary cell
+#' (THERAPY_MATCH, PROGNOSTIC_OUTCOME or DIAGNOSTIC_EVIDENCE) background
+#' reflects the row's tier.
+#'
+#' Shared implementation behind \code{render_actble_bm_table},
+#' \code{render_progn_bm_table} and \code{render_diagn_bm_table}.
+#'
+#' @param rctbl_recs List with $main and $nested data frames,
+#' as returned by \code{prep_bm_display_tbl}.
 #'   $main must contain ACTIONABILITY_TIER with values 1 and 2.
-#' @param variant_category One of "snv_indel", "cnv", "fusion"
-#' @param clnsig One of "therapeutic_sensitivity" or
-#' "therapeutic_resistance",
+#' @param variant_category One of "snv_indel", "cna", "fusion",
+#' "msi", "tmb" (msi and tmb for predictive biomarkers only)
+#' @param clnsig One of "therapeutic_sensitivity",
+#' "therapeutic_resistance", "prognostic_poor", "prognostic_better",
+#' "diagnostic_positive" or "diagnostic_negative"
+#' @param color_palette color palette (default: pcgrr::color_palette)
+#' @param evidence_type One of "predictive", "prognostic" or "diagnostic"
 #'
 #' @return A reactable object with the biomarker table
 #' @export
 #'
-render_actble_bm_table <- function(
+render_bm_table <- function(
     rctbl_recs = NULL,
     variant_category = "snv_indel",
     clnsig = "therapeutic_sensitivity",
-    color_palette = pcgrr::color_palette) {
+    color_palette = pcgrr::color_palette,
+    evidence_type = "predictive") {
 
-  tier_colors <-
-    list(
-      t1 = color_palette$tier_sensitivity$values[1],
-      t2 = color_palette$tier_sensitivity$values[2],
-      t3 = color_palette$tier_sensitivity$values[3]
-    )
-
-  tier_letter <- "T"
-  if(clnsig == "therapeutic_resistance"){
-    tier_letter <- "R"
-    tier_colors <- list(
-      t1 = color_palette$tier_resistance$values[1],
-      t2 = color_palette$tier_resistance$values[2],
-      t3 = color_palette$tier_resistance$values[3]
-    )
+  if (!evidence_type %in% c("predictive", "prognostic", "diagnostic")) {
+    log4r_fatal(
+      "evidence_type must be one of 'predictive', 'prognostic', or 'diagnostic'")
   }
+  is_predictive <- evidence_type == "predictive"
+
+  if (evidence_type == "predictive") {
+    tier_letter <- "T"
+    tier_colors <-
+      list(
+        t1 = color_palette$tier_sensitivity$values[1],
+        t2 = color_palette$tier_sensitivity$values[2],
+        t3 = color_palette$tier_sensitivity$values[3]
+      )
+    if(clnsig == "therapeutic_resistance"){
+      tier_letter <- "R"
+      tier_colors <- list(
+        t1 = color_palette$tier_resistance$values[1],
+        t2 = color_palette$tier_resistance$values[2],
+        t3 = color_palette$tier_resistance$values[3]
+      )
+    }
+  } else if (evidence_type == "prognostic") {
+    tier_letter <- "PP"
+    tier_colors <-
+      list(
+        t1 = color_palette$prognosis$values[2],
+        t2 = color_palette$prognosis$values[2]
+      )
+    if(clnsig == "prognostic_better"){
+      tier_letter <- "PB"
+      tier_colors <- list(
+        t1 = color_palette$prognosis$values[1],
+        t2 = color_palette$prognosis$values[1]
+      )
+    }
+  } else {
+    tier_letter <- "D"
+    tier_colors <-
+      list(
+        t1 = color_palette$diagnosis,
+        t2 = color_palette$diagnosis
+      )
+  }
+
+  ## per-variant summary column in the main table (see prep_bm_display_tbl)
+  summary_col <- switch(
+    evidence_type,
+    predictive = "THERAPY_MATCH",
+    prognostic = "PROGNOSTIC_OUTCOME",
+    diagnostic = "DIAGNOSTIC_EVIDENCE"
+  )
 
   ## check that rctbl_recs is
   ## 1. non-null
@@ -631,36 +1172,28 @@ render_actble_bm_table <- function(
       "rctbl_recs must be a list with 'main' and 'nested' data frames")
   }
 
-  if(variant_category == "snv_indel"){
-    required_cols <-
-      c("VAR_ID",
-        "ENTREZGENE",
-        "BM_SOURCES",
-        "ACTIONABILITY_TIER",
-        "BM_TOP_MAPPING_CONFIDENCE",
-        "VAF_TUMOR",
-        "MUTATION_HOTSPOT",
-        "ONCOGENICITY")
-  } else if(variant_category == "cna"){
-    required_cols <-
-      c("VAR_ID",
-        "ENTREZGENE",
-        "BM_SOURCES",
-        "ACTIONABILITY_TIER",
-        "BM_TOP_MAPPING_CONFIDENCE",
-        "CN_TOTAL")
-  } else if(variant_category == "fusion"){
-    required_cols <-
-      c("VAR_ID",
-        "ENTREZGENE",
-        "BM_SOURCES",
-        "ACTIONABILITY_TIER",
-        "BM_TOP_MAPPING_CONFIDENCE")
-  } else {
+  ## complex biomarkers (MSI-H, TMB-H) are so far only predictive,
+  ## and are displayed like fusions
+  valid_categories <- c("snv_indel", "cna", "fusion",
+                        if (is_predictive) c("msi", "tmb"))
+  if (!variant_category %in% valid_categories) {
     log4r_fatal(
       paste0("Invalid variant_category: ", variant_category,
-             ". Must be one of 'snv_indel', 'cna', or 'fusion'."))
+             ". Must be one of ",
+             paste0("'", valid_categories, "'", collapse = ", "), "."))
   }
+  required_cols <-
+    c("VAR_ID",
+      "ENTREZGENE",
+      "BM_SOURCES",
+      "ACTIONABILITY_TIER",
+      "BM_TOP_MAPPING_CONFIDENCE",
+      summary_col,
+      switch(
+        variant_category,
+        snv_indel = c("VAF_TUMOR", "MUTATION_HOTSPOT", "ONCOGENICITY"),
+        cna = "CN_TOTAL",
+        NULL))
 
   if (NROW(rctbl_recs$main) == 0) {
     return(invisible(NULL))
@@ -682,7 +1215,7 @@ render_actble_bm_table <- function(
       "BM_REFERENCE",
       "BM_SOURCE_DB",
       "BM_CANCER_TYPE",
-      "BM_THERAPEUTIC_CONTEXT",
+      if (is_predictive) "BM_THERAPEUTIC_CONTEXT",
       "BM_EVIDENCE_LEVEL",
       "BM_EVIDENCE_DESCRIPTION"),
     only_colnames = FALSE,
@@ -700,59 +1233,65 @@ render_actble_bm_table <- function(
     borderRight = "1px solid rgba(255,255,255,0.3)"
   )
 
-  if(variant_category == "fusion"){
-    main_cols <-  list(
-      SAMPLE_ALTERATION = reactable::colDef(
-        name = "Alteration",
-        cell = render_alteration_cell(
-          rctbl_recs$main),
-        minWidth = 100
-      ),
-      BM_SOURCES = reactable::colDef(
-        name = "Source",
-        cell = render_source_logos(),
-        align = "center",
-        minWidth = 70
-      ),
-      THERAPY_MATCH = reactable::colDef(
-        name = switch(
-          clnsig,
-          therapeutic_sensitivity =
-            "Therapy Match",
-          therapeutic_resistance =
-            "Resistance Match",
-          "Therapy Match"
-        ),
-        html = TRUE,
-        style = render_therapy_style(
-          rctbl_recs$main, tier_colors)
-      ),
-      VAR_ID = reactable::colDef(show = FALSE),
-      ENTREZGENE = reactable::colDef(show = FALSE),
-      ACTIONABILITY_TIER = reactable::colDef(show = FALSE),
-      BM_TOP_MAPPING_CONFIDENCE = reactable::colDef(show = FALSE)
-    )
-  }
+  summary_coldef <- reactable::colDef(
+    name = switch(
+      clnsig,
+      therapeutic_sensitivity = "Therapy Match",
+      therapeutic_resistance = "Resistance Match",
+      prognostic_poor = "Prognostic Outcome",
+      prognostic_better = "Prognostic Outcome",
+      diagnostic_positive = "Diagnostic Evidence",
+      diagnostic_negative = "Diagnostic Evidence",
+      switch(
+        evidence_type,
+        predictive = "Therapy Match",
+        prognostic = "Prognostic Outcome",
+        diagnostic = "Diagnostic Evidence")
+    ),
+    html = TRUE,
+    minWidth = if (is_predictive &&
+                   variant_category %in% c("snv_indel", "cna")) 200,
+    style = if (is_predictive) {
+      render_therapy_style(rctbl_recs$main, tier_colors)
+    } else {
+      render_prognostic_outcome(rctbl_recs$main, tier_colors)
+    }
+  )
 
-  if(variant_category == "snv_indel"){
-    main_cols = list(
-      SAMPLE_ALTERATION = reactable::colDef(
-        name = "Alteration",
-        cell = render_alteration_cell(
-          rctbl_recs$main),
-        minWidth = 140,       # icon + monospace text like "BCR::ABL1 fusion"
-        maxWidth = 200
-      ),
-      BM_SOURCES = reactable::colDef(
-        name = "Source",
-        cell = render_source_logos(),
-        align = "center",
-        minWidth = 70
-      ),
+  alteration_coldef <- switch(
+    variant_category,
+    fusion = ,
+    msi = ,
+    tmb = reactable::colDef(
+      name = "Alteration",
+      cell = render_alteration_cell(
+        rctbl_recs$main),
+      minWidth = 100
+    ),
+    snv_indel = reactable::colDef(
+      name = "Alteration",
+      cell = render_alteration_cell(
+        rctbl_recs$main),
+      minWidth = 140,       # icon + monospace text like "BCR::ABL1 fusion"
+      maxWidth = 200
+    ),
+    cna = reactable::colDef(
+      name = "Alteration",
+      cell = render_alteration_cell(
+        rctbl_recs$main),
+      minWidth = 140
+    )
+  )
+
+  ## variant category-specific columns, shown between
+  ## the source and the summary column
+  category_cols <- switch(
+    variant_category,
+    snv_indel = list(
       ONCOGENICITY = reactable::colDef(
         name = "Oncogenicity",
         html = TRUE,
-        align = "center",
+        align = if (evidence_type != "diagnostic") "center",
         minWidth = 100
       ),
       VAF_TUMOR = reactable::colDef(
@@ -761,73 +1300,62 @@ render_actble_bm_table <- function(
           fill_color = "#5D5165"),
         minWidth = 100,
         maxWidth = 140
-      ),
-      THERAPY_MATCH = reactable::colDef(
-        name = switch(
-          clnsig,
-          therapeutic_sensitivity =
-            "Therapy Match",
-          therapeutic_resistance =
-            "Resistance Match",
-          "Therapy Match"
-        ),
-        html = TRUE,
-        minWidth = 200,
-        style = render_therapy_style(
-          rctbl_recs$main,
-          tier_colors)
-      ),
-      VAR_ID = reactable::colDef(show = FALSE),
-      ENTREZGENE = reactable::colDef(show = FALSE),
-      MUTATION_HOTSPOT = reactable::colDef(show = FALSE),
-      ONCOGENICITY_CODE = reactable::colDef(show = FALSE),
-      ACTIONABILITY_TIER = reactable::colDef(show = FALSE),
-      BM_TOP_MAPPING_CONFIDENCE = reactable::colDef(show = FALSE)
-    )
-  }
+      )
+    ),
+    cna = list(
+      CN_TOTAL = reactable::colDef(
+        name = "Total Copy Number",
+        align = "center",
+        minWidth = 100
+      )
+    ),
+    list()
+  )
 
-  if(variant_category == "cna"){
-    main_cols = list(
-      SAMPLE_ALTERATION = reactable::colDef(
-        name = "Alteration",
-        cell = render_alteration_cell(
-          rctbl_recs$main),
-        minWidth = 140
-      ),
+  hidden_cols <- c(
+    "VAR_ID",
+    "ENTREZGENE",
+    if (variant_category == "snv_indel") "MUTATION_HOTSPOT",
+    if (variant_category == "snv_indel" && is_predictive) "ONCOGENICITY_CODE",
+    "ACTIONABILITY_TIER",
+    "BM_TOP_MAPPING_CONFIDENCE")
+
+  main_cols <- c(
+    list(
+      SAMPLE_ALTERATION = alteration_coldef,
       BM_SOURCES = reactable::colDef(
         name = "Source",
         cell = render_source_logos(),
         align = "center",
         minWidth = 70
-        #maxWidth = 105
-      ),
-      CN_TOTAL = reactable::colDef(
-        name = "Total Copy Number",
+      )
+    ),
+    category_cols,
+    stats::setNames(list(summary_coldef), summary_col),
+    stats::setNames(
+      rep(list(reactable::colDef(show = FALSE)), length(hidden_cols)),
+      hidden_cols)
+  )
+
+  ## evidence item column that the summary column is built from
+  context_coldef <- switch(
+    evidence_type,
+    predictive = list(
+      BM_THERAPEUTIC_CONTEXT = reactable::colDef(
+        name = "Therapy",
+        minWidth = 120
+      )),
+    prognostic = list(
+      BM_CLINICAL_SIGNIFICANCE = reactable::colDef(
+        name = "Outcome",
         align = "center",
-        minWidth = 100
-      ),
-      THERAPY_MATCH = reactable::colDef(
-        name = switch(
-          clnsig,
-          therapeutic_sensitivity =
-            "Therapy Match",
-          therapeutic_resistance =
-            "Resistance Match",
-          "Therapy Match"
-        ),
-        html = TRUE,
-        minWidth = 200,
-        style = render_therapy_style(
-          rctbl_recs$main, tier_colors)
-      ),
-      VAR_ID = reactable::colDef(show = FALSE),
-      ENTREZGENE = reactable::colDef(show = FALSE),
-      ACTIONABILITY_TIER =
-        reactable::colDef(show = FALSE),
-      BM_TOP_MAPPING_CONFIDENCE =
-        reactable::colDef(show = FALSE)
-    )
-  }
+        minWidth = 120)),
+    diagnostic = list(
+      BM_CLINICAL_SIGNIFICANCE = reactable::colDef(
+        name = "Diagnostic Evidence",
+        align = "center",
+        minWidth = 140))
+  )
 
   result_table <- reactable::reactable(
     rctbl_recs$main,
@@ -885,11 +1413,8 @@ render_actble_bm_table <- function(
                 minWidth = 80
               )
             ),
+            context_coldef,
             list(
-              BM_THERAPEUTIC_CONTEXT = reactable::colDef(
-                name = "Therapy",
-                minWidth = 120
-              ),
               BM_EVIDENCE_LEVEL = reactable::colDef(
                 name = "Evidence level",
                 cell = render_evidence_level_cell(color_palette),
@@ -938,15 +1463,33 @@ render_actble_bm_table <- function(
 }
 
 
-#' Build biomarker reactable with category-aware styling
-#' Combines tier 1 and tier 2 records in one table.
-#' Header uses tier 1 color; THERAPY_MATCH cell background
-#' reflects the row's tier (1 or 2).
-#' @param rctbl_recs List with $main and $nested data frames.
-#'   $main must contain ACTIONABILITY_TIER with values 1 and 2.
-#' @param variant_category One of "snv_indel", "cnv", "fusion"
+#' Build actionable (predictive) biomarker reactable
+#'
+#' @inheritParams render_bm_table
 #' @param clnsig One of "therapeutic_sensitivity" or
 #' "therapeutic_resistance",
+#'
+#' @return A reactable object with the biomarker table
+#' @export
+#'
+render_actble_bm_table <- function(
+    rctbl_recs = NULL,
+    variant_category = "snv_indel",
+    clnsig = "therapeutic_sensitivity",
+    color_palette = pcgrr::color_palette) {
+  render_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = variant_category,
+    clnsig = clnsig,
+    color_palette = color_palette,
+    evidence_type = "predictive")
+}
+
+
+#' Build prognostic biomarker reactable
+#'
+#' @inheritParams render_bm_table
+#' @param clnsig One of "prognostic_poor" or "prognostic_better"
 #'
 #' @return A reactable object with the biomarker table
 #' @export
@@ -956,310 +1499,19 @@ render_progn_bm_table <- function(
     variant_category = "snv_indel",
     clnsig = "prognostic_poor",
     color_palette = pcgrr::color_palette) {
-
-  tier_colors <-
-    list(
-      t1 = color_palette$prognosis$values[2],
-      t2 = color_palette$prognosis$values[2]
-    )
-
-  tier_letter <- "PP"
-  if(clnsig == "prognostic_better"){
-    tier_letter <- "PB"
-    tier_colors <- list(
-      t1 = color_palette$prognosis$values[1],
-      t2 = color_palette$prognosis$values[1]
-    )
-  }
-
-  ## check that rctbl_recs is
-  ## 1. non-null
-  ## 2. is a list object that contains two elements
-  ## 3. both elements are data frames
-  ## 4. main data frame contains required columns
-  ##.   (pending upon variant_category)
-  if (is.null(rctbl_recs) ||
-      !is.list(rctbl_recs) ||
-      !all(c("main", "nested") %in% names(rctbl_recs)) ||
-      !is.data.frame(rctbl_recs$main) ||
-      !is.data.frame(rctbl_recs$nested)) {
-    log4r_fatal(
-      "rctbl_recs must be a list with 'main' and 'nested' data frames")
-  }
-
-  if(variant_category == "snv_indel"){
-    required_cols <-
-      c("VAR_ID",
-        "ENTREZGENE",
-        "BM_SOURCES",
-        "ACTIONABILITY_TIER",
-        "BM_TOP_MAPPING_CONFIDENCE",
-        "VAF_TUMOR",
-        "MUTATION_HOTSPOT",
-        "PROGNOSTIC_OUTCOME",
-        "ONCOGENICITY")
-  } else if(variant_category == "cna"){
-    required_cols <-
-      c("VAR_ID",
-        "ENTREZGENE",
-        "BM_SOURCES",
-        "ACTIONABILITY_TIER",
-        "PROGNOSTIC_OUTCOME",
-        "BM_TOP_MAPPING_CONFIDENCE",
-        "CN_TOTAL")
-  } else if(variant_category == "fusion"){
-    required_cols <-
-      c("VAR_ID",
-        "ENTREZGENE",
-        "BM_SOURCES",
-        "ACTIONABILITY_TIER",
-        "PROGNOSTIC_OUTCOME",
-        "BM_TOP_MAPPING_CONFIDENCE")
-  } else {
-    log4r_fatal(
-      paste0("Invalid variant_category: ", variant_category,
-             ". Must be one of 'snv_indel', 'cna', or 'fusion'."))
-  }
-
-  assertable::assert_colnames(
-    rctbl_recs$main,
-    required_cols,
-    only_colnames = FALSE,
-    quiet = TRUE
-  )
-
-  assertable::assert_colnames(
-    rctbl_recs$nested,
-    c("VAR_ID",
-      "ENTREZGENE",
-      "ACTIONABILITY_TIER",
-      "BM_MOLECULAR_PROFILE",
-      "BM_REFERENCE",
-      "BM_SOURCE_DB",
-      "BM_CANCER_TYPE",
-      "BM_EVIDENCE_LEVEL",
-      "BM_EVIDENCE_DESCRIPTION"),
-    only_colnames = FALSE,
-    quiet = TRUE
-  )
-
-
-  hdr_style <- list(
-    background = tier_colors$t1,
-    color = "white",
-    fontFamily = "inherit",
-    fontWeight = "bold",
-    fontSize = "1.1em",
-    #padding = "24px 18px",
-    borderRight = "1px solid rgba(255,255,255,0.3)"
-  )
-
-  if(variant_category == "fusion"){
-    main_cols <-  list(
-      SAMPLE_ALTERATION = reactable::colDef(
-        name = "Alteration",
-        cell = render_alteration_cell(
-          rctbl_recs$main),
-        minWidth = 100
-      ),
-      BM_SOURCES = reactable::colDef(
-        name = "Source",
-        cell = render_source_logos(),
-        align = "center",
-        minWidth = 70
-      ),
-      PROGNOSTIC_OUTCOME = reactable::colDef(
-        name = "Prognostic Outcome",
-        html = TRUE,
-        style = render_prognostic_outcome(
-          rctbl_recs$main, tier_colors)
-      ),
-      VAR_ID = reactable::colDef(show = FALSE),
-      ENTREZGENE = reactable::colDef(show = FALSE),
-      ACTIONABILITY_TIER = reactable::colDef(show = FALSE),
-      BM_TOP_MAPPING_CONFIDENCE = reactable::colDef(show = FALSE)
-    )
-  }
-
-  if(variant_category == "snv_indel"){
-    main_cols = list(
-      SAMPLE_ALTERATION = reactable::colDef(
-        name = "Alteration",
-        cell = render_alteration_cell(
-          rctbl_recs$main),
-        minWidth = 140,   # icon + monospace text like "BCR::ABL1 fusion"
-        maxWidth = 200
-      ),
-      BM_SOURCES = reactable::colDef(
-        name = "Source",
-        cell = render_source_logos(),
-        align = "center",
-        minWidth = 70
-      ),
-      ONCOGENICITY = reactable::colDef(
-        name = "Oncogenicity",
-        html = TRUE,
-        align = "center",
-        minWidth = 100
-      ),
-      VAF_TUMOR = reactable::colDef(
-        name = "Allelic Fraction",
-        cell = render_bar_cell(
-          fill_color = "#5D5165"),
-        minWidth = 100,
-        maxWidth = 140
-      ),
-      PROGNOSTIC_OUTCOME = reactable::colDef(
-        name = "Prognostic Outcome",
-        html = TRUE,
-        style = render_prognostic_outcome(
-          rctbl_recs$main, tier_colors)
-      ),
-      VAR_ID = reactable::colDef(show = FALSE),
-      ENTREZGENE = reactable::colDef(show = FALSE),
-      MUTATION_HOTSPOT = reactable::colDef(show = FALSE),
-      ACTIONABILITY_TIER = reactable::colDef(show = FALSE),
-      BM_TOP_MAPPING_CONFIDENCE = reactable::colDef(show = FALSE)
-    )
-  }
-
-  if(variant_category == "cna"){
-    main_cols = list(
-      SAMPLE_ALTERATION = reactable::colDef(
-        name = "Alteration",
-        cell = render_alteration_cell(
-          rctbl_recs$main),
-        minWidth = 140
-      ),
-      BM_SOURCES = reactable::colDef(
-        name = "Source",
-        cell = render_source_logos(),
-        align = "center",
-        minWidth = 70
-        #maxWidth = 105
-      ),
-      CN_TOTAL = reactable::colDef(
-        name = "Total Copy Number",
-        align = "center",
-        minWidth = 100
-      ),
-      PROGNOSTIC_OUTCOME = reactable::colDef(
-        name = "Prognostic Outcome",
-        html = TRUE,
-        style = render_prognostic_outcome(
-          rctbl_recs$main, tier_colors)
-      ),
-      VAR_ID = reactable::colDef(show = FALSE),
-      ENTREZGENE = reactable::colDef(show = FALSE),
-      ACTIONABILITY_TIER =
-        reactable::colDef(show = FALSE),
-      BM_TOP_MAPPING_CONFIDENCE =
-        reactable::colDef(show = FALSE)
-    )
-  }
-
-  result_table <- reactable::reactable(
-    rctbl_recs$main,
-    columns = main_cols,
-    details = function(index) {
-      eg <- rctbl_recs$main$ENTREZGENE[index]
-      vid <- rctbl_recs$main$VAR_ID[index]
-      tier <- rctbl_recs$main$ACTIONABILITY_TIER[index]
-      nested <- rctbl_recs$nested[
-        rctbl_recs$nested$ENTREZGENE == eg &
-          rctbl_recs$nested$ACTIONABILITY_TIER == tier &
-          rctbl_recs$nested$VAR_ID == vid,
-      ]
-      if (nrow(nested) == 0) return(NULL)
-      display_cols <- setdiff(
-        names(nested),
-        c("VAR_ID",
-          "ACTIONABILITY_TIER",
-          "ENTREZGENE")
-      )
-      htmltools::div(
-        style = "padding: 4px 40px 12px 40px; background: #f9f9f9;",
-        reactable::reactable(
-          nested[, display_cols],
-          columns = list(
-            BM_MOLECULAR_PROFILE = reactable::colDef(
-              name = "Molecular Profile",
-              html = TRUE,
-              minWidth = 140
-            ),
-            BM_REFERENCE = reactable::colDef(
-              name = "Reference",
-              html = TRUE,
-              minWidth = 180
-            ),
-            BM_SOURCE_DB = reactable::colDef(
-              name = "Source",
-              maxWidth = 100
-            ),
-            BM_CANCER_TYPE = reactable::colDef(
-              name = "Cancer Type",
-              minWidth = 130
-            ),
-            BM_EVIDENCE_LEVEL = reactable::colDef(
-              name = "Evidence level",
-              cell = render_evidence_level_cell(color_palette),
-              align = "center",
-              minWidth = 100
-            ),
-            BM_EVIDENCE_DESCRIPTION = reactable::colDef(
-              name = "Evidence Description",
-              cell = render_evidence_desc_cell(),
-              minWidth = 350
-            ),
-            BM_CLINICAL_SIGNIFICANCE = reactable::colDef(
-              name = "Outcome",
-              align = "center",
-              minWidth = 120)
-          ),
-          outlined = TRUE,
-          compact = TRUE,
-          highlight = TRUE,
-          wrap = TRUE,
-          defaultPageSize = 5,
-          theme = reactable::reactableTheme(
-            backgroundColor = "#f9f9f9"
-          )
-        )
-      )
-    },
-    searchable = TRUE,
-    striped = TRUE,
-    highlight = TRUE,
-    filterable = TRUE,
-    compact = TRUE,
-    defaultPageSize = 5,
-    theme = reactable::reactableTheme(
-      style = list(fontFamily = "inherit"),
-      headerStyle = hdr_style,
-      cellStyle = list(
-        borderRight = "1px solid #e0e0e0",
-        display = "flex",
-        alignItems = "center"),
-      searchInputStyle = list(
-        borderColor = tier_colors$t1
-      )
-    )
-  )
-
-
-  return(result_table)
+  render_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = variant_category,
+    clnsig = clnsig,
+    color_palette = color_palette,
+    evidence_type = "prognostic")
 }
 
 
-#' Build biomarker reactable with category-aware styling
-#' Combines tier 1 and tier 2 records in one table.
-#' Header uses tier 1 color; THERAPY_MATCH cell background
-#' reflects the row's tier (1 or 2).
-#' @param rctbl_recs List with $main and $nested data frames.
-#'   $main must contain ACTIONABILITY_TIER with values 1 and 2.
-#' @param variant_category One of "snv_indel", "cnv", "fusion"
-#' @param clnsig One of "therapeutic_sensitivity" or
-#' "therapeutic_resistance",
+#' Build diagnostic biomarker reactable
+#'
+#' @inheritParams render_bm_table
+#' @param clnsig One of "diagnostic_positive" or "diagnostic_negative"
 #'
 #' @return A reactable object with the biomarker table
 #' @export
@@ -1269,297 +1521,12 @@ render_diagn_bm_table <- function(
     variant_category = "snv_indel",
     clnsig = "diagnostic_positive",
     color_palette = pcgrr::color_palette) {
-
-  tier_colors <-
-    list(
-      t1 = color_palette$diagnosis,
-      t2 = color_palette$diagnosis
-    )
-
-  tier_letter <- "D"
-  # if(clnsig == "prognostic_better"){
-  #   tier_letter <- "PB"
-  #   tier_colors <- list(
-  #     t1 = color_palette$prognosis$values[1],
-  #     t2 = color_palette$prognosis$values[1]
-  #   )
-  # }
-
-  ## check that rctbl_recs is
-  ## 1. non-null
-  ## 2. is a list object that contains two elements
-  ## 3. both elements are data frames
-  ## 4. main data frame contains required columns
-  ##.   (pending upon variant_category)
-  if (is.null(rctbl_recs) ||
-      !is.list(rctbl_recs) ||
-      !all(c("main", "nested") %in% names(rctbl_recs)) ||
-      !is.data.frame(rctbl_recs$main) ||
-      !is.data.frame(rctbl_recs$nested)) {
-    log4r_fatal(
-      "rctbl_recs must be a list with 'main' and 'nested' data frames")
-  }
-
-  if(variant_category == "snv_indel"){
-    required_cols <-
-      c("VAR_ID",
-        "ENTREZGENE",
-        "BM_SOURCES",
-        "ACTIONABILITY_TIER",
-        "BM_TOP_MAPPING_CONFIDENCE",
-        "VAF_TUMOR",
-        "MUTATION_HOTSPOT",
-        "DIAGNOSTIC_EVIDENCE",
-        "ONCOGENICITY")
-  } else if(variant_category == "cna"){
-    required_cols <-
-      c("VAR_ID",
-        "ENTREZGENE",
-        "BM_SOURCES",
-        "ACTIONABILITY_TIER",
-        "DIAGNOSTIC_EVIDENCE",
-        "BM_TOP_MAPPING_CONFIDENCE",
-        "CN_TOTAL")
-  } else if(variant_category == "fusion"){
-    required_cols <-
-      c("VAR_ID",
-        "ENTREZGENE",
-        "BM_SOURCES",
-        "ACTIONABILITY_TIER",
-        "DIAGNOSTIC_EVIDENCE",
-        "BM_TOP_MAPPING_CONFIDENCE")
-  } else {
-    log4r_fatal(
-      paste0("Invalid variant_category: ", variant_category,
-             ". Must be one of 'snv_indel', 'cna', or 'fusion'."))
-  }
-
-  assertable::assert_colnames(
-    rctbl_recs$main,
-    required_cols,
-    only_colnames = FALSE,
-    quiet = TRUE
-  )
-
-  assertable::assert_colnames(
-    rctbl_recs$nested,
-    c("VAR_ID",
-      "ENTREZGENE",
-      "ACTIONABILITY_TIER",
-      "BM_MOLECULAR_PROFILE",
-      "BM_REFERENCE",
-      "BM_SOURCE_DB",
-      "BM_CANCER_TYPE",
-      "BM_EVIDENCE_LEVEL",
-      "BM_EVIDENCE_DESCRIPTION"),
-    only_colnames = FALSE,
-    quiet = TRUE
-  )
-
-
-  hdr_style <- list(
-    background = tier_colors$t1,
-    color = "white",
-    fontFamily = "inherit",
-    fontWeight = "bold",
-    fontSize = "1.1em",
-    #padding = "24px 18px",
-    borderRight = "1px solid rgba(255,255,255,0.3)"
-  )
-
-  if(variant_category == "fusion"){
-    main_cols <-  list(
-      SAMPLE_ALTERATION = reactable::colDef(
-        name = "Alteration",
-        cell = render_alteration_cell(
-          rctbl_recs$main),
-        minWidth = 100
-      ),
-      BM_SOURCES = reactable::colDef(
-        name = "Source",
-        cell = render_source_logos(),
-        align = "center",
-        minWidth = 70
-      ),
-      DIAGNOSTIC_EVIDENCE = reactable::colDef(
-        name = "Diagnostic Evidence",
-        html = TRUE,
-        style = render_diagnosis(
-          rctbl_recs$main, tier_colors)
-      ),
-      VAR_ID = reactable::colDef(show = FALSE),
-      ENTREZGENE = reactable::colDef(show = FALSE),
-      ACTIONABILITY_TIER = reactable::colDef(show = FALSE),
-      BM_TOP_MAPPING_CONFIDENCE = reactable::colDef(show = FALSE)
-    )
-  }
-
-  if(variant_category == "snv_indel"){
-    main_cols = list(
-      SAMPLE_ALTERATION = reactable::colDef(
-        name = "Alteration",
-        cell = render_alteration_cell(
-          rctbl_recs$main),
-        minWidth = 140,   # icon + monospace text like "BCR::ABL1 fusion"
-        maxWidth = 200
-      ),
-      BM_SOURCES = reactable::colDef(
-        name = "Source",
-        cell = render_source_logos(),
-        align = "center",
-        minWidth = 70
-      ),
-      ONCOGENICITY = reactable::colDef(
-        name = "Oncogenicity",
-        html = TRUE,
-        minWidth = 100
-      ),
-      VAF_TUMOR = reactable::colDef(
-        name = "Allelic Fraction",
-        cell = render_bar_cell(
-          fill_color = "#5D5165"),
-        minWidth = 100,
-        maxWidth = 140
-      ),
-      DIAGNOSTIC_EVIDENCE = reactable::colDef(
-        name = "Diagnostic Evidence",
-        html = TRUE,
-        style = render_diagnosis(
-          rctbl_recs$main, tier_colors)
-      ),
-      VAR_ID = reactable::colDef(show = FALSE),
-      ENTREZGENE = reactable::colDef(show = FALSE),
-      MUTATION_HOTSPOT = reactable::colDef(show = FALSE),
-      ACTIONABILITY_TIER = reactable::colDef(show = FALSE),
-      BM_TOP_MAPPING_CONFIDENCE = reactable::colDef(show = FALSE)
-    )
-  }
-
-  if(variant_category == "cna"){
-    main_cols = list(
-      SAMPLE_ALTERATION = reactable::colDef(
-        name = "Alteration",
-        cell = render_alteration_cell(
-          rctbl_recs$main),
-        minWidth = 140
-      ),
-      BM_SOURCES = reactable::colDef(
-        name = "Source",
-        cell = render_source_logos(),
-        align = "center",
-        minWidth = 70
-        #maxWidth = 105
-      ),
-      CN_TOTAL = reactable::colDef(
-        name = "Total Copy Number",
-        align = "center",
-        minWidth = 100
-      ),
-      DIAGNOSTIC_EVIDENCE = reactable::colDef(
-        name = "Diagnostic Evidence",
-        html = TRUE,
-        style = render_diagnosis(
-          rctbl_recs$main, tier_colors)
-      ),
-      VAR_ID = reactable::colDef(show = FALSE),
-      ENTREZGENE = reactable::colDef(show = FALSE),
-      ACTIONABILITY_TIER =
-        reactable::colDef(show = FALSE),
-      BM_TOP_MAPPING_CONFIDENCE =
-        reactable::colDef(show = FALSE)
-    )
-  }
-
-  result_table <- reactable::reactable(
-    rctbl_recs$main,
-    columns = main_cols,
-    details = function(index) {
-      eg <- rctbl_recs$main$ENTREZGENE[index]
-      vid <- rctbl_recs$main$VAR_ID[index]
-      tier <- rctbl_recs$main$ACTIONABILITY_TIER[index]
-      nested <- rctbl_recs$nested[
-        rctbl_recs$nested$ENTREZGENE == eg &
-          rctbl_recs$nested$ACTIONABILITY_TIER == tier &
-          rctbl_recs$nested$VAR_ID == vid,
-      ]
-      if (nrow(nested) == 0) return(NULL)
-      display_cols <- setdiff(
-        names(nested),
-        c("VAR_ID",
-          "ACTIONABILITY_TIER",
-          "ENTREZGENE")
-      )
-      htmltools::div(
-        style = "padding: 4px 40px 12px 40px; background: #f9f9f9;",
-        reactable::reactable(
-          nested[, display_cols],
-          columns = list(
-            BM_CLINICAL_SIGNIFICANCE = reactable::colDef(
-              name = "Diagnostic Evidence",
-              align = "center",
-              minWidth = 140),
-            BM_MOLECULAR_PROFILE = reactable::colDef(
-              name = "Molecular Profile",
-              html = TRUE,
-              minWidth = 140
-            ),
-            BM_REFERENCE = reactable::colDef(
-              name = "Reference",
-              html = TRUE,
-              minWidth = 180
-            ),
-            BM_SOURCE_DB = reactable::colDef(
-              name = "Source",
-              maxWidth = 100
-            ),
-            BM_CANCER_TYPE = reactable::colDef(
-              name = "Cancer Type",
-              minWidth = 130
-            ),
-            BM_EVIDENCE_LEVEL = reactable::colDef(
-              name = "Evidence level",
-              cell = render_evidence_level_cell(color_palette),
-              align = "center",
-              minWidth = 100
-            ),
-            BM_EVIDENCE_DESCRIPTION = reactable::colDef(
-              name = "Evidence Description",
-              cell = render_evidence_desc_cell(),
-              minWidth = 350
-            )
-          ),
-          outlined = TRUE,
-          compact = TRUE,
-          highlight = TRUE,
-          wrap = TRUE,
-          defaultPageSize = 5,
-          theme = reactable::reactableTheme(
-            backgroundColor = "#f9f9f9"
-          )
-        )
-      )
-    },
-    searchable = TRUE,
-    striped = TRUE,
-    highlight = TRUE,
-    filterable = TRUE,
-    compact = TRUE,
-    defaultPageSize = 5,
-    theme = reactable::reactableTheme(
-      style = list(fontFamily = "inherit"),
-      headerStyle = hdr_style,
-      cellStyle = list(
-        borderRight = "1px solid #e0e0e0",
-        display = "flex",
-        alignItems = "center"),
-      searchInputStyle = list(
-        borderColor = tier_colors$t1
-      )
-    )
-  )
-
-
-  return(result_table)
+  render_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = variant_category,
+    clnsig = clnsig,
+    color_palette = color_palette,
+    evidence_type = "diagnostic")
 }
 
 
@@ -1571,11 +1538,13 @@ render_diagn_bm_table <- function(
 callout_biomarker_scope <- function(variant_label = "variants") {
   cat(paste0(
     "::: {.callout-note collapse=\"false\"}\n",
-    "## Note — biomarker types and report scope\n\n",
+    "## Note &mdash; biomarker types and report scope\n\n",
     "The ultimate _variant tier classification_ in PCGR is driven by **therapeutic sensitivity** biomarkers ",
     "(i.e. those related to treatment response). Evidence items where variants match ",
-    "**resistance**, **prognostic**, or **diagnostic** biomarkers are also shown — ",
-    "all restricted to biomarkers matching the tumor type of the query sample.\n\n",
+    "**resistance**, **prognostic**, or **diagnostic** biomarkers are also shown (prognostic and ",
+    "diagnostic evidence without tiers) &mdash; restricted to biomarkers matching the tumor ",
+    "type of the query sample when a primary tumor site is specified, and considered for any ",
+    "tumor type otherwise (site code 0).\n\n",
     "The complete set of **Tier III** ", variant_label,
     " (uncertain/unknown clinical significance) is only available in the TSV and Excel workbook outputs.\n\n",
     ":::\n"

@@ -200,11 +200,11 @@ generate_report_data_signatures <-
 
         # get reference signatures (COSMIC v3.4)
         all_reference_signatures <-
-          cosmic_sbs_signatures[['all']]
+          pcgrr::cosmic_sbs_signatures[['all']]
 
         if (as.logical(sig_settings$include_artefact_signatures) == FALSE) {
           all_reference_signatures <-
-            cosmic_sbs_signatures[['no_artefacts']]
+            pcgrr::cosmic_sbs_signatures[['no_artefacts']]
         }
 
         if (length(snv_grl[[1]]) >= n_snvs_required) {
@@ -213,7 +213,7 @@ generate_report_data_signatures <-
             MutationalPatterns::cos_sim_matrix(
               mut_mat, all_reference_signatures)
 
-          if (length(sig_similarity) >= 67) {
+          if (length(sig_similarity) == NCOL(all_reference_signatures)) {
             pcg_report_signatures[["result"]][['signature_similarity']] <-
               tidyr::pivot_longer(
                 as.data.frame(sig_similarity),
@@ -255,6 +255,8 @@ generate_report_data_signatures <-
           )
           selected_reference_signatures <-
             all_reference_signatures[, selected_sigs]
+          pcg_report_signatures[["result"]][["n_reference_signatures"]] <-
+            length(selected_sigs)
 
           ## reconstruct mutation profile from reference mutational signatures
           ## using bootstrapping

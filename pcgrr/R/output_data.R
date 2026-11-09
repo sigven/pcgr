@@ -34,7 +34,10 @@ get_settings_sheet <- function(report = NULL) {
     data.frame(SECTION = "General", PARAMETER = "Actionability guidelines",
                VALUE = "AMP/ASCO/CAP"),
     data.frame(SECTION = "General", PARAMETER = "Oncogenicity guidelines",
-               VALUE = "ClinGen/CGC/VICC")
+               VALUE = "ClinGen/CGC/VICC"),
+    data.frame(SECTION = "General", PARAMETER = "HRD assay/tool (external)",
+               VALUE = if (isTRUE(report$content$hrd$external$eval))
+                 hrd_external_display(report$content$hrd)$caller_label else "OFF")
   )
 
   ## SNV/InDel settings — only when SNV/InDel data present
@@ -46,12 +49,19 @@ get_settings_sheet <- function(report = NULL) {
                  VALUE = as.character(conf$other$show_noncoding)),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "Include germline findings",
                  VALUE = if (isTRUE(report$content$germline_classified$eval)) "ON" else "OFF"),
-      data.frame(SECTION = "SNV/InDel", PARAMETER = "MSI prediction",
-                 VALUE = if (isTRUE(report$content$msi$eval)) "ON" else "OFF"),
+      data.frame(SECTION = "SNV/InDel", PARAMETER = "MSI classifier (internal)",
+                 VALUE = if (isTRUE(report$content$msi$eval) &&
+                             !isTRUE(report$content$msi$missing_data)) "ON" else "OFF"),
+      data.frame(SECTION = "SNV/InDel", PARAMETER = "MSI caller (external)",
+                 VALUE = if (isTRUE(report$content$msi$external$eval))
+                   msi_external_display(report$content$msi)$caller_label else "OFF"),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "Mutational burden estimation",
                  VALUE = if (isTRUE(report$content$tmb$eval)) "ON" else "OFF"),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "TMB algorithm",
                  VALUE = paste0("TMB_", conf$somatic_snv$tmb$tmb_display)),
+      data.frame(SECTION = "SNV/InDel", PARAMETER = "TMB-high threshold (mutations/Mb)",
+                 VALUE = as.character(
+                   conf$somatic_snv$tmb$tmb_high_threshold %||% 10)),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "Mutational signatures estimation",
                  VALUE = if (isTRUE(report$content$mutational_signatures$eval)) "ON" else "OFF"),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "Signatures - min mutations required",
@@ -121,7 +131,9 @@ get_settings_sheet <- function(report = NULL) {
       data.frame(SECTION = "CNA", PARAMETER = "Heterozygous deletion threshold - absolute",
                  VALUE = as.character(conf$somatic_cna$del_threshold_absolute)),
       data.frame(SECTION = "CNA", PARAMETER = "Heterozygous deletion threshold - relative",
-                 VALUE = as.character(conf$somatic_cna$del_threshold_relative))
+                 VALUE = as.character(conf$somatic_cna$del_threshold_relative)),
+      data.frame(SECTION = "CNA", PARAMETER = "Genomic instability (HRD) score estimated",
+                 VALUE = as.character(as.logical(conf$somatic_cna$estimate_hrd)))
     ))
   }
 
@@ -284,7 +296,7 @@ get_excel_sheets <- function(report = NULL) {
     }
   }
 
-  ## initialize sample and assay information
+  ## initialize subject, sample and assay information
   sample_assay <-
     dplyr::bind_rows(
       data.frame(
@@ -292,12 +304,20 @@ get_excel_sheets <- function(report = NULL) {
         PROPERTY = 'SITE', VALUE = NA
       ),
       data.frame(
-        SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
+        SAMPLE_ID = sample_id, CATEGORY = 'SUBJECT',
         PROPERTY = 'SEX', VALUE = NA
+      ),
+      data.frame(
+        SAMPLE_ID = sample_id, CATEGORY = 'SUBJECT',
+        PROPERTY = 'AGE_AT_SAMPLING', VALUE = NA
       ),
       data.frame(
         SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
         PROPERTY = 'TUMOR_PURITY', VALUE = NA
+      ),
+      data.frame(
+        SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
+        PROPERTY = 'TUMOR_PURITY_SOURCE', VALUE = NA
       ),
       data.frame(
         SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
@@ -325,12 +345,22 @@ get_excel_sheets <- function(report = NULL) {
     )
   }
 
-  for (elem in c('SITE','SEX','TUMOR_PURITY','TUMOR_PLOIDY','TUMOR_PLOIDY_SOURCE')) {
+  for (elem in c('SITE','TUMOR_PURITY','TUMOR_PURITY_SOURCE',
+                 'TUMOR_PLOIDY','TUMOR_PLOIDY_SOURCE')) {
     if (tolower(elem) %in% names(report$content$sample_properties)) {
         sample_assay[sample_assay$PROPERTY == elem, 'VALUE'] <-
           report$content$sample_properties[[tolower(elem)]]
       }
     }
+  ## subject sex and age at tumor sampling ('--sex', '--age'; 'NA' if not provided)
+  if ('sex' %in% names(report$content$subject_properties)) {
+    sample_assay[sample_assay$PROPERTY == 'SEX', 'VALUE'] <-
+      report$content$subject_properties[['sex']]
+  }
+  if ('age' %in% names(report$content$subject_properties)) {
+    sample_assay[sample_assay$PROPERTY == 'AGE_AT_SAMPLING', 'VALUE'] <-
+      report$content$subject_properties[['age']]
+  }
 
   if (dna_data_present) {
     for (elem in c('TYPE','MODE','EFFECTIVE_TARGET_SIZE_MB')) {
@@ -352,6 +382,51 @@ get_excel_sheets <- function(report = NULL) {
     }
   }
 
+  ## Biomarker evidence for complex biomarkers (MSI-H, TMB-H)
+  for (biomarker in c("msi", "tmb")) {
+    bm_callset <- report$content[[biomarker]]$callset
+    if (is.null(bm_callset)) {
+      next
+    }
+    bm_sheet <- data.frame()
+    for (clnsig in c("therapeutic_sensitivity", "therapeutic_resistance")) {
+      eitems <- bm_callset$bm_evidence[[clnsig]]$eitems
+      if (NROW(eitems) == 0) {
+        next
+      }
+      bm_sheet <- dplyr::bind_rows(
+        bm_sheet,
+        eitems |>
+          dplyr::mutate(
+            TIER = paste0(
+              dplyr::if_else(
+                clnsig == "therapeutic_sensitivity", "T", "R"),
+              .data$ACTIONABILITY_TIER)) |>
+          dplyr::select(
+            -dplyr::any_of(
+              c("BM_VARIANT_ID",
+                "ACTIONABILITY_TIER",
+                "BM_REFERENCE",
+                "BM_EVIDENCE_LEVEL_FULL",
+                "BM_EVIDENCE_DIRECTION"))) |>
+          dplyr::mutate(
+            BM_MOLECULAR_PROFILE = strip_html(.data$BM_MOLECULAR_PROFILE),
+            SAMPLE_ID = report$settings$sample_id) |>
+          dplyr::left_join(
+            dplyr::select(
+              bm_callset$variant,
+              c("VAR_ID", "VARIANT_CLASS", "SAMPLE_ALTERATION")),
+            by = c("VAR_ID", "VARIANT_CLASS")) |>
+          dplyr::select(
+            c("SAMPLE_ID", "VARIANT_CLASS", "VAR_ID",
+              "SAMPLE_ALTERATION", "TIER"),
+            dplyr::everything()))
+    }
+    if (NROW(bm_sheet) > 0) {
+      excel_sheets[[paste0(toupper(biomarker), "_BIOMARKER")]] <- bm_sheet
+    }
+  }
+
   ## Mutational signatures
   if (!is.null(report$content$mutational_signatures)) {
     if (report$content$mutational_signatures$missing_data == FALSE) {
@@ -360,8 +435,16 @@ get_excel_sheets <- function(report = NULL) {
           colnames(report$content$mutational_signatures$result$tsv) <-
             toupper(colnames(report$content$mutational_signatures$result$tsv))
 
+          ## max four decimals (unrounded values are in the TSV)
           excel_sheets[['MUTATIONAL_SIGNATURE']] <-
-            report$content$mutational_signatures$result$tsv
+            report$content$mutational_signatures$result$tsv |>
+            dplyr::mutate(
+              dplyr::across(
+                dplyr::any_of(
+                  c("PROP_SIGNATURE",
+                    "PROP_SIGNATURE_CI_LOWER",
+                    "PROP_SIGNATURE_CI_UPPER")),
+                ~ round(.x, 4)))
         }
       }
     }
@@ -389,11 +472,22 @@ get_excel_sheets <- function(report = NULL) {
           colnames(report$content$msi$prediction$msi_stats) <-
             toupper(colnames(report$content$msi$prediction$msi_stats))
 
-          excel_sheets[['MSI']] <-
+          excel_sheets[['MSI_INTERNAL']] <-
             report$content$msi$prediction$msi_stats
         }
       }
     }
+  }
+
+  ## MSI - result from external MSI caller (takes precedence, hence 'MSI')
+  if (isTRUE(report$content$msi$external$eval)) {
+    excel_sheets[['MSI']] <- report$content$msi$external$result
+  }
+
+  ## HRD - result from external HRD assay/tool (the genomic scar score
+  ## estimated by PCGR is part of the CNA_SUMMARY sheet)
+  if (isTRUE(report$content$hrd$external$eval)) {
+    excel_sheets[['HRD']] <- report$content$hrd$external$result
   }
 
   ## Immune contexture
@@ -425,6 +519,23 @@ get_excel_sheets <- function(report = NULL) {
     }
   }
 
+  ## CNA summary - sample-level scores derived from the copy number segments
+  ## (same content as the .cna_summary.tsv file)
+  if (isTRUE(report$content$cna$eval)) {
+    cna_conf <- report$settings$conf$somatic_cna
+    na_if_null <- function(x) if (is.null(x)) NA else x
+    excel_sheets[['CNA_SUMMARY']] <- data.frame(
+      SAMPLE_ID = report$settings$sample_id,
+      FRACTION_GENOME_ALTERED = na_if_null(cna_conf$fraction_genome_altered),
+      WGD_FRACTION = na_if_null(cna_conf$wgd_fraction),
+      GENOME_DOUBLED = if (is.null(cna_conf$genome_doubled)) NA else as.logical(cna_conf$genome_doubled),
+      HRD_LOH = na_if_null(cna_conf$hrd_loh),
+      HRD_LST = na_if_null(cna_conf$hrd_lst),
+      HRD_TAI = na_if_null(cna_conf$hrd_tai),
+      HRD_SUM = na_if_null(cna_conf$hrd_sum)
+    )
+  }
+
   ## Copy number alterations
   if (!is.null(report$content$cna) &&
       !is.null(callsets[['cna']]) &&
@@ -433,7 +544,7 @@ get_excel_sheets <- function(report = NULL) {
     if (NROW(callsets[['cna']]$variant) > 0) {
       excel_sheets[['SOMATIC_CNA']] <- as.data.frame(
         callsets[['cna']]$variant |>
-          dplyr::select(dplyr::any_of(tsv_cols$cna)) |>
+          dplyr::select(dplyr::any_of(pcgrr::tsv_cols$cna)) |>
           dplyr::select(-dplyr::any_of("BIOMARKER_MATCH")) |>
           dplyr::filter(!is.na(.data$ACTIONABILITY_TIER)) |>
           dplyr::arrange(
@@ -444,7 +555,7 @@ get_excel_sheets <- function(report = NULL) {
       ## Evidence items - biomarkers
       excel_sheets[['SOMATIC_CNA_BIOMARKER']] <- data.frame()
 
-      for (clnsig in names(bm_categories)) {
+      for (clnsig in names(pcgrr::bm_categories)) {
         if(clnsig == "diagnostic_negative") {
           next
         }
@@ -533,7 +644,7 @@ get_excel_sheets <- function(report = NULL) {
     if (NROW(callsets[['fusion']]$variant) > 0) {
       excel_sheets[['RNA_FUSION']] <- as.data.frame(
         callsets[['fusion']]$variant |>
-          dplyr::select(dplyr::any_of(tsv_cols$fusion)) |>
+          dplyr::select(dplyr::any_of(pcgrr::tsv_cols$fusion)) |>
           dplyr::select(-dplyr::any_of("BIOMARKER_MATCH")) |>
           dplyr::filter(!is.na(.data$ACTIONABILITY_TIER)) |>
           dplyr::arrange(
@@ -543,7 +654,7 @@ get_excel_sheets <- function(report = NULL) {
       ## Evidence items - biomarkers
       excel_sheets[['RNA_FUSION_BIOMARKER']] <- data.frame()
 
-      for (clnsig in names(bm_categories)) {
+      for (clnsig in names(pcgrr::bm_categories)) {
         if(clnsig == "diagnostic_negative") {
           next
         }
@@ -638,7 +749,7 @@ get_excel_sheets <- function(report = NULL) {
       !is.null(callsets$snv_indel) &&
      isTRUE(report$content$snv_indel$eval)) {
 
-    snv_indel_cols <- tsv_cols$snv_indel
+    snv_indel_cols <- pcgrr::tsv_cols$snv_indel
     if (report$settings$conf$other$retained_vcf_info_tags != "None") {
       snv_indel_cols <- c(
         snv_indel_cols,
@@ -678,7 +789,7 @@ get_excel_sheets <- function(report = NULL) {
       ## Evidence items - biomarkers
       excel_sheets[['SOMATIC_SNV_INDEL_BIOMARKER']] <- data.frame()
 
-      for (clnsig in names(bm_categories)) {
+      for (clnsig in names(pcgrr::bm_categories)) {
         if(clnsig == "diagnostic_negative") {
           next
         }

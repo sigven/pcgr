@@ -1,0 +1,203 @@
+```{=typst}
+#pagebreak(weak: true)
+```
+
+# Somatic SNVs/InDels
+
+```{r snv_indel_pdf_setup}
+#| echo: false
+#| eval: true
+
+vstats_pdf <- pcg_report$content$snv_indel$vstats
+snv_pdf <- pcg_report$content$snv_indel$callset$variant
+oncogenic_pdf <- if ("ONCOGENICITY" %in% colnames(snv_pdf)) {
+  snv_pdf |>
+    dplyr::filter(
+      tolower(stringr::str_replace_all(.data$ONCOGENICITY, "_", " ")) %in%
+        c("oncogenic", "likely oncogenic"))
+} else snv_pdf[0, , drop = FALSE]
+## ranked by actionability tier (Tier 1 first; no tier last), then by
+## oncogenicity score (highest first)
+if (NROW(oncogenic_pdf) > 0) {
+  tier_rank <- if ("ACTIONABILITY_TIER" %in% colnames(oncogenic_pdf))
+    suppressWarnings(as.integer(oncogenic_pdf$ACTIONABILITY_TIER)) else
+      rep(NA_integer_, NROW(oncogenic_pdf))
+  score <- if ("ONCOGENICITY_SCORE" %in% colnames(oncogenic_pdf))
+    suppressWarnings(as.numeric(oncogenic_pdf$ONCOGENICITY_SCORE)) else
+      rep(NA_real_, NROW(oncogenic_pdf))
+  oncogenic_pdf <- oncogenic_pdf[order(
+    dplyr::coalesce(tier_rank, 99L), -dplyr::coalesce(score, -Inf)), ,
+    drop = FALSE]
+}
+n_oncogenic_pdf <- NROW(oncogenic_pdf)
+```
+
+## Variant statistics
+
+```{r snv_indel_stats_kpis}
+#| echo: false
+#| output: asis
+#| eval: true
+
+stat_or_na <- function(x) if (is.null(x)) "N/A" else as.character(x)
+cat(pcgrr:::pdf_kpi_row(list(
+  list(title = "Somatic variants (total)", value = stat_or_na(vstats_pdf$n_var)),
+  list(title = "SNVs", value = stat_or_na(vstats_pdf$n_var_snv)),
+  list(title = "InDels", value = stat_or_na(vstats_pdf$n_var_indel)),
+  list(title = "Protein-coding variants",
+       value = stat_or_na(vstats_pdf$n_var_coding)))))
+```
+
+```{r snv_indel_stats_plots}
+#| echo: false
+#| eval: !expr isTRUE(vstats_pdf$n_var > 0)
+#| fig-width: 3.4
+#| fig-height: 1.8
+#| layout-ncol: 2
+
+pdf_plot_varstats <- pcgrr:::pdf_plot_varstats(pcg_report)
+for (p in pdf_plot_varstats) print(p)
+```
+
+## Oncogenic and likely oncogenic variants {#pcgr-oncogenic-variants}
+
+```{r oncogenic_intro}
+#| echo: false
+#| output: asis
+cat("The oncogenicity of somatic SNVs/InDels is classified through an ",
+    "implementation of the ClinGen/CGC/VICC standard operating procedure ",
+    "[@Horak2022-uh]: evidence _for_ and _against_ an oncogenic nature of a given variant is ",
+    "aggregated into an overall oncogenicity score, which determines its ",
+    "classification (see *Appendix: Documentation - Variant oncogenicity ",
+    "classification*). Listed below are the variants classified as ",
+    "oncogenic or likely oncogenic (**n = ", n_oncogenic_pdf, "**), ranked by ",
+    "actionability tier (AMP/ASCO/CAP) [@Li2017-ew], then by oncogenicity ",
+    "score.\n\n",
+    sep = "")
+```
+
+```{r oncogenic_table}
+#| echo: false
+#| eval: !expr n_oncogenic_pdf > 0
+
+## all oncogenic / likely oncogenic variants (coding and non-coding,
+## actionable or not)
+oncogenic_pdf |>
+  pcgrr:::pdf_table_variants(color = report_color, variant_class = FALSE)
+```
+
+```{r oncogenic_hotspot_legend}
+#| echo: false
+#| output: asis
+#| eval: !expr n_oncogenic_pdf > 0
+cat(pcgrr:::pdf_legend("hotspot", oncogenic_pdf))
+```
+
+```{r oncogenic_none_msg}
+#| echo: false
+#| output: asis
+#| eval: !expr n_oncogenic_pdf == 0
+cat(pcgrr:::pdf_note(kind = "empty", 
+  "No oncogenic or likely oncogenic SNVs/InDels were found in this tumor sample."))
+```
+
+## Variant filtering {#pcgr-variant-filtering}
+
+```{r snv_indel_filtering_setup}
+#| echo: false
+#| output: asis
+
+filt_pdf <- pcgrr:::filtering_summary(pcg_report)
+fmt_n <- function(x) format(x, big.mark = ",", trim = TRUE)
+if (!is.na(filt_pdf$n_input)) {
+  cat("Of **n = ", fmt_n(filt_pdf$n_input), "** somatic SNVs/InDels in the ",
+      "input VCF, **n = ", fmt_n(filt_pdf$n_reported), "** were retained ",
+      "after filtering and are considered in this report",
+      if (filt_pdf$tumor_only) " (depth/allelic support filtering, then ",
+      if (filt_pdf$tumor_only) "germline filtering of the tumor-only input)",
+      ".\n\n", sep = "")
+}
+cat("### Depth and allelic support\n\n")
+if (NROW(filt_pdf$read_support) == 0) {
+  cat(pcgrr:::pdf_note(kind = "empty", paste0(
+    "No thresholds for sequencing depth or allelic support were set - no ",
+    "variants were filtered on depth/allelic support."),
+    title = "Not applied"))
+} else {
+  cat("Variants were filtered on sequencing depth (DP), allelic fraction ",
+      "(AF) and allelic depth (AD) in the tumor",
+      if (!filt_pdf$tumor_only) " and control", " sample",
+      if (!filt_pdf$tumor_only) "s", ", in the order listed.\n\n", sep = "")
+}
+```
+
+```{r snv_indel_filtering_read_support}
+#| echo: false
+#| eval: !expr NROW(filt_pdf$read_support) > 0
+pcgrr:::pdf_table_read_support(filt_pdf$read_support, color = report_color)
+```
+
+```{r snv_indel_filtering_read_support_warning}
+#| echo: false
+#| output: asis
+#| eval: !expr NROW(filt_pdf$read_support_removed) > 0
+lbl <- pcgrr:::filtered_variant_labels(filt_pdf$read_support_removed)
+cat(pcgrr:::pdf_note(paste0(
+  "The following actionable variants (Tier 1/2) or mutation hotspots did ",
+  "not pass the depth/allelic support thresholds and are not considered ",
+  "in this report - review them and/or the filtering settings:\n\n",
+  paste0("- ", lbl, collapse = "\n")),
+  title = "Actionable variants removed by filtering", kind = "warning"))
+```
+
+```{r snv_indel_filtering_germline}
+#| echo: false
+#| output: asis
+#| eval: !expr filt_pdf$tumor_only
+cat("### Germline filtering (tumor-only)\n\n")
+cat("Without a matched control sample, likely germline variants are ",
+    "excluded from the tumor-only input based on the following settings:",
+    "\n\n", sep = "")
+cat(pcgrr:::tumor_only_settings_markdown(filt_pdf$tumor_only_settings), "\n")
+if (NROW(filt_pdf$germline) > 0) {
+  cat("*Step 1 - germline filters*: classification of the variants (n = ",
+      fmt_n(sum(filt_pdf$germline$N)), ") - variants matching more than one ",
+      "germline filter are counted as *MULTIPLE FILTERS*:\n\n", sep = "")
+}
+```
+
+```{r snv_indel_filtering_germline_table}
+#| echo: false
+#| eval: !expr filt_pdf$tumor_only && NROW(filt_pdf$germline) > 0
+pcgrr:::pdf_table_filter_shares(
+  filt_pdf$germline, settings = filt_pdf$tumor_only_settings,
+  color = report_color)
+```
+
+```{r snv_indel_filtering_exonic}
+#| echo: false
+#| output: asis
+#| eval: !expr filt_pdf$tumor_only && NROW(filt_pdf$exonic) > 0
+cat("\n*Step 2 - exonic status*: classification of the remaining somatic ",
+    "variants (n = ", fmt_n(sum(filt_pdf$exonic$N)), ") - non-exonic ",
+    "variants are excluded:\n\n", sep = "")
+```
+
+```{r snv_indel_filtering_exonic_table}
+#| echo: false
+#| eval: !expr filt_pdf$tumor_only && NROW(filt_pdf$exonic) > 0
+pcgrr:::pdf_table_filter_shares(filt_pdf$exonic, color = report_color)
+```
+
+```{r snv_indel_filtering_germline_warning}
+#| echo: false
+#| output: asis
+#| eval: !expr NROW(filt_pdf$germline_removed) > 0
+lbl <- pcgrr:::filtered_variant_labels(filt_pdf$germline_removed)
+cat(pcgrr:::pdf_note(paste0(
+  "The following actionable variants (Tier 1/2) were filtered as likely ",
+  "germline events and are not considered in this report - germline status ",
+  "should be verified (e.g. with a matched control sample):\n\n",
+  paste0("- ", lbl, collapse = "\n")),
+  title = "Actionable variants filtered as likely germline", kind = "warning"))
+```

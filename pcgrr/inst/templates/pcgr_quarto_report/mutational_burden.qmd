@@ -102,24 +102,118 @@ Be aware of the nature of the _reference dataset_ (TCGA), which must be taken in
 ```{r tmb_reference_comparison_plot}
 
 tmb_plot <- pcgrr::plot_tmb_primary_site_tcga(
-  pcg_report$content$tmb$tmb_reference, 
-  p_site = 
-    pcg_report$settings$conf$sample_properties$site, 
-  tmb_estimates = 
+  pcg_report$content$tmb$tmb_reference,
+  p_site =
+    pcg_report$settings$conf$sample_properties$site,
+  tmb_estimates =
     pcg_report$content$tmb$sample_estimate,
-  tmb_display_type = 
+  tmb_display_type =
     pcg_report$settings$conf$somatic_snv$tmb$tmb_display,
-  tumor_only = 
+  tumor_only =
     as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only))
 
+## Highlight color used for the query sample's primary site in the plot
+## differs by assay type (color_palette$report_color) - name it correctly
+## in the caption rather than hardcoding a single color
+tmb_highlight_color_name <- if (isTRUE(as.logical(
+  pcg_report$settings$conf$assay_properties$vcf_tumor_only))) {
+  "blue"
+} else {
+  "purple"
+}
 
 bslib::card(
     full_screen = TRUE,
-    height = "850px",
+    height = "900px",
     bslib::card_header(
-      class = "bg-dark", 
+      class = "bg-dark",
       paste0("TMB reference cohorts comparison - ",
              pcg_report$settings$sample_id)),
-    plotly::ggplotly(tmb_plot)
+    plotly::ggplotly(tmb_plot),
+    bslib::card_footer(
+      class = "text-muted",
+      style = "font-size: 0.85em;",
+      paste0(
+        "Each row shows the distribution of tumor mutational burden (TMB, log10 mutations/Mb) ",
+        "among TCGA samples of a given primary tumor site (box: interquartile range; violin: ",
+        "full distribution shape), sorted by descending median TMB. The row highlighted in ",
+        tmb_highlight_color_name, " corresponds to the query sample's primary site (",
+        pcg_report$settings$conf$sample_properties$site,
+        "). The dashed vertical line marks this sample's own TMB estimate for comparison ",
+        "across all sites. Note: the TMB axis is log10-scaled - axis labels indicate the ",
+        "power of ten (e.g. \"1\" = 10 mutations/Mb)."
+      )
+    )
   )
+```
+
+```{r tmb_biomarker_header}
+#| echo: false
+#| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset))
+#| output: asis
+
+cs <- pcgrr::color_palette$bm_callout
+cat("<br>\n\n### Biomarker evidence for TMB-High\n\n")
+cat("The tumor mutational burden (", round(tmb_estimate$TMB_ESTIMATE, 1),
+    " mutations/Mb, ", algo, ") is at or above the threshold for TMB-High (",
+    pcg_report$content$tmb$tmb_high_threshold,
+    " mutations/Mb). Therapeutic implications of TMB-High were retrieved from ", bm_db_label,
+    ", and are classified according to the strength of evidence for the tumor type (",
+    pcg_report$settings$conf$sample_properties$site, "), following AMP/ASCO/CAP guidelines. ",
+    if (nzchar(bm_db_tier_note)) paste0(bm_db_tier_note, " ") else "",
+    "Expand a row for details on the underlying evidence items.\n\n", sep = "")
+```
+
+```{r tmb_biomarker_sensitivity}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset)) && any(pcg_report$content$tmb$callset$variant_display$ACTIONABILITY_TIER %in% c(1,2,3))
+
+rctbl_recs <- pcgrr::prep_actble_display_tbl(
+  rep = pcg_report,
+  tier = c(1,2,3),
+  etype_for_tiering = c("predictive"),
+  clnsig = "therapeutic_sensitivity",
+  variant_category = 'tmb')
+
+result_table <-
+  pcgrr::render_actble_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = 'tmb',
+    clnsig = "therapeutic_sensitivity"
+  )
+
+result_table
+```
+
+```{r tmb_biomarker_sensitivity_none}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset)) && !any(pcg_report$content$tmb$callset$variant_display$ACTIONABILITY_TIER %in% c(1,2,3))
+
+cs <- pcgrr::color_palette$bm_callout
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_sensitivity$border, "; background:", cs$therapeutic_sensitivity$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_sensitivity$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no therapeutic sensitivity biomarkers (Tier 1&ndash;3) were identified for TMB-High in this tumor sample.</div>"))
+```
+
+```{r tmb_biomarker_resistance}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset)) && NROW(pcg_report$content$tmb$callset$bm_evidence$therapeutic_resistance$classification) > 0
+
+rctbl_recs <- pcgrr::prep_actble_display_tbl(
+  rep = pcg_report,
+  tier = c(1,2,3),
+  clnsig = "therapeutic_resistance",
+  variant_category = 'tmb')
+
+result_table <-
+  pcgrr::render_actble_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = 'tmb',
+    clnsig = "therapeutic_resistance"
+  )
+
+if (!is.null(result_table)) {
+  result_table
+}
 ```

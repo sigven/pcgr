@@ -227,7 +227,13 @@ def pick_single_gene_csq(vep_csq_results,
         ## APPRIS level - lower value prioritized
         if csq_elem['APPRIS'] is not None:
             if 'ALTERNATIVE' not in csq_elem['APPRIS']:
-                csq_candidate['appris'] = int(re.sub(r'[A-Z]{1,}:?', '', csq_elem['APPRIS']))
+                appris_grade = re.sub(r'[A-Z]{1,}:?', '', csq_elem['APPRIS'])
+                ## Newer APPRIS/VEP releases may emit grade-less codes (e.g. 'PM', 'AM' for
+                ## MANE-linked principal/alternative isoforms) with no trailing digit - VEP's
+                ## own pick logic falls back to leaving the grade unset in that case, so we
+                ## likewise keep the pre-assigned default rather than failing on int('')
+                if appris_grade != '':
+                    csq_candidate['appris'] = int(appris_grade)
             else:
                 csq_candidate['appris'] = int(re.sub(r'ALTERNATIVE:','', csq_elem['APPRIS'])) + 10
 

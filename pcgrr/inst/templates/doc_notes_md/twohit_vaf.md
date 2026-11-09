@@ -11,10 +11,10 @@ VAF is consistent with the variant residing on the _retained_ (major) allele of 
 segment. The expected VAF of a clonal mutation is derived from the purity-adjusted mixture model
 ([Carter et al., Nat Biotechnol, 2012](https://doi.org/10.1038/nbt.2203)):
 
-$$\text{VAF}_{\text{expected}} = \frac{p \times n_{\text{mut}}}{p \times n_{\text{total}} + 2 \times (1 - p)}$$
+`VAF_expected = (p * n_mut) / (p * n_total + 2 * (1 - p))`
 
-where $p$ is tumor purity, $n_{\text{mut}}$ is the number of mutant allele copies on the
-retained allele, and $n_{\text{total}}$ is the total segment copy number. A variant is considered consistent if the observed tumor VAF falls within a tolerance of ±0.15 of the expected VAF.
+where `p` is tumor purity, `n_mut` is the number of mutant allele copies on the
+retained allele, and `n_total` is the total segment copy number. A variant is considered consistent if the observed tumor VAF falls within a tolerance of ±0.15 of the expected VAF.
 
 | Flag | Interpretation |
 |---|---|

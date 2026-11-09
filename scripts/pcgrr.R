@@ -62,6 +62,15 @@ if (!is.null(pcg_report)) {
       "Skipping HTML report generation (option '--no_html' set to TRUE)")
   }
 
+  ## PDF report (Quarto/Typst) - generated unless '--no_pdf' is set
+  if(!isTRUE(as.logical(pcg_report$settings$conf$other$no_pdf))){
+    pcgrr::write_report_pdf(report = pcg_report)
+  }
+  else{
+    pcgrr::log4r_info(
+      "Skipping PDF report generation (option '--no_pdf' set to TRUE)")
+  }
+
 
 
 }

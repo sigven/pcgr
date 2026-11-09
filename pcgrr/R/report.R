@@ -94,10 +94,12 @@ init_report <- function(yaml_fname = NULL,
     for (a_elem in c("snv_indel",
                      "cna",
                      "sample_properties",
+                     "subject_properties",
                      "assay_properties",
                      "mutational_signatures",
                      "tmb",
                      "msi",
+                     "hrd",
                      "germline_classified",
                      "rainfall",
                      "kataegis",
@@ -171,6 +173,10 @@ init_report <- function(yaml_fname = NULL,
       if (a_elem == "msi") {
         report[["content"]][[a_elem]][["missing_data"]] <- FALSE
         report[["content"]][[a_elem]][["prediction"]] <- list()
+        report[["content"]][[a_elem]][["external"]] <- init_external_result()
+      }
+      if (a_elem == "hrd") {
+        report[["content"]][[a_elem]] <- init_hrd_content()
       }
       if (a_elem == "tumor_only") {
         report[["content"]][[a_elem]] <-
@@ -188,6 +194,11 @@ init_report <- function(yaml_fname = NULL,
   if (!is.null(report$settings$conf$sample_properties)) {
     report[['content']][['sample_properties']] <-
       report[['settings']]$conf$sample_properties
+  }
+
+  if (!is.null(report$settings$conf$subject_properties)) {
+    report[['content']][['subject_properties']] <-
+      report[['settings']]$conf$subject_properties
   }
 
   return(report)
@@ -234,6 +245,8 @@ init_tmb_content <- function(ref_data = NULL) {
   rep[["eval"]] <- FALSE
   rep[["sample_estimate"]] <- data.frame()
   rep[["tmb_reference"]] <- ref_data$misc$tmb
+  rep[["tmb_high"]] <- NA
+  rep[["tmb_high_threshold"]] <- NA
 
   return(rep)
 }
@@ -256,6 +269,7 @@ init_mutsignature_content <- function() {
   rep[["result"]][["mut_mat"]] <- NULL
   rep[["result"]][["chromosomes"]] <- NULL
   rep[["result"]][["no_site_prevalence"]] <- FALSE
+  rep[["result"]][["n_reference_signatures"]] <- 0
   rep[["result"]][["tsv"]] <- data.frame()
   rep[["result"]][["contributions"]] <- list()
   rep[["result"]][["contributions"]][["per_signature"]] <- data.frame()
@@ -280,6 +294,7 @@ init_msi_content <- function() {
   rep[["missing_data"]] <- FALSE
   rep[["low_mutation_warning"]] <- FALSE
   rep[["prediction"]] <- list()
+  rep[["external"]] <- init_external_result()
 
   return(rep)
 
@@ -490,7 +505,7 @@ init_biomarker_content <- function() {
   bm_evidence <- list()
   bm_evidence[['eitems']] <- data.frame()
   bm_evidence[['classification']] <- data.frame()
-  for (cat in names(bm_categories)) {
+  for (cat in names(pcgrr::bm_categories)) {
     bm_evidence[[cat]] <- list()
     for (e in c('classification','eitems')) {
       bm_evidence[[cat]][[e]] <- data.frame()

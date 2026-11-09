@@ -19,9 +19,34 @@ generate_report_data_tmb <- function(settings = NULL) {
 
   }
 
+  ## Threshold (mutations/Mb) for classifying the tumor as TMB-high, applied
+  ## to the TMB measure used for display. Defaults to 10 (FDA/OncoKB TMB-H
+  ## definition) for configuration files lacking the setting.
+  tmb_conf <- settings[["conf"]][["somatic_snv"]][["tmb"]]
+  tmb_high_threshold <- 10
+  if (!is.null(tmb_conf[["tmb_high_threshold"]])) {
+    tmb_high_threshold <- as.numeric(tmb_conf[["tmb_high_threshold"]])
+  }
+  tmb_display <- tmb_conf[["tmb_display"]]
+
+  tmb_high <- NA
+  if (NROW(tmb_data) > 0 && "TMB_ESTIMATE" %in% colnames(tmb_data)) {
+    tmb_data$TMB_HIGH <-
+      as.numeric(tmb_data$TMB_ESTIMATE) >= tmb_high_threshold
+    if (!is.null(tmb_display) && "TMB_MEASURE" %in% colnames(tmb_data)) {
+      display_row <- tmb_data[
+        tmb_data$TMB_MEASURE == paste0("TMB_", tmb_display), , drop = FALSE]
+      if (NROW(display_row) == 1) {
+        tmb_high <- display_row$TMB_HIGH
+      }
+    }
+  }
+
   tmb_rep <- list()
   tmb_rep[["eval"]] <- TRUE
   tmb_rep[["sample_estimate"]] <- tmb_data
+  tmb_rep[["tmb_high_threshold"]] <- tmb_high_threshold
+  tmb_rep[["tmb_high"]] <- tmb_high
 
   return(tmb_rep)
 }

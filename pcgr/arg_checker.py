@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pcgr import pcgr_vars, utils
+from pcgr import pcgr_vars, utils, msi, hrd_external
 from pcgr.utils import getlogger, error_message, warn_message, check_file_exists, check_tabix_file
 import os
 
@@ -187,6 +187,23 @@ def verify_args(arg_dict, logger = None):
 
     # Optional arguments
 
+    if arg_dict.get('input_msi_caller') is not None and arg_dict.get('input_msi') is None:
+        err_msg = f"Option '--input_msi_caller' ({arg_dict['input_msi_caller']}) requires an MSI result file ('--input_msi')"
+        error_message(err_msg, logger)
+
+    if arg_dict.get('input_msi_threshold') is not None:
+        if arg_dict.get('input_msi') is None:
+            err_msg = "Option '--input_msi_threshold' requires an MSI result file ('--input_msi')"
+            error_message(err_msg, logger)
+        threshold_error = msi.check_msi_threshold(
+            arg_dict.get('input_msi_caller') or 'generic', arg_dict['input_msi_threshold'])
+        if threshold_error is not None:
+            error_message(threshold_error, logger)
+
+    if arg_dict.get('input_hrd_threshold') is not None and arg_dict.get('input_hrd') is None:
+        err_msg = "Option '--input_hrd_threshold' requires an HRD result file ('--input_hrd')"
+        error_message(err_msg, logger)
+
     if arg_dict['expression_sim'] and arg_dict['input_rna_exp'] is None:
         warn_msg = f"RNA expression similarity analysis can only be performed if --input_rna_exp is set (--input_rna_exp = {arg_dict['input_rna_exp']})."
         warn_message(warn_msg, logger)
@@ -213,8 +230,7 @@ def verify_args(arg_dict, logger = None):
         uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
         if not re.match(uuid_pattern, str(arg_dict['oncokb_api_token']), re.IGNORECASE):
             err_msg = (
-                f"OncoKB API token ('--oncokb_api_token') does not match the expected UUID format "
-                f"(e.g. 'c3f8a1d2-7b4e-49c0-85f1-2e6d0a9b3c7e')"
+                f"OncoKB API token ('--oncokb_api_token') does not match the expected UUID format"
             )
             error_message(err_msg, logger)
 
@@ -225,6 +241,11 @@ def verify_args(arg_dict, logger = None):
             "please supply '--oncokb_api_token' to use OncoKB-exclusive biomarker matching"
         )
         error_message(err_msg, logger)
+
+    # OncoKB: warn if --oncokb_tumor_type_only is set without a token (no effect)
+    if arg_dict.get('oncokb_tumor_type_only') is True and arg_dict.get('oncokb_api_token') is None:
+        warn_message(
+            "'--oncokb_tumor_type_only' is set but no OncoKB API token was provided - option is ignored", logger)
 
     # OncoKB: warn if --oncokb_maf_query_all is enabled for WGS (intended for TARGETED/WES only)
     if arg_dict.get('oncokb_maf_query_all') is True and arg_dict.get('assay') == 'WGS':
@@ -250,6 +271,8 @@ def verify_args(arg_dict, logger = None):
         if not float(arg_dict['tumor_ploidy']) > 0:
             err_msg = f"Tumor ploidy value ('--tumor_ploidy' = {arg_dict['tumor_ploidy']}) must be > 0"
             error_message(err_msg, logger)
+
+    verify_subject_age(arg_dict, logger)
 
     ## VCF-dependent validations - only check when input VCF is provided
     if arg_dict['input_vcf'] is not None:
@@ -321,6 +344,11 @@ def verify_args(arg_dict, logger = None):
                     f"and less than or equal to minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']})"
                 )
                 error_message(err_msg, logger)
+
+        # TMB: check that threshold for TMB-high is positive
+        if float(arg_dict['tmb_high_threshold']) <= 0:
+            err_msg = f"Threshold for TMB-high ('tmb_high_threshold' = {arg_dict['tmb_high_threshold']}) must be > 0 (mutations/Mb)"
+            error_message(err_msg, logger)
 
         # TMB: check that minimum/maximum depth/allelic fractions are set correctly
         if arg_dict['tmb_dp_min'] is not None:
@@ -469,6 +497,23 @@ def verify_args(arg_dict, logger = None):
             err_msg = f"Minimum percent overlap between copy number segment and gene transcript ('--cna_transcript_overlap_pct' = {arg_dict['cna_transcript_overlap_pct']}) must be within (0, 100]"
             error_message(err_msg, logger)
 
+        if arg_dict['estimate_hrd'] is True:
+            if arg_dict['assay'] == 'TARGETED':
+                err_msg = ("Genomic instability ('--estimate_hrd') scoring requires genome-wide copy number data and is not "
+                           "supported for TARGETED sequencing assays ('--assay TARGETED')")
+                error_message(err_msg, logger)
+            ## HRD scores are derived from the CNA segments only - '--tumor_only' concerns the SNV/InDel calls,
+            ## and the CNA segments may well have been called with a matched control
+            if arg_dict['tumor_only'] is True:
+                warn_msg = ("Genomic instability ('--estimate_hrd') scoring in tumor-only mode ('--tumor_only'): the HRD "
+                            "score is only reliable if the copy number segments were called with a matched control - "
+                            "without one, germline runs of homozygosity are indistinguishable from somatic LOH, and "
+                            "may inflate HRD-LOH (and TAI)")
+                warn_message(warn_msg, logger)
+    elif arg_dict['estimate_hrd'] is True:
+        err_msg = "Genomic instability scoring ('--estimate_hrd') requires copy number segment input ('--input_cna')"
+        error_message(err_msg, logger)
+
     return(arg_dict)
 
 
@@ -497,6 +542,7 @@ def define_output_files(arg_dict, cpsr = False):
     output_data['html'] = f"{output_prefix}.html"
     output_data['xlsx'] = f"{output_prefix}.xlsx"
     output_data['yaml']= f"{output_prefix}.conf.yaml"
+    output_data['pdf'] = f"{output_prefix}.pdf"
     
     if not cpsr:
         for otype in ['cna_gene','cna_segment','expression','expression_outliers',
@@ -504,11 +550,14 @@ def define_output_files(arg_dict, cpsr = False):
             output_data[otype] = f"{output_prefix}.{otype}.tsv.gz"        
         output_data['maf'] = f"{output_prefix}.maf"
         output_data['tmb'] = f"{output_prefix}.tmb.tsv"
+        output_data['cna_summary'] = f"{output_prefix}.cna_summary.tsv"
+        output_data['msi_external'] = f"{output_prefix}.msi.tsv"
+        output_data['hrd_external'] = f"{output_prefix}.hrd.tsv"
     else:
         output_data['classification'] = f"{output_prefix}.classification.tsv.gz"
     
     
-    for otype in ['vcf', 'vcf_pass','vcf2tsv', 'html', 'xlsx','yaml']:
+    for otype in ['vcf', 'vcf_pass','vcf2tsv', 'html', 'xlsx','yaml','pdf']:
         if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
             err_msg = "Output files (e.g. " + str(output_data[otype]) + \
                 ") already exist - please specify different sample_id or add option --force_overwrite"
@@ -516,7 +565,8 @@ def define_output_files(arg_dict, cpsr = False):
     
     if not cpsr:
         for otype in ['cna_gene', 'cna_segment','expression', 'expression_outliers', 'snv_indel_ann',
-                      'expression_similarity', 'maf', 'tmb', 'msigs', 'rna_fusion']:
+                      'expression_similarity', 'maf', 'tmb', 'cna_summary', 'msigs', 'rna_fusion',
+                      'msi_external', 'hrd_external']:
             # if annotated output cna segments exist and overwrite not set
             if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
                 err_msg = "Output files (e.g. " + str(output_data[otype]) + \
@@ -544,6 +594,10 @@ def verify_input_files(arg_dict):
     input_germline_dir = 'NA'
     input_germline_yaml_dir = 'NA'
     input_rna_expression_dir = 'NA'
+    input_msi_dir = 'NA'
+    input_msi_basename = 'NA'
+    input_hrd_dir = 'NA'
+    input_hrd_basename = 'NA'
     pon_vcf_dir = 'NA'
     pon_vcf_basename = 'NA'
     input_vcf_basename = 'NA'
@@ -616,6 +670,26 @@ def verify_input_files(arg_dict):
         input_cna_basename = os.path.basename(str(arg_dict["input_cna"]))
         input_cna_dir = os.path.dirname(os.path.abspath(arg_dict["input_cna"]))
 
+    # check external MSI result - the file extension is not restricted (output files from
+    # some workflows have none), the content is validated (cheaply) here to fail early
+    if arg_dict.get("input_msi") is not None:
+        check_file_exists(os.path.abspath(arg_dict["input_msi"]), strict = True, logger = logger)
+        msi.read_external_msi(
+            os.path.abspath(arg_dict["input_msi"]),
+            caller = arg_dict.get("input_msi_caller") or 'generic', logger = logger, quiet = True,
+            msih_threshold = arg_dict.get("input_msi_threshold"))
+        input_msi_basename = os.path.basename(str(arg_dict["input_msi"]))
+        input_msi_dir = os.path.dirname(os.path.abspath(arg_dict["input_msi"]))
+
+    # check external HRD result - as for MSI, the content is validated (cheaply) here to fail early
+    if arg_dict.get("input_hrd") is not None:
+        check_file_exists(os.path.abspath(arg_dict["input_hrd"]), strict = True, logger = logger)
+        hrd_external.read_external_hrd(
+            os.path.abspath(arg_dict["input_hrd"]),
+            threshold = arg_dict.get("input_hrd_threshold"), logger = logger, quiet = True)
+        input_hrd_basename = os.path.basename(str(arg_dict["input_hrd"]))
+        input_hrd_dir = os.path.dirname(os.path.abspath(arg_dict["input_hrd"]))
+
     # check if input rna fusion variants exist
     if arg_dict["input_rna_fusion"] is not None:
         check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]), strict = True, logger = logger)
@@ -680,6 +754,10 @@ def verify_input_files(arg_dict):
       "cna_dir": input_cna_dir,
       "rna_fusion_dir": input_rna_fusion_dir,
       "rna_expression_dir": input_rna_expression_dir,
+      "msi_dir": input_msi_dir,
+      "msi_basename": input_msi_basename,
+      "hrd_dir": input_hrd_dir,
+      "hrd_basename": input_hrd_basename,
       "germline_dir": input_germline_dir,
       "germline_basename": input_germline_basename,
       "germline_yaml_dir": input_germline_yaml_dir,
@@ -854,6 +932,15 @@ def verify_required_args(arg_dict: dict, logger = None):
     
 ##---- CPSR ----##
 
+def verify_subject_age(arg_dict, logger = None):
+    """
+    Check that the age of the subject ('--age', PCGR/CPSR) is within [0, 120]
+    """
+    if arg_dict.get('age') is not None:
+        if not (0 <= int(arg_dict['age']) <= 120):
+            err_msg = f"Subject age ('--age' = {arg_dict['age']}) must be within [0, 120]"
+            error_message(err_msg, logger)
+
 def verify_args_cpsr(arg_dict):
 
     logger = getlogger('cpsr-validate-input-arguments-a')
@@ -863,6 +950,11 @@ def verify_args_cpsr(arg_dict):
     verify_required_args(arg_dict, logger)
     
     ### Optional arguments
+    ## Deprecated: --clinvar_report_noncancer (non-cancer ClinVar variants are reported by default)
+    if arg_dict.get('clinvar_report_noncancer', False):
+        warn_msg = ("Option '--clinvar_report_noncancer' is deprecated and has no effect - ClinVar variants attributed to "
+                    "non-cancer phenotypes are now reported by default (use '--clinvar_cancer_only' to exclude them)")
+        warn_message(warn_msg, logger)
     ## Provide virtual_panel_id or a custom list from panel 0
     if arg_dict['virtual_panel_id'] == "-1" and not arg_dict['custom_list']:
         err_msg = (
@@ -875,6 +967,7 @@ def verify_args_cpsr(arg_dict):
     if arg_dict['max_af_gnomad'] <= 0.05 or arg_dict['max_af_gnomad'] > 1:
         err_msg = f"AF gnomAD threshold must be greater than 0.05 and below 1, current value is {arg_dict['max_af_gnomad']}"
         error_message(err_msg,logger)
+    verify_subject_age(arg_dict, logger)
     #if arg_dict['maf_upper_threshold'] <= 0 or arg_dict['maf_upper_threshold'] > 1:
     #    err_msg = f"MAF upper threshold must be greater than 0 and below 1, current value is {arg_dict['maf_upper_threshold']}"
     #    error_message(err_msg,logger)

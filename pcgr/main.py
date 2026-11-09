@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from pcgr import pcgr_vars, arg_checker, utils, cna
+from pcgr import pcgr_vars, arg_checker, utils, cna, hrd, hrd_external, msi
 from pcgr.utils import getlogger, check_subprocess, remove_file, random_id_generator, pd_to_csv, error_message
-from pcgr.config import populate_config_data, create_config, verify_oncotree_code
+from pcgr.config import populate_config_data, create_config, verify_oncotree_code, get_oncotree_lineage
 from pcgr.maf import update_maf, generate_oncokb_maf_input, add_var_id_to_vcf, append_oncokb_snv_annotations
 from pcgr.cna import append_oncokb_fusion_annotations, append_oncokb_cna_annotations
 from pcgr.oncogenicity import refine_oncogenicity_with_oncokb
@@ -25,7 +25,7 @@ def cli():
     program_description = (f"Personal Cancer Genome Reporter (PCGR) workflow for clinical translation of "
                            f"tumor omics data (SNVs/InDels, CNA, RNA expression, RNA fusions) - version: {pcgr_vars.PCGR_VERSION}")
     program_options = "\n\t[--input_vcf <INPUT_VCF>]\n\t[--input_cna <INPUT_CNA>]\n\t[--input_rna_fusion <INPUT_RNA_FUSION>]\n\t" + \
-        "[--input_rna_expression <INPUT_RNA_EXPRESSION>]\n\t[--vep_dir <VEP_DIR>]\n\t--refdata_dir <REFDATA_DIR>\n\t" + \
+        "[--input_rna_expression <INPUT_RNA_EXPRESSION>]\n\t[--input_msi <INPUT_MSI>]\n\t[--input_hrd <INPUT_HRD>]\n\t[--vep_dir <VEP_DIR>]\n\t--refdata_dir <REFDATA_DIR>\n\t" + \
         "--output_dir <OUTPUT_DIR>\n\t--genome_assembly <GENOME_ASSEMBLY>\n\t--sample_id <SAMPLE_ID>"
 
     parser = argparse.ArgumentParser(description=program_description,
@@ -36,6 +36,7 @@ def cli():
     optional_input = parser.add_argument_group(
         "Molecular input data",
         "At least one input type must be provided")
+    optional_subject = parser.add_argument_group("Subject options")
     optional_sample = parser.add_argument_group("Tumor sample options")
     optional_snv_indel = parser.add_argument_group(
         "Somatic SNV/InDel options",
@@ -77,9 +78,15 @@ def cli():
                                 help = "File with RNA fusion transcripts detected in tumor (tab-separated values)")
     optional_input.add_argument("--input_rna_expression", dest = "input_rna_exp", 
                                 help = "File with bulk RNA expression counts (TPM) of transcripts in tumor (tab-separated values)")
+    optional_input.add_argument("--input_msi", dest = "input_msi", 
+                                help = "Summary result file from an external MSI caller (tab-separated; see --input_msi_caller and the documentation for the expected format)")
+    optional_input.add_argument("--input_hrd", dest = "input_hrd",
+                                help = "Result file from an external HRD assay/tool (tab-separated, see the documentation for the expected format)")
 
-    optional_sample.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN", 
-                                 help = "Sex of cancer case/sample (default: %(default)s)")
+    optional_subject.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN", 
+                                  help = "Sex of the subject (default: %(default)s)")
+    optional_subject.add_argument("--age", dest="age", type=int, 
+                                  help = "Age of the subject (whole years) at the time of tumor sampling (default: %(default)s)")
     optional_sample.add_argument("--tumor_site", dest="tsite", type=int, default=0, 
                                  help = "Optional integer code to specify primary tumor type/site of query sample,\nchoose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
     optional_sample.add_argument("--tumor_purity", type=float, dest="tumor_purity", 
@@ -160,6 +167,9 @@ def cli():
                                   help = "Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_display", dest="tmb_display", default="coding_and_silent", choices=["coding_and_silent", "coding_non_silent", "missense_only"], 
                                   help = "Type of TMB measure to show in report, default: %(default)s")
+    optional_tmb_msi.add_argument("--tmb_high_threshold", dest="tmb_high_threshold", type=float, default=10.0, 
+                                  help = ("Threshold (mutations/Mb) for classifying the tumor as TMB-High, applied to the TMB measure shown in the report (--tmb_display), "
+                                          "default: %(default)s"))
     optional_tmb_msi.add_argument("--tmb_dp_min", dest="tmb_dp_min", default=None, 
                                   help = "If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=None, 
@@ -167,15 +177,21 @@ def cli():
     optional_tmb_msi.add_argument("--tmb_ad_min", dest="tmb_ad_min", default=None, 
                                   help=("If VCF INFO tag for sequencing depth (tumor) and allelic fraction (tumor) are specified and found, \n"
                                         "set minimum required allelic depth (tumor, i.e. number of reads supporting alternate allele) for TMB calculation: default: %(default)s"))
+    optional_tmb_msi.add_argument("--input_msi_caller", dest="input_msi_caller", default=None, choices=pcgr_vars.MSI_CALLERS,
+                                  help = "Caller that produced the file provided with --input_msi (default: generic, i.e. tab-separated file with MSI_STATUS and MSI_CALLER columns)")
+    optional_tmb_msi.add_argument("--input_msi_threshold", dest="input_msi_threshold", type=float, default=None,
+                                  help = "Threshold on the MSI score for MSI-H (percentage of unstable sites), for MSI callers that report a score but no MSI status (--input_msi_caller msisensor-pro; default: 20)")
     optional_tmb_msi.add_argument("--estimate_msi", action="store_true", 
-                                  help = "Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
+                                  help = "Internal MSI classification based on patterns of somatic mutations/indels, default: %(default)s")
 
     optional_signatures.add_argument("--estimate_signatures", action="store_true", 
                                      help = "Estimate relative contributions of reference mutational signatures in query sample (re-fitting), default: %(default)s")
     optional_signatures.add_argument("--min_mutations_signatures", type=int, default=200, dest="min_mutations_signatures", 
                                      help = "Minimum number of SNVs required for re-fitting of mutational signatures (SBS) (default: %(default)s, minimum n = 100)")
-    optional_signatures.add_argument("--all_reference_signatures", action="store_true", 
-                                     help = "Use _all_ reference mutational signatures (SBS) during signature re-fitting rather than only those already attributed to the tumor type (default: %(default)s)")
+    optional_signatures.add_argument("--tumor_type_reference_signatures", action="store_true",
+                                     help = "Restrict signature re-fitting to reference mutational signatures (SBS) already attributed to the "
+                                            "tumor type,\nrather than the full reference set - default: %(default)s (i.e. _all_ reference "
+                                            "signatures are used by default)")
     optional_signatures.add_argument("--include_artefact_signatures", action="store_true", 
                                      help = "Include sequencing artefacts in the collection of reference signatures (default: %(default)s")
     optional_signatures.add_argument("--prevalence_reference_signatures", type=float, default=0.1, 
@@ -201,6 +217,13 @@ def cli():
                               help = "Fold-change below tumor ploidy threshold for heterozygous deletion calls (default: %(default)s)")
     optional_cna.add_argument("--cna_transcript_overlap_pct", type = float, default = 50, dest="cna_transcript_overlap_pct",
                               help = "Mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes, (default: %(default)s)")
+    optional_cna.add_argument("--estimate_hrd", action="store_true",
+                              help = ("Estimate a genomic instability ('HRD') score (HRD-LOH + LST + TAI) from the allele-specific "
+                                      "copy number segments (default: %(default)s)"))
+    optional_cna.add_argument("--input_hrd_threshold", dest="input_hrd_threshold", type=float, default=None,
+                              help = ("Threshold on the score of the external HRD result (HRD_SCORE in --input_hrd) for "
+                                      "HR-deficient (score >= threshold).\nRequired if the file has no HRD_STATUS; if given, the "
+                                      "status is derived from the score (no default - thresholds are specific to the HRD assay/tool)"))
 
     optional_rna.add_argument("--fusion_min_split_reads", type=int, default=3, dest="fusion_min_split_reads", 
                               help = "Minimum number of split reads supporting a fusion event (default: %(default)s, minimum: 2)")
@@ -217,21 +240,31 @@ def cli():
                                    help = "Do not show variants of uncertain significance (VUS) in the germline section of the HTML report (default: %(default)s)")
 
     optional_biomarker.add_argument("--oncokb_api_token", dest="oncokb_api_token", default = None,
-                                    help = "Oncokb API token (default: ")
+                                    help = "Oncokb API token (default: %(default)s)")
     optional_biomarker.add_argument("--oncokb_oncotree_code", dest="oncokb_oncotree_code",
                                     help = "OncoKB oncotree code (default: %(default)s)")
+    optional_biomarker.add_argument("--oncokb_tumor_type_only", action="store_true",
+                                    help = "Limit OncoKB evidence to what OncoKB returns for the tumor type (--oncokb_oncotree_code, or the OncoTree code "
+                                           "of --tumor_site).\nBy default, OncoKB is also queried without tumor type, adding evidence for other tumor types "
+                                           "(labelled by cancer type,\ntiered as evidence from other tumor sites, as for CIViC/CGI) - this halves the number "
+                                           "of OncoKB web API queries (default: %(default)s)")
     optional_biomarker.add_argument("--oncokb_exclusive", action="store_true",
                                     help = "Limit biomarker reporting to OncoKB only - skip CIViC and CGI sources (default: %(default)s)")
     optional_biomarker.add_argument("--oncokb_maf_query_all", action="store_true",
-                                    help = "Query OncoKB for all variant classes, including non-coding variants (IGR, Intron, UTR, flanking regions). "
-                                           "By default, non-coding variants are filtered out before OncoKB annotation to reduce processing time. "
+                                    help = "Query OncoKB for all variant classes, including non-coding variants (IGR, Intron, UTR, flanking regions).\n"
+                                           "By default, non-coding variants are filtered out before OncoKB annotation to reduce processing time.\n"
                                            "Intended for TARGETED/WES assays only - enabling for WGS may result in very long MafAnnotator.py runtimes (default: %(default)s)")
+    optional_biomarker.add_argument("--oncokb_keep_files", action="store_true",
+                                    help = "Keep intermediate OncoKB annotator files (input queries, raw annotator output, clinical file and logs) in the output\ndirectory. "
+                                           "By default, these files are removed once OncoKB annotations have been integrated into the PCGR output (default: %(default)s)")
     optional_other.add_argument("--force_overwrite", action="store_true", 
                                 help = "By default, the script will fail with an error if any output file already exists.\nYou can force the overwrite of existing result files by using this flag, default: %(default)s")
     optional_other.add_argument("--no_reporting", action="store_true", 
                                 help = "Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses\n(i.e. Tier assignment/MSI/TMB/Signatures etc. and report generation (STEP 4), default: %(default)s")
     optional_other.add_argument("--no_html", action="store_true", 
                                 help = "Do not generate HTML report (default: %(default)s)")
+    optional_other.add_argument("--no_pdf", action="store_true", 
+                                help = "Do not generate PDF report (Quarto/Typst) (default: %(default)s)")
     optional_other.add_argument("--debug", action="store_true", 
                                 help = "Print full commands to log")
     optional_other.add_argument("--pcgrr_conda", default="pcgrr", 
@@ -288,6 +321,8 @@ def run_pcgr(input_data, output_data, conf_options):
     input_cna = 'None'
     input_rna_fusion = 'None'
     input_rna_expression = 'None'
+    input_msi = 'None'
+    input_hrd = 'None'
     input_cpsr_calls = 'None'
     input_cpsr_yaml = 'None'
     pon_vcf = 'None'
@@ -301,6 +336,10 @@ def run_pcgr(input_data, output_data, conf_options):
         input_rna_fusion = os.path.join(input_data['rna_fusion_dir'], input_data['rna_fusion_basename'])
     if input_data['rna_expression_basename'] != 'NA':
         input_rna_expression = os.path.join(input_data['rna_expression_dir'], input_data['rna_expression_basename'])
+    if input_data['msi_basename'] != 'NA':
+        input_msi = os.path.join(input_data['msi_dir'], input_data['msi_basename'])
+    if input_data['hrd_basename'] != 'NA':
+        input_hrd = os.path.join(input_data['hrd_dir'], input_data['hrd_basename'])
     if input_data['germline_basename'] != 'NA':
         input_cpsr_calls = os.path.join(input_data['germline_dir'], input_data['germline_basename'])
     if input_data['germline_yaml_basename'] != 'NA':
@@ -342,7 +381,9 @@ def run_pcgr(input_data, output_data, conf_options):
     oncokb_output_maf_hgvsg =         f'{output_prefix}.oncokb_output.maf.hgvsg.txt'
     oncokb_output_maf_hgvsp =         f'{output_prefix}.oncokb_output.maf.hgvsp.txt'
     oncokb_output_cna_tsv =           f'{output_prefix}.oncokb_output.cna.txt'
-    yaml_fname =                      f'{output_prefix}.conf.yaml'
+    oncokb_clinical_tsv =             f'{output_prefix}.oncokb_clinical.txt'
+    oncokb_logs = [f'{output_prefix}.oncokb.{x}.log' for x in ['maf.hgvsp', 'maf.hgvsg', 'fusion', 'cna']]
+    yaml_fname =                     f'{output_prefix}.conf.yaml'
     tmb_fname =                       f'{output_prefix}.tmb.tsv'
 
     # PCGR|Generate YAML file - containing configuration options and paths to first-pass annotation of molecular profile datasets
@@ -371,6 +412,10 @@ def run_pcgr(input_data, output_data, conf_options):
         conf_options['molecular_data']['fname_germline_tsv'] = input_cpsr_calls
     if not input_rna_fusion == 'None':
         conf_options['molecular_data']['fname_rna_fusion_tsv'] = output_data['rna_fusion']
+    if not input_msi == 'None':
+        conf_options['molecular_data']['fname_msi_tsv'] = output_data['msi_external']
+    if not input_hrd == 'None':
+        conf_options['molecular_data']['fname_hrd_tsv'] = output_data['hrd_external']
     if not input_cpsr_yaml == 'None':
         conf_options['molecular_data']['fname_germline_yaml'] = input_cpsr_yaml
     if not input_rna_expression == 'None':
@@ -423,6 +468,20 @@ def run_pcgr(input_data, output_data, conf_options):
             f'{"--keep_uncompressed" if run_vcf2maf else ""} '
             )
     check_subprocess(logger, vcf_validate_command, debug)
+
+    # Genomic instability ('HRD') scoring requires genome-wide copy number segments - stop early
+    # if the input segments do not span (most of) the autosomal genome (e.g. from a gene panel)
+    if conf_options.get('somatic_cna', {}).get('estimate_hrd', 0) == 1:
+        try:
+            hrd_chrom_arms = hrd.read_chrom_arms(
+                os.path.join(input_data['refdata_assembly_dir'], 'chromsize.' + genome_assembly + '.tsv'),
+                logger = logger)
+            hrd_coverage = hrd.check_segment_coverage(
+                pd.read_csv(input_cna, sep="\t", na_values="."), hrd_chrom_arms, logger = logger)
+            logger.info(f"Copy number segments span {hrd_coverage * 100:.1f}% of the autosomal genome (required for '--estimate_hrd')")
+        except ValueError as e:
+            error_message(f"'--estimate_hrd' - {e}", logger)
+
     logger.info('Finished pcgr-validate-input-arguments')
     print('----')
 
@@ -434,11 +493,14 @@ def run_pcgr(input_data, output_data, conf_options):
         logger.info('Tumor type: Cancer_NOS (Any tumortype)')
     else:
         logger.info(f'Tumor type: {conf_options["sample_properties"]["site"]}')
+    logger.info(f'Subject sex / age: {conf_options["subject_properties"]["sex"]} / {conf_options["subject_properties"]["age"]}')
     
     ## Log information about which molecular input types are being providd as input
     logger.info(f'Molecular input data - somatic SNVs/InDels: {"OFF" if input_vcf == "None" else "ON"}')
     logger.info(f'Molecular input data - somatic copy number alterations: {"OFF" if input_cna == "None" else "ON"}')
     logger.info(f'Molecular input data - tumor RNA fusion transcripts: {"OFF" if input_rna_fusion == "None" else "ON"}')
+    logger.info(f'Molecular input data - external MSI result: {"OFF" if input_msi == "None" else "ON"}')
+    logger.info(f'Molecular input data - external HRD result: {"OFF" if input_hrd == "None" else "ON"}')
     logger.info(f'Molecular input data - tumor RNA expression: {"OFF" if input_rna_expression == "None" else "ON"}')
     logger.info(f'Molecular input data - germline SNVs/InDels (CPSR): {"OFF" if input_cpsr_calls == "None" else "ON"}')
     
@@ -567,14 +629,15 @@ def run_pcgr(input_data, output_data, conf_options):
                 debug = debug
             )
 
-            # Generate OncoKB-compliant MAF input file
-            logger.info('Generating OncoKB-API compliant MAF input file')
-            generate_oncokb_maf_input(
-                maf_fname = output_maf,
-                output_fname = oncokb_input_maf,
-                oncokb_maf_query_all = bool(conf_options['oncokb']['maf_query_all']),
-                logger = logger
-            )
+            # Generate OncoKB-compliant MAF input file (only needed when OncoKB annotation will actually run)
+            if conf_options.get('oncokb', {}).get('api_token'):
+                logger.info('Generating OncoKB-API compliant MAF input file')
+                generate_oncokb_maf_input(
+                    maf_fname = output_maf,
+                    output_fname = oncokb_input_maf,
+                    oncokb_maf_query_all = bool(conf_options['oncokb']['maf_query_all']),
+                    logger = logger
+                )
 
             if not debug:
                 remove_file(vep_vcf_reheadered)
@@ -811,7 +874,7 @@ def run_pcgr(input_data, output_data, conf_options):
             output_dir = output_data['dir'],
             build = yaml_data['genome_assembly'],
             sample_id = yaml_data['sample_id'],
-            sex = yaml_data['conf']['sample_properties']['sex'],
+            sex = yaml_data['conf']['subject_properties']['sex'],
             refdata_assembly_dir = input_data['refdata_assembly_dir'],
             amp_threshold_absolute = yaml_data["conf"]['somatic_cna']['amp_threshold_absolute'],
             amp_threshold_relative = yaml_data["conf"]['somatic_cna']['amp_threshold_relative'],
@@ -824,6 +887,7 @@ def run_pcgr(input_data, output_data, conf_options):
             tumor_ploidy = yaml_data['conf']['sample_properties']['tumor_ploidy'] if yaml_data['conf']['sample_properties']['tumor_ploidy'] != 'NA' else None,
             tumor_purity = yaml_data['conf']['sample_properties']['tumor_purity'] if yaml_data['conf']['sample_properties']['tumor_purity'] != 'NA' else None,
             expression_data = expression_data,
+            run_oncokb = bool(conf_options.get('oncokb', {}).get('api_token')),
             logger = logger)
         if cna_annotation['status'] == 0:
             logger.info('Finished pcgr-annotate-cna-segments')
@@ -833,6 +897,65 @@ def run_pcgr(input_data, output_data, conf_options):
             yaml_data['conf']['sample_properties']['tumor_ploidy_source'] = cna_annotation['tumor_ploidy_source']
             if cna_annotation['tumor_ploidy'] is not None:
                 yaml_data['conf']['sample_properties']['tumor_ploidy'] = cna_annotation['tumor_ploidy']
+            # Segment-level output is always produced on success. Gene-level output is a
+            # separate concern - it's only skipped if no segment overlapped a
+            # protein-coding transcript (rare, e.g. all-intergenic segment set).
+            if cna_annotation.get('gene_annotations_empty', False):
+                yaml_data['molecular_data']['fname_cna_gene_tsv'] = "None"
+
+            # PCGR|CNA summary - sample-level scores derived from the allele-specific CNA segments:
+            #  - fraction of genome altered (always computed)
+            #  - opt-in genomic instability ('HRD') score: research use only, derived from the
+            #    CNA segments only (arg_checker.py rejects TARGETED assays, and warns for
+            #    '--tumor_only', since the segments may still be called with a matched control)
+            logger = getlogger("pcgr-cna-summary")
+            chromsizes_fname = os.path.join(
+                input_data['refdata_assembly_dir'], 'chromsize.' + yaml_data['genome_assembly'] + '.tsv')
+            cytoband_fname = os.path.join(
+                input_data['refdata_assembly_dir'], 'misc', 'tsv', 'cytoband', 'cytoband.tsv.gz')
+            cna_summary = {
+                'SAMPLE_ID': yaml_data['sample_id'],
+                'FRACTION_GENOME_ALTERED': None, 'WGD_FRACTION': None, 'GENOME_DOUBLED': None,
+                'HRD_LOH': None, 'HRD_LST': None, 'HRD_TAI': None, 'HRD_SUM': None}
+
+            try:
+                cna_segments_df = pd.read_csv(input_cna, sep="\t", na_values=".")
+                chrom_arms = hrd.read_chrom_arms(chromsizes_fname, logger = logger)
+                fga = hrd.calc_fraction_genome_altered(cna_segments_df, chrom_arms = chrom_arms, logger = logger)
+                if fga is not None:
+                    yaml_data['conf']['somatic_cna']['fraction_genome_altered'] = fga
+                    cna_summary['FRACTION_GENOME_ALTERED'] = fga
+                wgd = hrd.calc_genome_doubling(cna_segments_df, chrom_arms = chrom_arms, logger = logger)
+                if wgd is not None:
+                    yaml_data['conf']['somatic_cna']['wgd_fraction'] = wgd['wgd_fraction']
+                    yaml_data['conf']['somatic_cna']['genome_doubled'] = int(wgd['genome_doubled'])
+                    cna_summary['WGD_FRACTION'] = wgd['wgd_fraction']
+                    cna_summary['GENOME_DOUBLED'] = 'TRUE' if wgd['genome_doubled'] else 'FALSE'
+            except Exception as e:
+                logger.warning(f"Estimation of fraction of genome altered/genome doubling failed - omitting: {e}")
+
+            if yaml_data['conf']['somatic_cna']['estimate_hrd'] == 1:
+                logger.info('PCGR - HRD ANALYSIS SECTION: Estimation of HRD score (HRD-LOH, LST, TAI) from allele-specific CNA segments')
+                try:
+                    hrd_result = hrd.compute_genomic_instability_score(
+                        input_cna_segment_fname = input_cna,
+                        chromsizes_fname = chromsizes_fname,
+                        cytoband_fname = cytoband_fname,
+                        logger = logger)
+                    for yaml_key, result_key, tsv_key in [
+                            ('hrd_loh', 'hrd_loh', 'HRD_LOH'), ('hrd_lst', 'lst', 'HRD_LST'),
+                            ('hrd_tai', 'tai', 'HRD_TAI'), ('hrd_sum', 'hrd_sum', 'HRD_SUM')]:
+                        yaml_data['conf']['somatic_cna'][yaml_key] = hrd_result[result_key]
+                        cna_summary[tsv_key] = hrd_result[result_key]
+                    logger.info('Finished pcgr-hrd')
+                except Exception as e:
+                    logger.warning(f"HRD scoring ('--estimate_hrd') failed - omitting from report: {e}")
+                    yaml_data['conf']['somatic_cna']['estimate_hrd'] = 0
+
+            pd_to_csv(
+                pd.DataFrame([{k: ('.' if v is None else str(v)) for k, v in cna_summary.items()}]),
+                output_data['cna_summary'], compression = None)
+            print('----')
         else:
             yaml_data['molecular_data']['fname_cna_gene_tsv'] = "None"
             yaml_data['molecular_data']['fname_cna_segment_tsv'] = "None"
@@ -849,10 +972,11 @@ def run_pcgr(input_data, output_data, conf_options):
         fusion_annotation = cna.annotate_fusions(
             input_fusion_fname = input_rna_fusion,
             output_fusion_fname = output_data['rna_fusion'],
-            oncokb_input_fname = oncokb_input_fusion_tsv, 
+            oncokb_input_fname = oncokb_input_fusion_tsv,
             build = yaml_data['genome_assembly'],
-            sample_id = yaml_data['sample_id'],           
-            refdata_assembly_dir = input_data['refdata_assembly_dir'],            
+            sample_id = yaml_data['sample_id'],
+            refdata_assembly_dir = input_data['refdata_assembly_dir'],
+            run_oncokb = bool(conf_options.get('oncokb', {}).get('api_token')),
             logger = logger)
         if fusion_annotation == 0:
             logger.info('Finished pcgr-annotate-rna-fusion')
@@ -862,6 +986,27 @@ def run_pcgr(input_data, output_data, conf_options):
     else:
         logger = getlogger("pcgr-annotate-rna-fusion")
         logger.info('PCGR - RNA FUSION ANALYSIS SECTION: Annotation of RNA fusions with biomarkers - OMITTED (no data available)')
+        print('----')
+
+    # PCGR|MSI - Read external MSI result (e.g. MSIsensor-pro) and write normalised result
+    if not input_msi == 'None':
+        logger = getlogger("pcgr-external-msi")
+        logger.info('PCGR - EXTERNAL MSI SECTION: Import of MSI result from external caller')
+        msi_result = msi.read_external_msi(
+            input_msi, caller = conf_options['msi_external']['caller'], logger = logger,
+            msih_threshold = conf_options['msi_external']['threshold'])
+        msi.write_external_msi(msi_result, yaml_data['sample_id'], output_data['msi_external'])
+        logger.info('Finished pcgr-external-msi')
+        print('----')
+
+    # PCGR|HRD - Read external HRD result and write normalised result
+    if not input_hrd == 'None':
+        logger = getlogger("pcgr-external-hrd")
+        logger.info('PCGR - EXTERNAL HRD SECTION: Import of HRD result from external assay/tool')
+        hrd_result = hrd_external.read_external_hrd(
+            input_hrd, threshold = conf_options['hrd_external']['threshold'], logger = logger)
+        hrd_external.write_external_hrd(hrd_result, yaml_data['sample_id'], output_data['hrd_external'])
+        logger.info('Finished pcgr-external-hrd')
         print('----')
 
     # PCGR|OncoKB - Annotate variants, CNAs, and fusions with OncoKB
@@ -900,6 +1045,10 @@ def run_pcgr(input_data, output_data, conf_options):
 
             ## update conf with resolved oncotree code (even if None) for record-keeping and downstream use
             yaml_data['conf']['oncokb']['oncotree_code'] = oncotree_code
+            ## OncoTree names of the code and its ancestors - OncoKB evidence for these cancer types
+            ## is tiered as evidence for the PCGR tumor site (relevant when the code's site differs)
+            yaml_data['conf']['oncokb']['oncotree_lineage'] = \
+                get_oncotree_lineage(oncotree_code, input_data["refdata_assembly_dir"])
 
         # Map genome assembly to OncoKB reference genome format
         reference_genome = "GRCh38" if yaml_data['genome_assembly'] == "grch38" else "GRCh37"
@@ -973,7 +1122,7 @@ def run_pcgr(input_data, output_data, conf_options):
         logger.info('PCGR - TWO-HIT SECTION: Annotating TSG/LOH CNA records with somatic and germline two-hit candidates')
         cna_df_twohit = pd.read_csv(cna_gene_tsv, sep='\t', na_values='.', low_memory=False)
         cna_df_twohit = cna.append_twohit_candidates(cna_df_twohit, snv_df_twohit, germline_df, logger)
-        cna_df_twohit.to_csv(cna_gene_tsv, sep='\t', header=True, index=False)
+        cna_df_twohit.to_csv(cna_gene_tsv, sep='\t', header=True, index=False, na_rep='.')
         logger.info('Finished annotating two-hit candidates')
         print('----')
 
@@ -1035,13 +1184,30 @@ def run_pcgr(input_data, output_data, conf_options):
         logger.info("Finished PCGR!")
         print('----')
 
-    # Redact OncoKB API token from the YAML config file to avoid credential exposure 
+    # PCGR|clean - remove intermediate OncoKB annotator files (after report generation,
+    # since pcgrr reads the OncoKB output files), unless explicitly kept or debugging
+    remove_oncokb_files = conf_options['oncokb']['run'] == 1 and \
+        not conf_options['oncokb']['keep_files'] and not debug
+    if remove_oncokb_files:
+        for fname in [oncokb_input_maf, oncokb_input_fusion_tsv, oncokb_input_cna_tsv,
+                      oncokb_output_maf_hgvsp, oncokb_output_maf_hgvsg,
+                      oncokb_output_fusion_tsv, oncokb_output_cna_tsv,
+                      oncokb_clinical_tsv] + oncokb_logs:
+            remove_file(fname)
+
+    # Redact OncoKB API token from the YAML config file to avoid credential exposure
     # in shared output files
     if os.path.exists(yaml_fname):
         with open(yaml_fname) as fh:
             yaml_data_redact = yaml.safe_load(fh)
         if isinstance(yaml_data_redact.get('conf', {}).get('oncokb'), dict):
             yaml_data_redact['conf']['oncokb']['api_token'] = None
+        # do not point to OncoKB annotator output files that have been removed
+        if remove_oncokb_files:
+            for key in ['fname_oncokb_output_maf_hgvsg', 'fname_oncokb_output_maf_hgvsp',
+                        'fname_oncokb_output_fusions', 'fname_oncokb_output_cna']:
+                if key in yaml_data_redact.get('molecular_data', {}):
+                    yaml_data_redact['molecular_data'][key] = 'None'
         with open(yaml_fname, "w") as fh:
             fh.write(yaml.dump(yaml_data_redact))
 

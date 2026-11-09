@@ -71,12 +71,6 @@
 #'
 "effect_prediction_algos"
 
-#' Regular expression of terms indicative of cancer-related phenotypes and syndromes
-#'
-#' @format A long regular expression of cancer-related phenotype terms
-#'
-"cancer_phenotypes_regex"
-
 #' Color encodings for report elements of PCGR/CPSR
 #'
 #' @format A list object with different report elements that are color-coded in

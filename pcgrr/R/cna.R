@@ -104,6 +104,10 @@ plot_cna_segments_absolute <- function(
     quiet = T
   )
 
+  ## Segments with observed total copy number, but imputed major/minor split
+  ## (optional input column 'nMajor_nMinor_Imputed')
+  cna_segment <- append_cna_imputed_flag(cna_segment)
+
 
   ## Identify segments that involve oncogene amplification/gain or
   ## tumor suppressor loss (homozygous or heterozygous)
@@ -146,7 +150,7 @@ plot_cna_segments_absolute <- function(
           .data$SEGMENT_END) |>
         dplyr::summarise(
           ONC_AMPL = paste(
-            utils::head(.data$SYMBOL, 3), collapse = ", "),
+            utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
           .groups = "drop")
     }
 
@@ -164,7 +168,7 @@ plot_cna_segments_absolute <- function(
           .data$SEGMENT_END) |>
         dplyr::summarise(
           ONC_GAIN = paste(
-            utils::head(.data$SYMBOL, 3), collapse = ", "),
+            utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
           .groups = "drop")
     }
 
@@ -186,7 +190,7 @@ plot_cna_segments_absolute <- function(
           .data$SEGMENT_END) |>
         dplyr::summarise(
           TSG_LOSS = paste(
-            utils::head(.data$SYMBOL, 3), collapse = ", "),
+            utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
           .groups = "drop")
     }
 
@@ -207,7 +211,7 @@ plot_cna_segments_absolute <- function(
           .data$SEGMENT_END) |>
         dplyr::summarise(
           TSG_HET_LOSS = paste(
-            utils::head(.data$SYMBOL, 3), collapse = ", "),
+            utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
           .groups = "drop")
     }
 
@@ -221,7 +225,8 @@ plot_cna_segments_absolute <- function(
     dplyr::select(
       c("CHROM", "SEGMENT_START", "SEGMENT_END",
         "CYTOBAND","CN_MINOR",
-        "CN_TOTAL","EVENT_TYPE","VARIANT_CLASS")) |>
+        "CN_TOTAL","EVENT_TYPE","VARIANT_CLASS",
+        "CN_MAJOR_MINOR_IMPUTED")) |>
     # dplyr::left_join(
     #   dplyr::select(
     #     cna_gene, c("CHROM", "SEGMENT_START", "SEGMENT_END",
@@ -256,6 +261,9 @@ plot_cna_segments_absolute <- function(
       # ),
       SegmentStart = .data$genome_start + .data$SEGMENT_START,
       SegmentEnd = .data$genome_start + .data$SEGMENT_END,
+      SegmentMid = .data$genome_start +
+        (.data$SEGMENT_START + .data$SEGMENT_END) / 2,
+      SegmentWidthBp = .data$SEGMENT_END - .data$SEGMENT_START,
       SegmentInfo = paste0(paste(
         .data$CHROM, paste(
           scales::comma(.data$SEGMENT_START),
@@ -263,6 +271,7 @@ plot_cna_segments_absolute <- function(
           sep = "-"),
         sep = ":"), " (",.data$segsize,")<br> - ",
         .data$CYTOBAND, " (", .data$EVENT_TYPE,")")) |>
+    append_cna_imputed_info() |>
     dplyr::select(
       -c("genome_start","EVENT_TYPE","segsize")) |>
     dplyr::distinct()
@@ -339,6 +348,13 @@ plot_cna_segments_absolute <- function(
 
   low = min(reference_coordinates$genome_start)
   upp = max(reference_coordinates$genome_end)
+
+  ## Focal / short segments render below one pixel on a genome-wide x-axis and
+  ## disappear. Rather than inflating their plotted width (which distorts extent
+  ## and makes neighbouring focal events overlap), mark the true midpoint of any
+  ## sub-resolution segment with a point. Threshold ~0.25% of the genome span.
+  min_visible_bp <- (upp - low) / 400
+
   y_max <- max(unique(cna_segments_global$CN_TOTAL))
 
   y_max_display <- y_max + 1
@@ -398,6 +414,16 @@ plot_cna_segments_absolute <- function(
       leg_colors_abs,
       stats::setNames(amp_color_abs, amp_line_label_abs))
     leg_breaks_abs <- c(leg_breaks_abs, amp_line_label_abs)
+  }
+  ## Minor copy number of segments with imputed major/minor split - lighter colour
+  minor_cn_imputed_label <- "Minor copy number (imputed)"
+  if (any(cna_segments_global$CN_MAJOR_MINOR_IMPUTED)) {
+    leg_colors_abs <- c(
+      leg_colors_abs,
+      stats::setNames("#A6DBA0", minor_cn_imputed_label))
+    leg_breaks_abs <- append(
+      leg_breaks_abs, minor_cn_imputed_label,
+      after = match("Minor copy number", leg_breaks_abs))
   }
 
   y_axis_interval <- 1
@@ -463,7 +489,10 @@ plot_cna_segments_absolute <- function(
   cna_plot <- cna_plot +
     ggplot2::geom_segment(
       data = cna_segments_global |>
-        dplyr::mutate(Track = "Minor copy number"),
+        dplyr::mutate(Track = dplyr::if_else(
+          .data$CN_MAJOR_MINOR_IMPUTED,
+          minor_cn_imputed_label,
+          "Minor copy number")),
       ggplot2::aes(
         x = .data$SegmentStart,
         xend = .data$SegmentEnd,
@@ -477,6 +506,35 @@ plot_cna_segments_absolute <- function(
         y = .data$CN_TOTAL,
         yend = .data$CN_TOTAL,
         colour = .data$SegmentClass), linewidth = 1.6) +
+    ## Point mark at the true midpoint for sub-resolution (focal / short) segments
+    ## so they stay visible without inflating their plotted genomic extent
+    ggplot2::geom_point(
+      data = cna_segments_global |>
+        dplyr::filter(.data$SegmentWidthBp < min_visible_bp),
+      ggplot2::aes(
+        x = .data$SegmentMid,
+        y = .data$CN_TOTAL,
+        colour = .data$SegmentClass,
+        z = .data$SegmentInfo), size = 1.0, show.legend = FALSE) +
+    ## Emphasise focal amplifications / gains of oncogenes with a larger triangle
+    ggplot2::geom_point(
+      data = cna_segments_global |>
+        dplyr::filter(!is.na(.data$ONC_AMPL) | !is.na(.data$ONC_GAIN)),
+      ggplot2::aes(
+        x = .data$SegmentMid,
+        y = .data$CN_TOTAL,
+        colour = .data$SegmentClass,
+        z = .data$SegmentInfo), shape = 17, size = 1.8, show.legend = FALSE) +
+    ## Emphasise deep deletions of tumor suppressor genes with a downward-pointing triangle
+    ggplot2::geom_point(
+      data = cna_segments_global |>
+        dplyr::filter(!is.na(.data$TSG_LOSS)),
+      ggplot2::aes(
+        x = .data$SegmentMid,
+        y = .data$CN_TOTAL,
+        z = .data$SegmentInfo),
+      shape = 25, size = 1.8, colour = homdel_color_abs,
+      fill = homdel_color_abs, show.legend = FALSE) +
     ggplot2::scale_color_manual(
       breaks = leg_breaks_abs,
       values = leg_colors_abs,
@@ -633,7 +691,7 @@ plot_cna_segments_relative <-
           dplyr::group_by(
             .data$CHROM, .data$SEGMENT_START, .data$SEGMENT_END) |>
           dplyr::summarise(
-            ONC_AMPL = paste(utils::head(.data$SYMBOL, 3), collapse = ", "),
+            ONC_AMPL = paste(utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
             .groups = "drop")
       }
 
@@ -649,7 +707,7 @@ plot_cna_segments_relative <-
             .data$SEGMENT_START,
             .data$SEGMENT_END) |>
           dplyr::summarise(
-            ONC_GAIN = paste(utils::head(.data$SYMBOL, 3), collapse = ", "),
+            ONC_GAIN = paste(utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
             .groups = "drop")
       }
 
@@ -666,7 +724,7 @@ plot_cna_segments_relative <-
             .data$SEGMENT_START,
             .data$SEGMENT_END) |>
           dplyr::summarise(
-            TSG_LOSS = paste(utils::head(.data$SYMBOL, 3), collapse = ", "),
+            TSG_LOSS = paste(utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
             .groups = "drop")
       }
 
@@ -683,7 +741,7 @@ plot_cna_segments_relative <-
             .data$SEGMENT_END) |>
           dplyr::summarise(
             TSG_HET_LOSS = paste(
-              utils::head(.data$SYMBOL, 3), collapse = ", "),
+              utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
             .groups = "drop")
       }
     }
@@ -697,6 +755,7 @@ plot_cna_segments_relative <-
     ## Prepare segment data: compute log2(CN_TOTAL / ploidy)
     ## Cap CN_TOTAL at 0.1 to avoid log2(0) = -Inf for homozygous deletions
     cna_segments_global <- cna_segment |>
+      append_cna_imputed_flag() |>
       dplyr::select(
         c("CHROM",
           "SEGMENT_START",
@@ -704,7 +763,8 @@ plot_cna_segments_relative <-
           "CYTOBAND",
           "EVENT_TYPE",
           "VARIANT_CLASS",
-          "CN_TOTAL")) |>
+          "CN_TOTAL",
+          "CN_MAJOR_MINOR_IMPUTED")) |>
       dplyr::mutate(CHROM = paste0("chr", .data$CHROM)) |>
       dplyr::left_join(
         dplyr::select(
@@ -735,6 +795,9 @@ plot_cna_segments_relative <-
       dplyr::mutate(
         SegmentStart = .data$genome_start + .data$SEGMENT_START,
         SegmentEnd   = .data$genome_start + .data$SEGMENT_END,
+        SegmentMid   = .data$genome_start +
+          (.data$SEGMENT_START + .data$SEGMENT_END) / 2,
+        SegmentWidthBp = .data$SEGMENT_END - .data$SEGMENT_START,
         SegmentInfo  = paste0(
           paste(.data$CHROM,
                 paste(scales::comma(.data$SEGMENT_START),
@@ -745,6 +808,7 @@ plot_cna_segments_relative <-
           .data$CYTOBAND, " (", .data$EVENT_TYPE, ")")
         #"<br> - log\u2082FC: ", round(.data$Log2FC, 3))
       ) |>
+      append_cna_imputed_info() |>
       dplyr::select(-c("genome_start", "EVENT_TYPE", "segsize")) |>
       dplyr::distinct()
 
@@ -811,6 +875,10 @@ plot_cna_segments_relative <-
 
     low <- min(reference_coordinates$genome_start)
     upp <- max(reference_coordinates$genome_end)
+
+    ## Sub-resolution (focal / short) segments are marked with a point at their
+    ## true midpoint rather than inflating plotted width (see plot_cna_segments_absolute)
+    min_visible_bp <- (upp - low) / 400
 
     ## Y-axis limits and breaks
     y_min_data <- min(cna_segments_global$Log2FC, na.rm = TRUE)
@@ -941,6 +1009,40 @@ plot_cna_segments_relative <-
           colour = .data$SegmentClass),
         linewidth = 1.6
       ) +
+      ## Point mark at the true midpoint for sub-resolution (focal / short)
+      ## segments so they stay visible without inflating plotted extent
+      ggplot2::geom_point(
+        data = cna_segments_global |>
+          dplyr::filter(.data$SegmentWidthBp < min_visible_bp),
+        ggplot2::aes(
+          x      = .data$SegmentMid,
+          y      = .data$Log2FC,
+          colour = .data$SegmentClass,
+          z      = .data$SegmentInfo),
+        size = 1.0, show.legend = FALSE
+      ) +
+      ## Emphasise focal amplifications / gains of oncogenes with a larger triangle
+      ggplot2::geom_point(
+        data = cna_segments_global |>
+          dplyr::filter(!is.na(.data$ONC_AMPL) | !is.na(.data$ONC_GAIN)),
+        ggplot2::aes(
+          x      = .data$SegmentMid,
+          y      = .data$Log2FC,
+          colour = .data$SegmentClass,
+          z      = .data$SegmentInfo),
+        shape = 17, size = 1.8, show.legend = FALSE
+      ) +
+      ## Emphasise deep deletions of tumor suppressor genes with a downward-pointing triangle
+      ggplot2::geom_point(
+        data = cna_segments_global |>
+          dplyr::filter(!is.na(.data$TSG_LOSS)),
+        ggplot2::aes(
+          x = .data$SegmentMid,
+          y = .data$Log2FC,
+          z = .data$SegmentInfo),
+        shape = 25, size = 1.8, colour = homdel_color,
+        fill = homdel_color, show.legend = FALSE
+      ) +
       ggplot2::scale_color_manual(
         breaks = leg_breaks,
         values = leg_colors,
@@ -1007,6 +1109,7 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL, table_display_cols =
   assertable::assert_colnames(
     cna_df_display,
     c("ACTIONABLE_GENE",
+      "ACTIONABILITY_TIER",
       "ONCOGENE",
       "ENTREZGENE",
       "ONCOGENICITY_OKB",
@@ -1023,14 +1126,15 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL, table_display_cols =
     is.character(cna_df_display$VARIANT_CLASS)
   )
 
-  oncogene_ampl_variants <-
+  oncogene_ampl_gain_variants <-
     dplyr::filter(
       cna_df_display,
         (.data$ONCOGENE == TRUE |
            .data$ONCOGENICITY_OKB == "Oncogenic" |
            .data$ONCOGENICITY_OKB == "Likely Oncogenic" |
            .data$ACTIONABLE_GENE == TRUE) &
-        .data$VARIANT_CLASS == "amplification")
+        (.data$VARIANT_CLASS == "amplification" |
+           .data$VARIANT_CLASS == "gain"))
 
   tsgene_loss_variants <-
     dplyr::filter(
@@ -1042,22 +1146,40 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL, table_display_cols =
 
   cna_oncogenic_events <-
     dplyr::bind_rows(
-      oncogene_ampl_variants,
+      oncogene_ampl_gain_variants,
       tsgene_loss_variants
+    ) |>
+    ## Default ordering: therapeutically actionable events first (tier 1, then
+    ## tier 2), then OncoKB-curated Oncogenic / Likely Oncogenic events (when
+    ## OncoKB annotation is available), then by the existing CN /
+    ## cancer-association ranking. All-NA (no OncoKB token) leaves the prior
+    ## order untouched.
+    dplyr::mutate(
+      ACTIONABILITY_TIER = actionable_tier(.data$ACTIONABILITY_TIER),
+      .okb_onc_rank = dplyr::case_when(
+        .data$ONCOGENICITY_OKB == "Oncogenic"        ~ 1L,
+        .data$ONCOGENICITY_OKB == "Likely Oncogenic" ~ 2L,
+        TRUE                                         ~ 3L
+      )
     ) |>
     dplyr::select(
       dplyr::any_of(
-        table_display_cols$cna_other_oncogenic
+        c(table_display_cols$cna_other_oncogenic,
+          "ACTIONABILITY_TIER", ".okb_onc_rank")
       )
     ) |>
+    dplyr::relocate("ACTIONABILITY_TIER", .after = "GENENAME") |>
     append_styled_cna_vclass(
       colname = "VARIANT_CLASS_DISPLAY"
     ) |>
     dplyr::arrange(
+      .data$ACTIONABILITY_TIER,
+      .data$.okb_onc_rank,
       .data$CN_TOTAL,
       dplyr::desc(.data$TISSUE_ASSOC_RANK),
-      dplyr::desc(.data$GLOBAL_ASSOC_RANK),
-    )
+      dplyr::desc(.data$GLOBAL_ASSOC_RANK)
+    ) |>
+    dplyr::select(-".okb_onc_rank")
 
   if ("SEGMENT_LENGTH_MB" %in% colnames(cna_oncogenic_events)) {
     cna_oncogenic_events <- cna_oncogenic_events |>
@@ -1382,4 +1504,42 @@ build_twohit_display_data <- function(
   result$nested <- nested_df
 
   return(result)
+}
+
+
+#' Append flag for segments with imputed allele-specific copy number
+#'
+#' Ensures that column 'CN_MAJOR_MINOR_IMPUTED' is present (logical) in a
+#' data frame with copy number segments - segments with an observed total
+#' copy number, but imputed major/minor split (optional input column
+#' 'nMajor_nMinor_Imputed'). A missing column (or NA) means not imputed.
+#'
+#' @param cna_segment data frame with copy number segments
+#'
+#' @keywords internal
+append_cna_imputed_flag <- function(cna_segment = NULL) {
+  if (!("CN_MAJOR_MINOR_IMPUTED" %in% colnames(cna_segment))) {
+    cna_segment$CN_MAJOR_MINOR_IMPUTED <- FALSE
+  }
+  cna_segment |>
+    dplyr::mutate(
+      CN_MAJOR_MINOR_IMPUTED = dplyr::if_else(
+        is.na(.data$CN_MAJOR_MINOR_IMPUTED),
+        FALSE,
+        as.logical(.data$CN_MAJOR_MINOR_IMPUTED)))
+}
+
+#' Append note on imputed allele-specific copy number to segment hover info
+#'
+#' @param cna_segments data frame with copy number segments, with
+#' columns 'SegmentInfo' and 'CN_MAJOR_MINOR_IMPUTED'
+#'
+#' @keywords internal
+append_cna_imputed_info <- function(cna_segments = NULL) {
+  cna_segments |>
+    dplyr::mutate(SegmentInfo = dplyr::if_else(
+      .data$CN_MAJOR_MINOR_IMPUTED,
+      paste0(.data$SegmentInfo,
+             "<br> - Major/minor copy number imputed (total copy number observed)"),
+      .data$SegmentInfo))
 }

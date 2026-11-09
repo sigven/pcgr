@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import contextlib
 import sys
 import subprocess
 import shutil
@@ -52,8 +53,11 @@ def pd_to_csv(df, fname, index = False, col_sep = "\t", compression = "gzip"):
     # Make a copy to avoid modifying the original dataframe
     df = df.copy()
 
-    # Opt-in to future pandas behavior to suppress FutureWarning on fillna
-    with pd.option_context('future.no_silent_downcasting', True):
+    # Opt-in to future pandas behavior to suppress FutureWarning on fillna (pandas 2.x;
+    # the default from pandas 3, where the option is deprecated)
+    no_downcasting = pd.option_context('future.no_silent_downcasting', True) \
+        if int(pd.__version__.split('.')[0]) < 3 else contextlib.nullcontext()
+    with no_downcasting:
         ## Replace NaN with '.' and handle empty strings for each column
         for col in df.columns:
             if df[col].dtype == 'object' or pd.api.types.is_string_dtype(df[col]):
@@ -168,6 +172,29 @@ def is_integer(n):
         return False
     else:
         return float(n).is_integer()
+
+## Optional column in the CNA segment input: TRUE if the total copy number of a segment
+## is observed, but the major/minor allele split (nMajor/nMinor) is imputed
+CNA_IMPUTED_COLUMN = 'nMajor_nMinor_Imputed'
+CNA_IMPUTED_TRUE_VALUES = {'TRUE', 'T', '1', '1.0'}
+CNA_IMPUTED_FALSE_VALUES = {'FALSE', 'F', '0', '0.0'}
+
+def get_cna_imputed_flag(cna_df: pd.DataFrame) -> pd.Series:
+    """
+    Return a boolean Series (aligned to 'cna_df') from the optional CNA input column
+    'nMajor_nMinor_Imputed' (TRUE/FALSE or 1/0, case-insensitive). A missing column means
+    no segment is imputed. Raises a ValueError for any other (or missing) value.
+    """
+    if CNA_IMPUTED_COLUMN not in cna_df.columns:
+        return pd.Series(False, index=cna_df.index)
+    values = cna_df[CNA_IMPUTED_COLUMN].astype(str).str.strip().str.upper()
+    invalid = values[~values.isin(CNA_IMPUTED_TRUE_VALUES | CNA_IMPUTED_FALSE_VALUES)]
+    if len(invalid) > 0:
+        raise ValueError(
+            f"Column '{CNA_IMPUTED_COLUMN}' contains invalid value(s): "
+            f"{', '.join(sorted(set(cna_df.loc[invalid.index, CNA_IMPUTED_COLUMN].astype(str))))} "
+            f"- allowed values are TRUE/FALSE or 1/0")
+    return values.isin(CNA_IMPUTED_TRUE_VALUES)
 
 def get_cpsr_version():
     # use pcgrr's Rscript to grab cpsr's R pkg version

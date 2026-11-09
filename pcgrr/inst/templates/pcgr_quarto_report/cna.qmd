@@ -8,8 +8,9 @@ vstats <- pcg_report$content$cna$vstats
 tumor_site <- pcg_report$settings$conf$sample_properties$site
 cs <- pcgrr::color_palette$bm_callout
 
-```
+cna_conf <- pcg_report$settings$conf$somatic_cna
 
+```
 
 <br>
 
@@ -76,6 +77,12 @@ plotly::ggplotly(cna_plot, tooltip = c("y","z")) |>
 
 ```
 
+::: {.callout-note}
+## Note - reading the copy number profile
+
+Segments too short to render as a bar at whole-genome scale are drawn as a point at their midpoint. Triangles mark segments affecting cancer genes: &#9650; amplifications or gains of proto-oncogenes, and &#9660; deep deletions of tumor suppressor genes. Hover any mark for exact coordinates and affected genes.
+:::
+
 #### Relative copy number profile
 
 ```{r plot_cna_relative}
@@ -137,6 +144,12 @@ plotly::ggplotly(cna_plot_relative, tooltip = c("y", "z")) |>
 
 ```
 
+::: {.callout-note}
+## Note - reading the copy number profile
+
+Segments too short to render as a bar at whole-genome scale are drawn as a point at their midpoint. Triangles mark segments affecting cancer genes: &#9650; amplifications or gains of proto-oncogenes, and &#9660; deep deletions of tumor suppressor genes. Hover any mark for exact coordinates and affected genes.
+:::
+
 :::
 
 
@@ -145,13 +158,38 @@ plotly::ggplotly(cna_plot_relative, tooltip = c("y", "z")) |>
 
 ### Potentially oncogenic events
 
+```{r cna_oncogenic_gain_threshold}
+#| echo: false
+#| eval: true
+
+## Computed independently of the plot chunks above (which may not execute, e.g.
+## when there are no gene-level CNA annotations) to safely support the bullet
+## text below regardless of whether a CN profile plot was rendered.
+gain_threshold_effective_display <-
+  pcg_report$settings$conf$somatic_cna$gain_threshold_absolute
+if (as.character(pcg_report$settings$conf$somatic_cna$threshold_mode) == "relative") {
+  tumor_ploidy_display <- pcg_report$settings$conf$sample_properties$tumor_ploidy
+  if (is.na(tumor_ploidy_display) || tumor_ploidy_display == "NA") {
+    tumor_ploidy_display <- 2
+  }
+  gain_threshold_effective_display <-
+    as.numeric(tumor_ploidy_display) *
+    as.numeric(pcg_report$settings$conf$somatic_cna$gain_threshold_relative)
+}
+gain_threshold_effective_display <- as.numeric(gain_threshold_effective_display)
+```
+
 Here we show all protein-coding genes subject to copy number alteration that may potentially have oncogenic effects. Specifically, we list
 
- * [Proto-oncogenes](#documentation) subject to copy-number __amplification__ (total copy number >= __`r pcg_report$settings$conf$somatic_cna$amp_threshold_effective`__ (effective amplification threshold, user-configurable))
+ * [Proto-oncogenes](#documentation) subject to copy-number __amplification__ (total copy number >= __`r pcg_report$settings$conf$somatic_cna$amp_threshold_effective`__ (effective amplification threshold, user-configurable)) or __gain__ (total copy number >= __`r gain_threshold_effective_display`__)
  * [Tumor suppressor](#documentation) genes subject to __deep deletions__ (homozygous/hemizygous deletions; total copy number = __0__), and __shallow deletions__ (heterozygous deletions; total copy number less than baseline ploidy (__`r pcg_report$settings$conf$sample_properties$tumor_ploidy`__))
- * Other clinically actionable genes subject to amplification
+ * Other clinically actionable genes subject to amplification or gain
 
 Gene symbols are color-coded according to their strength of association to cancer (here, specifically __`r pcg_report$settings$conf$sample_properties$site`__ cancers), from <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[1]`; padding:2x; color:white"><b>&nbsp; weak associations &nbsp; </b></span>&nbsp; to <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[length(pcgrr::color_palette$cancer_assoc$values)]`; padding:2x; color:white"><b>&nbsp; strong associations &nbsp; </b></span> [@Ochoa2021-jc;@Nakken2023-ol].
+
+Where OncoKB curation is available, the __Genename__ cell is tinted (with a colored left border) according to the OncoKB oncogenicity classification &ndash; <span style="background-color:`r pcgrr::color_palette$oncogenicity$values[1]`; padding:2x; color:white"><b>&nbsp; Oncogenic &nbsp; </b></span>&nbsp; or <span style="background-color:`r pcgrr::color_palette$oncogenicity$values[2]`; padding:2x; color:white"><b>&nbsp; Likely Oncogenic &nbsp; </b></span>. The full set of OncoKB annotations (mutation effect, tumor-type / variant summaries, citations) is available by expanding a table row.
+
+Therapeutically actionable events (__T1__/__T2__ in the _Tier_ column, only shown if any are found) are listed first, followed by all other events.
 
 
 <br>
@@ -175,14 +213,24 @@ symbol_rank_col <- if (
 ) "GLOBAL_ASSOC_RANK" else "TISSUE_ASSOC_RANK"
 
 primary_cols <- c(
-  "SYMBOL", 
-  "GENENAME", 
-  "VARIANT_CLASS_DISPLAY", 
+  "SYMBOL",
+  "GENENAME",
+  "ACTIONABILITY_TIER",
+  "VARIANT_CLASS_DISPLAY",
   "EVENT_TYPE",
-  "CN_TOTAL", 
-  "CYTOBAND", 
+  "CN_TOTAL",
+  "CYTOBAND",
   "SEGMENT_LENGTH_MB"
 )
+
+## Genename cell is tinted by OncoKB oncogenicity (ONCOGENICITY_OKB) when the
+## gene/event is OncoKB-curated as (Likely) Oncogenic - a quick visual cue that
+## curated OncoKB evidence exists for the row. Full _OKB fields stay in row
+## details. When no OncoKB token was supplied the column is all-NA -> no tint.
+onc_okb_levels <- pcgrr::color_palette$oncogenicity$levels
+onc_okb_colors <- pcgrr::color_palette$oncogenicity$values
+has_okb_onc <- "ONCOGENICITY_OKB" %in% colnames(oncogenic_events) &&
+  any(!is.na(oncogenic_events$ONCOGENICITY_OKB))
 
 vc_levels <- 
   pcgrr::color_palette$cna_variant_class$levels_display
@@ -198,7 +246,16 @@ col_defs <- list(
     minWidth = 90
   ),
   GENENAME = reactable::colDef(
-    name = "Genename", minWidth = 150),
+    name = "Genename", minWidth = 150,
+    style = if (has_okb_onc) function(value, index) {
+      onc <- oncogenic_events$ONCOGENICITY_OKB[index]
+      bg <- onc_okb_colors[match(onc, onc_okb_levels)]
+      if (length(onc) == 0 || is.na(onc) || is.na(bg)) return(NULL)
+      list(
+        borderLeft = paste0("4px solid ", bg),
+        background = paste0(bg, "1A"))
+    } else NULL),
+  ACTIONABILITY_TIER = pcgrr::actionability_tier_col_def(oncogenic_events),
   VARIANT_CLASS_DISPLAY = reactable::colDef(
     name = "Variant Class",
     align = "center",
@@ -219,7 +276,7 @@ col_defs <- list(
   CYTOBAND = reactable::colDef(
     name = "Cytoband", maxWidth = 100),
   SEGMENT_LENGTH_MB = reactable::colDef(
-    name = "Segment (Mb)", maxWidth = 110),
+    name = "Segment size (Mb)", maxWidth = 110),
   GLOBAL_ASSOC_RANK = reactable::colDef(show = FALSE),
   TISSUE_ASSOC_RANK = reactable::colDef(show = FALSE)
 )
@@ -268,11 +325,33 @@ htmltools::br()
 
 ### Potential two-hit events
 
-For tumor suppressor genes (TSGs) subject to loss-of-heterozygosity (LOH) – either a deletion or copy-neutral LOH event – we show any co-occurring somatic or germline loss-of-function SNV/InDels that may constitute a _two-hit_ inactivation of the gene. 
+```{r twohit_germline_included}
+#| echo: false
+#| eval: true
 
-<br>
+twohit_germline_included <-
+  isTRUE(as.logical(pcg_report$content$germline_classified$eval))
+twohit_lof_origin <- if (twohit_germline_included) "somatic or germline" else "somatic"
+```
 
-::: {.callout-note}
+For tumor suppressor genes (TSGs) subject to loss-of-heterozygosity (LOH) – either a deletion or copy-neutral LOH event – we show any co-occurring `r twohit_lof_origin` loss-of-function SNV/InDels that may constitute a _two-hit_ inactivation of the gene.
+
+```{r twohit_germline_missing_warn}
+#| echo: false
+#| output: asis
+
+if (!twohit_germline_included) {
+  cat("::: {.callout-warning}\n\n")
+  cat("## Germline variants not included\n\n")
+  cat("No germline variant data (CPSR output) was provided for this sample, so only ",
+      "_somatic_ loss-of-function variants are considered here. Germline two-hit events ",
+      "(LOH of a gene with an inherited pathogenic variant) cannot be detected. ",
+      "Re-run PCGR with `--input_cpsr` and `--input_cpsr_yaml` to include them.\n\n", sep = "")
+  cat(":::\n\n")
+}
+```
+
+::: {.callout-note collapse="true"}
 
 ## Note - loss-of-function annotation
 
@@ -287,9 +366,9 @@ annotation strategy. Specifically, evidence from curated sources (e.g. OncoKB) m
 
 For somatic candidates, the **VAF consistency** column indicates whether the observed tumor VAF is consistent with the variant residing on the _retained_ (major) allele of the LOH segment. The expected VAF of a clonal mutation is derived from the purity-adjusted mixture model ([Carter et al., Nat Biotechnol 2012](https://doi.org/10.1038/nbt.2203)):
 
-$$\text{VAF}_{\text{expected}} = \frac{p \times n_{\text{mut}}}{p \times n_{\text{total}} + 2 \times (1 - p)}$$
+`VAF_expected = (p × n_mut) / (p × n_total + 2 × (1 − p))`
 
-where $p$ is tumor purity, $n_{\text{mut}}$ is the number of mutant allele copies on the retained allele (1 for deletion LOH; lower-bound of 1 for copy-neutral LOH), and $n_{\text{total}}$ is the total copy number of the segment. A variant is considered consistent if the observed tumor VAF falls within a tolerance of ±0.15 of the expected VAF.
+where `p` is tumor purity, `n_mut` is the number of mutant allele copies on the retained allele (1 for deletion LOH; lower-bound of 1 for copy-neutral LOH), and `n_total` is the total copy number of the segment. A variant is considered consistent if the observed tumor VAF falls within a tolerance of ±0.15 of the expected VAF.
 
 - **VAF_CONSISTENT**: observed VAF ≥ expected − tolerance → variant likely on the retained allele
 - **VAF_LOW**: observed VAF below expectation → variant may reside on the _deleted_ allele, or be subclonal relative to the LOH event; interpret with caution
@@ -419,8 +498,8 @@ htmltools::div(
     "padding:10px 16px;border-radius:4px;margin:6px 0;",
     "font-size:0.95em;"),
   htmltools::strong("No potential two-hit events identified."),
-  " No tumor suppressor genes with LOH were found to carry co-occurring",
-  " somatic or germline loss-of-function variants."
+  " No tumor suppressor genes with LOH were found to carry co-occurring ",
+  twohit_lof_origin, " loss-of-function variants."
 )
 
 ```
@@ -430,7 +509,7 @@ htmltools::div(
 ### Clinical actionability classification
 
 Genes subject to copy number aberrations in the tumor sample have been assessed for
-_clinical actionability_ through an implementation of AMP/ASCO/CAP guidelines [@Li2017-ew]. We use `r bm_db_label` `r bm_db_citation` as the underlying sources for actionable variants (versions indicated below).
+_clinical actionability_ through an implementation of AMP/ASCO/CAP guidelines [@Li2017-ew]. We use `r bm_db_label` `r bm_db_citation` as the underlying sources for actionable variants (versions indicated below). `r bm_db_tier_note`
 
 The table below indicates which variants have been classified into _tiers of clinical significance_ according to AMP/ASCO/CAP criteria.
 
@@ -478,7 +557,7 @@ result_table
 #| echo: false
 #| output: asis
 #| eval: !expr isTRUE(vstats$therapeutic_sensitivity$tier1$n_gene == 0) && isTRUE(vstats$therapeutic_sensitivity$tier2$n_gene == 0) && isTRUE(vstats$therapeutic_sensitivity$tier3$n_gene == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_sensitivity$border, "; background:", cs$therapeutic_sensitivity$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_sensitivity$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic sensitivity biomarkers (Tier 1&ndash;3) were identified among CNAs in this tumor sample.</div>"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_sensitivity$border, "; background:", cs$therapeutic_sensitivity$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_sensitivity$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no therapeutic sensitivity biomarkers (Tier 1&ndash;3) were identified among CNAs in this tumor sample.</div>"))
 ```
 
 <br>
@@ -502,7 +581,7 @@ result_table <-
   )
 
 if (is.null(result_table)) {
-  cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
+  cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
 } else {
   result_table
 }
@@ -513,18 +592,21 @@ if (is.null(result_table)) {
 #| echo: false
 #| output: asis
 #| eval: !expr isTRUE(vstats$therapeutic_resistance$tier1$n_gene == 0) && isTRUE(vstats$therapeutic_resistance$tier2$n_gene == 0) && isTRUE(vstats$therapeutic_resistance$tier3$n_gene == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
 ```
 
 #### Prognostic biomarkers
 
+`r pcgrr::progn_diagn_tier_note(pcg_report)`
+
 ```{r tier1_2_poor_prognosis_variants_cna}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$prognostic_poor$tier1$n_gene > 0) || isTRUE(vstats$prognostic_poor$tier2$n_gene > 0)
+#| eval: !expr pcgrr::has_progn_diagn_evidence(pcg_report, "cna", "prognostic_poor")
 
 rctbl_recs <- pcgrr::prep_progn_display_tbl(
   rep = pcg_report,
+tier = pcgrr::progn_diagn_tiers(pcg_report),
   etype_for_tiering = c("prognostic"),
   variant_category = 'cna',
   clnsig = "prognostic_poor")
@@ -543,8 +625,8 @@ result_table
 ```{r}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$prognostic_poor$tier1$n_gene == 0) && isTRUE(vstats$prognostic_poor$tier2$n_gene == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_poor$border, "; background:", cs$prognostic_poor$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_poor$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no poor outcome biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
+#| eval: !expr isFALSE(pcgrr::has_progn_diagn_evidence(pcg_report, "cna", "prognostic_poor"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_poor$border, "; background:", cs$prognostic_poor$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_poor$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no poor outcome biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
 ```
 
 <br>
@@ -552,10 +634,11 @@ cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic
 ```{r tier1_2_better_prognosis_variants_cna}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$prognostic_better$tier1$n_gene > 0) || isTRUE(vstats$prognostic_better$tier2$n_gene > 0)
+#| eval: !expr pcgrr::has_progn_diagn_evidence(pcg_report, "cna", "prognostic_better")
 
 rctbl_recs <- pcgrr::prep_progn_display_tbl(
   rep = pcg_report,
+tier = pcgrr::progn_diagn_tiers(pcg_report),
   etype_for_tiering = c("prognostic"),
   variant_category = 'cna',
   clnsig = "prognostic_better")
@@ -574,19 +657,22 @@ result_table
 ```{r}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$prognostic_better$tier1$n_gene == 0) && isTRUE(vstats$prognostic_better$tier2$n_gene == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_better$border, "; background:", cs$prognostic_better$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_better$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no better outcome biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
+#| eval: !expr isFALSE(pcgrr::has_progn_diagn_evidence(pcg_report, "cna", "prognostic_better"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_better$border, "; background:", cs$prognostic_better$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_better$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no better outcome biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
 ```
 
 #### Diagnostic biomarkers
 
+`r pcgrr::progn_diagn_tier_note(pcg_report)`
+
 ```{r tier1_2_diagnostic_variants_cna}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$diagnostic_positive$tier1$n_gene > 0) || isTRUE(vstats$diagnostic_positive$tier2$n_gene > 0)
+#| eval: !expr pcgrr::has_progn_diagn_evidence(pcg_report, "cna", "diagnostic_positive")
 
 rctbl_recs <- pcgrr::prep_diagn_display_tbl(
   rep = pcg_report,
+tier = pcgrr::progn_diagn_tiers(pcg_report),
   etype_for_tiering = c("diagnostic"),
   variant_category = 'cna',
   clnsig = "diagnostic_positive")
@@ -605,15 +691,14 @@ result_table
 ```{r}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$diagnostic_positive$tier1$n_gene == 0) && isTRUE(vstats$diagnostic_positive$tier2$n_gene == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$diagnostic_positive$border, "; background:", cs$diagnostic_positive$bg, "; border-radius:0 4px 4px 0; color:", cs$diagnostic_positive$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no diagnostic biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
+#| eval: !expr isFALSE(pcgrr::has_progn_diagn_evidence(pcg_report, "cna", "diagnostic_positive"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$diagnostic_positive$border, "; background:", cs$diagnostic_positive$bg, "; border-radius:0 4px 4px 0; color:", cs$diagnostic_positive$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no diagnostic biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
 ```
 
 
 
 
 :::
-
 
 <br>
 <br>

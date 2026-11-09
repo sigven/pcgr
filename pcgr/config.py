@@ -60,11 +60,18 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             'vcfanno_n_proc': int(arg_dict['vcfanno_n_proc']),                                          
             'no_reporting': int(arg_dict['no_reporting']),
             'no_html': int(arg_dict['no_html']),
+            'no_pdf': int(arg_dict['no_pdf']),
             'retained_vcf_info_tags': str(arg_dict['retained_info_tags']),
             'show_noncoding': not int(arg_dict['ignore_noncoding']),
             'force_overwrite': int(arg_dict['force_overwrite'])
         }
         conf_options['sample_properties'] = {}
+        ## subject (individual) properties - sex and age at tumor sampling
+        conf_options['subject_properties'] = {}
+        conf_options['subject_properties']['sex'] = str(arg_dict['sex']) \
+            if arg_dict.get('sex') is not None else 'UNKNOWN'
+        conf_options['subject_properties']['age'] = 'NA' if \
+            arg_dict.get('age') is None else int(arg_dict['age'])
         conf_options['molecular_data'] = {}
         conf_options['molecular_data']['fname_mut_vcf'] = "None"
         conf_options['molecular_data']['fname_mut_tsv'] = "None"
@@ -77,7 +84,9 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             arg_dict['tumor_ploidy'] is None else float(arg_dict['tumor_ploidy'])
         conf_options['sample_properties']['tumor_ploidy_source'] = 'NA' if \
             arg_dict['tumor_ploidy'] is None else 'provided'
-        conf_options['sample_properties']['sex'] = 'UNKNOWN'
+        ## tumor purity is not estimated by PCGR - user-provided only
+        conf_options['sample_properties']['tumor_purity_source'] = 'NA' if \
+            arg_dict['tumor_purity'] is None else 'provided'
         conf_options['sample_properties']['site'] = str(pcgr_vars.tsites[arg_dict['tsite']])
         conf_options['sample_properties']['site2'] = str(pcgr_vars.tsites[arg_dict['tsite']]).replace(" ","_").replace("/","@")
         for prop in ['dp_control_detected', 'vaf_control_detected', 'dp_tumor_detected', 'vaf_tumor_detected']:
@@ -104,15 +113,15 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
                 if sex == 'FEMALE':
                     error_message(f"Tumor site '{conf_options['sample_properties']['site']}' is not observed in females - please check the '--sex' option", logger)
 
-            conf_options['sample_properties']['sex'] = str(arg_dict['sex'])
-
         conf_options['other']['vcf2maf'] = 1
 
         conf_options['oncokb'] = {
             'api_token': str(arg_dict['oncokb_api_token']) if arg_dict['oncokb_api_token'] is not None else None,
             'oncotree_code': str(arg_dict['oncokb_oncotree_code']) if arg_dict['oncokb_oncotree_code'] is not None else None,
             'exclusive': int(arg_dict['oncokb_exclusive']),
+            'all_tumor_types': int(not arg_dict.get('oncokb_tumor_type_only', False)),
             'maf_query_all': int(arg_dict['oncokb_maf_query_all']),
+            'keep_files': int(arg_dict['oncokb_keep_files']),
             'data_version': None,
             'data_release_date': None,
             'api_version': None,
@@ -135,6 +144,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             'gain_threshold_relative': float(arg_dict['cna_gain_threshold_relative']),
             'del_threshold_absolute': int(arg_dict['cna_del_threshold_absolute']),
             'del_threshold_relative': float(arg_dict['cna_del_threshold_relative']),
+            'estimate_hrd': int(arg_dict['estimate_hrd']),
         }
         
         conf_options['germline'] = {
@@ -144,6 +154,23 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
         if arg_dict['input_cpsr'] is not None:
             conf_options['germline']['show'] = 1
             
+        ## external MSI result (e.g. from MSIsensor-pro)
+        conf_options['msi_external'] = {
+            'run': int(arg_dict.get('input_msi') is not None),
+            'caller': arg_dict.get('input_msi_caller') or 'generic',
+            ## user-defined threshold on the MSI score (None: default threshold of the caller)
+            'threshold': arg_dict.get('input_msi_threshold'),
+            'threshold_user_defined': int(arg_dict.get('input_msi_threshold') is not None)
+        }
+
+        ## external HRD result - the kind of score is given in the file (HRD_SCORE_TYPE)
+        conf_options['hrd_external'] = {
+            'run': int(arg_dict.get('input_hrd') is not None),
+            ## user-defined threshold on the HRD score (None: status as given in the file)
+            'threshold': arg_dict.get('input_hrd_threshold'),
+            'threshold_user_defined': int(arg_dict.get('input_hrd_threshold') is not None)
+        }
+
         conf_options['expression'] = {}
         conf_options['expression']['run'] = int(arg_dict['input_rna_exp'] is not None)
         conf_options['expression']['similarity_analysis'] = int(arg_dict['expression_sim'])
@@ -193,6 +220,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
         conf_options['somatic_snv']['tmb'] = {
             'run': int(arg_dict['estimate_tmb']), 
             'tmb_display': arg_dict['tmb_display'],           
+            'tmb_high_threshold': float(arg_dict['tmb_high_threshold']),
             'tmb_dp_min': tmb_dp_min,
             'tmb_af_min': tmb_af_min,
             'tmb_ad_min': tmb_ad_min
@@ -207,7 +235,10 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
         conf_options['somatic_snv']['mutational_signatures'] = {
             'run': int(arg_dict['estimate_signatures']),
             'mutation_limit': int(arg_dict['min_mutations_signatures']),
-            'all_reference_signatures': int(arg_dict['all_reference_signatures']),
+            ## Default behaviour (as of v2.3.3) is to use ALL reference signatures during
+            ## re-fitting; '--tumor_type_reference_signatures' opts into the previous
+            ## default of restricting to signatures already attributed to the tumor type
+            'all_reference_signatures': int(not arg_dict['tumor_type_reference_signatures']),
             'include_artefact_signatures': int(arg_dict['include_artefact_signatures']),
             'prevalence_reference_signatures': float(arg_dict['prevalence_reference_signatures'])
         }
@@ -216,7 +247,8 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
                       'fname_expression_tsv', 'fname_expression_outliers_tsv', 
                       'fname_rna_fusion_tsv', 'fname_maf_tsv', 
                       'fname_germline_tsv', 'fname_germline_yaml', 
-                      'fname_expression_similarity_tsv', 'fname_tmb_tsv']:
+                      'fname_expression_similarity_tsv', 'fname_tmb_tsv', 'fname_msi_tsv',
+                      'fname_hrd_tsv']:
             conf_options['molecular_data'][fname] = "None"
     
     
@@ -248,10 +280,10 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
                 0: 'ClinVar trusted (override conflicted records only)',
                 1: 'Override zero-star ClinVar records',
                 2: 'Override zero- and single-star ClinVar records',
-                3: 'Override low-star and non-cancer-phenotype records',
+                3: 'Override zero- and single-star ClinVar records, and records with non-cancer phenotypes',
                 4: 'CPSR always classifies'
             }[int(arg_dict['clinvar_trust_level'])],
-            'clinvar_report_noncancer': int(arg_dict['clinvar_report_noncancer'])
+            'clinvar_cancer_only': int(arg_dict['clinvar_cancer_only'])
         }
             
 
@@ -483,10 +515,33 @@ def set_virtual_target_genes(panel_id: str, refdata_assembly_dir: str, diagnosti
     return all_targets.to_dict(orient='records')
 
 
+def get_oncotree_lineage(oncotree_code, refdata_assembly_dir):
+    """Return the OncoTree names of an OncoTree code and its ancestors (from the
+    code path, e.g. PNS-NST-MPNST), or an empty list if the code is not found."""
+
+    oncotree_fname = os.path.join(
+        refdata_assembly_dir, "phenotype", "tsv", "phenotype_oncotree.tsv.gz")
+    if oncotree_code is None or not os.path.exists(oncotree_fname):
+        return []
+
+    oncotree_df = pd.read_csv(oncotree_fname, sep="\t", na_values=".")
+    if not {'ot_code', 'ot_name', 'ot_code_path'}.issubset(oncotree_df.columns):
+        return []
+    code_names = oncotree_df.dropna(subset=['ot_code', 'ot_name']) \
+        .drop_duplicates('ot_code').set_index('ot_code')
+    if oncotree_code not in code_names.index or pd.isna(code_names.loc[oncotree_code, 'ot_code_path']):
+        return []
+
+    return [str(code_names.loc[code, 'ot_name'])
+            for code in str(code_names.loc[oncotree_code, 'ot_code_path']).split('-')
+            if code in code_names.index]
+
+
 def verify_oncotree_code(oncotree_code, tumor_site, refdata_assembly_dir, logger=None):
-    """Verify that a user-provided OncoTree code is valid and matches the
-    selected PCGR tumor site. Returns the validated oncotree_code on success,
-    or None if validation fails."""
+    """Verify that a user-provided OncoTree code is valid, and check whether it
+    matches the selected PCGR tumor site. Returns the oncotree_code if it is a
+    recognized code (also when its primary site differs from the PCGR tumor
+    site, which only triggers a warning), or None if the code is not recognized."""
 
     oncotree_fname = os.path.join(
         refdata_assembly_dir, "phenotype", "tsv", "phenotype_oncotree.tsv.gz")
@@ -521,13 +576,17 @@ def verify_oncotree_code(oncotree_code, tumor_site, refdata_assembly_dir, logger
             "- proceeding with the provided code", logger)
         return oncotree_code
 
+    ## An explicitly provided (valid) code is more specific than the site-level
+    ## fallback code (e.g. MPNST vs. SOFT_TISSUE), so keep it. OncoKB evidence for
+    ## the code's own cancer type (and its ancestors) is tiered as evidence for the
+    ## PCGR tumor site (conf: oncokb/oncotree_lineage)
     if tumor_site not in code_primary_sites:
         warn_message(
             f"OncoTree code '{oncotree_code}' maps to primary site(s) "
             f"'{', '.join(code_primary_sites)}', which does not match the "
-            f"selected PCGR tumor site '{tumor_site}' - ignoring oncotree code "
-            "for OncoKB annotation", logger)
-        return None
+            f"selected PCGR tumor site '{tumor_site}' - using '{oncotree_code}' "
+            "for OncoKB annotation, with OncoKB evidence for this cancer type "
+            f"tiered as evidence for tumor site '{tumor_site}'", logger)
 
     return oncotree_code
 

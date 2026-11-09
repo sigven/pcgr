@@ -418,15 +418,15 @@ generate_report_data_msi <- function(
 
     if (n_calls < 100) {
       pcg_report_msi[["low_mutation_warning"]] <- TRUE
-      conf_tier <- pcg_report_msi[["prediction"]]$confidence_tier
+      conf_tier <- pcg_report_msi[["prediction"]][["msi_stats"]]$confidence_tier
       if (!is.null(conf_tier) && conf_tier == "High confidence") {
         log4r_info(paste0(
-          "NOTE: n = ", n_calls, " variants — below training threshold ",
+          "NOTE: n = ", n_calls, " variants - below training threshold ",
           "(n < 100), but P(MSI-H) is far from the decision boundary: ",
           "prediction is still high confidence."))
       } else {
         log4r_info(paste0(
-          "WARNING: n = ", n_calls, " variants — below training threshold ",
+          "WARNING: n = ", n_calls, " variants - below training threshold ",
           "(n < 100). Prediction may be less reliable; check confidence tier ",
           "and P(MSI-H) in the report."))
       }
@@ -441,6 +441,255 @@ generate_report_data_msi <- function(
   return(pcg_report_msi)
 }
 
+#' MSI status as displayed in the report (MSI status cards)
+#'
+#' Harmonizes the MSI status labels of the external MSI caller ('MSI-H',
+#' 'MSS', 'Indeterminate') and the PCGR MSI classifier
+#' ('MSI.H (Microsatellite instability - high)', 'MSS (Microsatellite stable)')
+#' to 'MSI-high' / 'MSS' (other values unchanged)
+#'
+#' @param status MSI status (character)
+#' @return display label (character)
+#' @keywords internal
+msi_status_display <- function(status) {
+  status <- as.character(status)
+  dplyr::case_when(
+    grepl("^MSI[-.]H", status) ~ "MSI-high",
+    grepl("^MSS", status) ~ "MSS",
+    .default = status)
+}
+
+#' Function that tells if the MSI status of the sample is MSI-high
+#'
+#' If a result from an external MSI caller is available (MSI-H or MSS), this
+#' determines the MSI status (an external MSI-H call is regarded as confident,
+#' as the confidence of the call is the responsibility of the caller). An
+#' external MSS call means that the sample is not regarded as MSI-high, also
+#' when the PCGR MSI classifier predicts MSI-H. If no external result is
+#' available (or the external result is indeterminate), the prediction of the
+#' PCGR MSI classifier is used.
+#'
+#' @param msi_content MSI report element (as returned by
+#' \code{generate_report_data_msi})
+#' @param high_confidence_only logical, if TRUE, return TRUE only if the
+#' MSI-H prediction is also of high confidence (P(MSI-H) >= 0.9) - only
+#' relevant for the PCGR MSI classifier
+#' @return logical
+#'
+#' @export
+msi_status_is_high <- function(msi_content = NULL,
+                               high_confidence_only = FALSE) {
+  if (isTRUE(msi_content[["external"]][["eval"]])) {
+    ext_status <- msi_content[["external"]][["result"]][["MSI_STATUS"]]
+    if (isTRUE(length(ext_status) == 1 && ext_status %in% c("MSI-H", "MSS"))) {
+      return(ext_status == "MSI-H")
+    }
+  }
+  msi_stats <- msi_content[["prediction"]][["msi_stats"]]
+  predicted_class <- msi_stats[["predicted_class"]]
+  if (is.null(predicted_class) || length(predicted_class) != 1 ||
+      is.na(predicted_class)) {
+    return(FALSE)
+  }
+  is_high <- stringr::str_detect(predicted_class, "^MSI")
+  if (is_high && high_confidence_only) {
+    is_high <- isTRUE(msi_stats[["confidence_tier"]] == "High confidence")
+  }
+  return(is_high)
+}
+
+#' Function that loads the normalised result of an external MSI caller
+#'
+#' Reads the (single-row) tab-separated file with the MSI result of an
+#' external caller (e.g. MSIsensor-pro), as written by the PCGR Python
+#' workflow (columns SAMPLE_ID, MSI_STATUS, MSI_STATUS_BASIS, MSI_CALLER,
+#' CALLER_VERSION, MSI_SCORE, MSI_SCORE_TYPE, MSI_SCORE_THRESHOLD_USED,
+#' N_LOCI_EVALUATED, N_LOCI_UNSTABLE).
+#'
+#' @param fname name of the file with the normalised external MSI result
+#' @return data frame with one row
+#'
+#' @export
+load_external_msi <- function(fname = NULL) {
+  load_external_result(
+    fname,
+    required_cols = c("MSI_STATUS", "MSI_STATUS_BASIS", "MSI_CALLER"),
+    num_cols = c("MSI_SCORE", "MSI_SCORE_THRESHOLD_USED"),
+    int_cols = c("N_LOCI_EVALUATED", "N_LOCI_UNSTABLE"),
+    label = "MSI")
+}
+
+#' Function that generates report data for an external MSI result
+#'
+#' @param settings PCGR run/configuration settings (the normalised external
+#' MSI result is given by \code{settings$molecular_data$fname_msi_tsv})
+#' @return list with elements 'eval', 'result' (one-row data frame) and
+#' 'threshold_user_defined' (logical: the threshold on the MSI score used for
+#' deriving the MSI status was set by the user, \code{--input_msi_threshold})
+#'
+#' @export
+generate_report_data_msi_external <- function(settings = NULL) {
+  generate_report_data_external(settings, type = "msi")
+}
+
+#' Function that compares the external MSI result with the PCGR MSI classifier
+#'
+#' @param msi_content MSI report element
+#' @return "concordant", "discordant", "not_evaluable" (the external result is
+#' indeterminate), or NA (no external result and/or no classifier prediction)
+#'
+#' @export
+msi_concordance <- function(msi_content = NULL) {
+  if (!isTRUE(msi_content[["external"]][["eval"]])) {
+    return(NA_character_)
+  }
+  predicted_class <-
+    msi_content[["prediction"]][["msi_stats"]][["predicted_class"]]
+  if (is.null(predicted_class) || length(predicted_class) != 1 ||
+      is.na(predicted_class)) {
+    return(NA_character_)
+  }
+  ext_status <- msi_content[["external"]][["result"]][["MSI_STATUS"]]
+  if (ext_status == "Indeterminate") {
+    return("not_evaluable")
+  }
+  classifier_high <- stringr::str_detect(predicted_class, "^MSI")
+  if ((ext_status == "MSI-H") == classifier_high) {
+    return("concordant")
+  }
+  return("discordant")
+}
+
+#' Function that prepares display strings for an external MSI result
+#'
+#' @param msi_content MSI report element
+#' @param classifier_ref where the details of the PCGR MSI classifier
+#' prediction can be found in the report (e.g. 'below', or 'the tab "PCGR MSI
+#' classifier"'), used in the notes on concordance. If NULL, no reference is made.
+#' @return list with elements: 'status', 'caller', 'caller_label' (caller, with
+#' the threshold on the score if the status is derived), 'score_title', 'score_value',
+#' 'loci_value' (NA if not available), 'basis_note' (how the status was
+#' obtained), 'zero_loci' (logical), 'concordance' (see
+#' \code{msi_concordance}), 'discordance_note' (NA unless discordant) and
+#' 'classifier_class' and 'classifier_detail' (class and probability of the
+#' classifier prediction)
+#'
+#' @export
+msi_external_display <- function(msi_content = NULL, classifier_ref = "below") {
+  res <- msi_content[["external"]][["result"]]
+  caller <- res$MSI_CALLER
+  if (!is.na(res$CALLER_VERSION)) {
+    caller <- paste0(caller, " ", res$CALLER_VERSION)
+  }
+
+  score_title <- "MSI score"
+  score_value <- "Not available"
+  if (!is.na(res$MSI_SCORE)) {
+    score_value <- as.character(res$MSI_SCORE)
+    if (!is.na(res$MSI_SCORE_TYPE)) {
+      score_title <- paste0("MSI score (", res$MSI_SCORE_TYPE, ")")
+      if (stringr::str_detect(res$MSI_SCORE_TYPE, "percent")) {
+        score_value <- paste0(score_value, "%")
+      }
+    }
+  }
+
+  loci_value <- NA_character_
+  if (!is.na(res$N_LOCI_EVALUATED) && !is.na(res$N_LOCI_UNSTABLE)) {
+    loci_value <- paste0(
+      res$N_LOCI_UNSTABLE, " / ", res$N_LOCI_EVALUATED)
+  }
+
+  caller_label <- caller
+  basis_note <- paste0(
+    "The MSI status was reported by the MSI caller (", caller, ").")
+  if (identical(res$MSI_STATUS_BASIS, "derived")) {
+    if (isTRUE(res$N_LOCI_EVALUATED == 0)) {
+      basis_note <- paste0(
+        "The MSI caller (", caller, ") does not report an MSI status, ",
+        "and no loci were evaluated.")
+    } else {
+      basis_note <- paste0(
+        "The MSI caller (", caller, ") does not report an MSI status - ",
+        "the status was derived by PCGR from the score")
+      if (!is.na(res$MSI_SCORE_THRESHOLD_USED)) {
+        threshold_text <- as.character(res$MSI_SCORE_THRESHOLD_USED)
+        if (!is.na(res$MSI_SCORE_TYPE) &&
+            stringr::str_detect(res$MSI_SCORE_TYPE, "percent")) {
+          threshold_text <- paste0(threshold_text, "%")
+        }
+        threshold_source <- ifelse(
+          isTRUE(msi_content[["external"]][["threshold_user_defined"]]),
+          "user-defined", "default")
+        basis_note <- paste0(
+          basis_note, " (MSI-H if the score is at least ", threshold_text,
+          "; ", threshold_source, " threshold)")
+        caller_label <- paste0(
+          caller, " (MSI-H if score >= ", threshold_text, ", ",
+          threshold_source, " threshold)")
+      }
+      basis_note <- paste0(basis_note, ".")
+    }
+  }
+
+  concordance <- msi_concordance(msi_content)
+  classifier_class <- as.character(
+    msi_content[["prediction"]][["msi_stats"]][["predicted_class"]])
+  if (length(classifier_class) == 1 && !is.na(classifier_class)) {
+    classifier_class <- ifelse(
+      stringr::str_detect(classifier_class, "^MSI"), "MSI-H", "MSS")
+  } else {
+    classifier_class <- NA_character_
+  }
+
+  classifier_detail <- classifier_class
+  prob_msi_h <- msi_content[["prediction"]][["msi_stats"]][["prob_msi_h"]]
+  if (!is.null(prob_msi_h) && !is.na(prob_msi_h)) {
+    classifier_detail <- paste0(
+      classifier_class, ", P(MSI-H) = ", round(prob_msi_h, 3))
+  }
+  ref_text <- ""
+  if (!is.null(classifier_ref)) {
+    ref_text <- paste0(" (see ", classifier_ref, ")")
+  }
+
+  ## explanation of the consequence of a discordant result for the assessment
+  ## of MSI-High biomarker evidence
+  discordance_note <- NA_character_
+  if (identical(concordance, "discordant")) {
+    discordance_note <- paste0(
+      "The result differs from the prediction of the PCGR MSI classifier (",
+      classifier_class, "), which is based on features of the somatic mutation ",
+      "profile only", ref_text, ". ")
+    if (res$MSI_STATUS == "MSS") {
+      discordance_note <- paste0(
+        discordance_note,
+        "Since the external MSI caller reports a microsatellite stable tumor, ",
+        "biomarker evidence for MSI-High is not shown.")
+    } else {
+      discordance_note <- paste0(
+        discordance_note,
+        "The result of the external MSI caller is used for the assessment of ",
+        "MSI-High biomarker evidence.")
+    }
+  }
+
+  list(
+    status = res$MSI_STATUS,
+    caller = caller,
+    caller_label = caller_label,
+    score_title = score_title,
+    score_value = score_value,
+    loci_value = loci_value,
+    basis_note = basis_note,
+    zero_loci = isTRUE(res$N_LOCI_EVALUATED == 0),
+    concordance = concordance,
+    discordance_note = discordance_note,
+    classifier_class = classifier_class,
+    classifier_detail = classifier_detail,
+    classifier_ref = if (is.null(classifier_ref)) NA_character_ else classifier_ref)
+}
+
 #' Function that plots the indel fraction for a given sample and
 #' contrasts this with the distribution for MSI-H/MSS samples from TCGA
 #'
@@ -453,9 +702,11 @@ generate_report_data_msi <- function(
 
 msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction, color_palette = pcgrr::color_palette) {
 
+  ## MSI-high samples are labelled 'MSI-H' in the TCGA dataset ('MSI.H'
+  ## kept for older datasets)
   color_vec <- utils::head(
-    color_palette[["multi"]][["values"]], 2)
-  names(color_vec) <- c("MSS", "MSI.H")
+    color_palette[["multi"]][["values"]], 2)[c(1, 2, 2)]
+  names(color_vec) <- c("MSS", "MSI-H", "MSI.H")
 
   p <- ggplot2::ggplot(data = tcga_msi_dataset) +
     ggplot2::geom_histogram(
@@ -494,64 +745,6 @@ msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction, color_pale
                    plot.margin = (grid::unit(c(0.5, 0.5, 0.5, 0.5), "cm"))) +
     ggplot2::geom_vline(xintercept = as.numeric(indel_fraction),
                         size = 1.1, linetype = "dotted")
-
-  return(p)
-
-}
-
-#' Function that plots the indel load for a given sample and
-#' contrasts this with the distribution for MSI-H/MSS samples from TCGA
-#'
-#' @param tcga_msi_dataset underlying dataset from TCGA used for development
-#' of statistical classifier
-#' @param indel_load fraction of indels of all mutations (SNVs + indels)
-#' @return p
-#'
-#' @export
-
-msi_indel_load_plot <- function(tcga_msi_dataset, indel_load, color_palette = pcgrr::color_palette) {
-
-  color_vec <- utils::head(
-    color_palette[["multi"]][["values"]], 2)
-  names(color_vec) <- c("MSS", "MSI.H")
-
-  p <- ggplot2::ggplot(data = tcga_msi_dataset) +
-    ggplot2::geom_histogram(
-      mapping = ggplot2::aes(x = .data$fracIndels,
-                             color = .data$MSI_status,
-                             fill = .data$MSI_status),
-      position = "dodge", binwidth = 0.01) +
-    ggplot2::ylab("Number of samples") +
-    ggplot2::scale_fill_manual(values = color_vec) +
-    ggplot2::scale_color_manual(values = color_vec) +
-    ggplot2::theme_classic() +
-    ggplot2::xlab("InDel load - somatic variants") +
-    ggplot2::theme(
-      plot.title =
-        ggplot2::element_text(family = "Helvetica",
-                              size = 16,
-                              hjust = 0.5, face = "bold"),
-      axis.text.x =
-        ggplot2::element_text(family = "Helvetica",
-                              size = 14, face = "bold"),
-      axis.title.x =
-        ggplot2::element_text(family = "Helvetica",
-                              size = 14),
-      legend.title =
-        ggplot2::element_blank(),
-      legend.text =
-        ggplot2::element_text(family = "Helvetica",
-                              size = 14),
-      axis.text.y =
-        ggplot2::element_text(family = "Helvetica",
-                              size = 14),
-      axis.title.y =
-        ggplot2::element_text(family = "Helvetica",
-                              size = 14, vjust = 1.5),
-      plot.margin = (grid::unit(c(0.5, 0.5, 0.5, 0.5), "cm"))) +
-    ggplot2::geom_vline(
-      xintercept = as.numeric(indel_load),
-      size = 1.1, linetype = "dotted")
 
   return(p)
 

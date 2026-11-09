@@ -113,7 +113,7 @@ mutational_signatures_doc_note <- function() {
 
 }
 
-#' Get documentation string for MSI status prediction
+#' Get documentation string for MSI status (external caller, PCGR classifier)
 #'
 #' @return A documentation string
 #'
@@ -136,6 +136,29 @@ msi_doc_note <- function() {
 
 }
 
+#' Get documentation string for HRD status (external assay/tool, PCGR genomic
+#' scar score)
+#'
+#' @return A documentation string
+#'
+#' @export
+#'
+hrd_doc_note <- function() {
+
+  doc_md_file <- system.file(
+    "templates", "doc_notes_md", "hrd.md", package = "pcgrr")
+  hrd_template <- paste0(readLines(doc_md_file, warn = FALSE), collapse = "\n")
+
+  pubmed_url <- "https://pubmed.ncbi.nlm.nih.gov/"
+
+  return(
+    glue::glue(
+      hrd_template, pubmed_url = pubmed_url
+    )
+  )
+
+}
+
 #' Get documentation string for RNA expression analysis (outlier, similarity)
 #'
 #' @return A documentation string
@@ -153,6 +176,36 @@ expression_doc_note <- function() {
       expr_template
     )
   )
+
+}
+
+
+#' Get documentation string for the key findings summary
+#'
+#' @return A documentation string
+#'
+#' @export
+#'
+key_findings_doc_note <- function() {
+
+  doc_md_file <- system.file(
+    "templates", "doc_notes_md", "key_findings.md", package = "pcgrr")
+  paste0(readLines(doc_md_file, warn = FALSE), collapse = "\n")
+
+}
+
+
+#' Get the medical disclaimer shown in PCGR and CPSR reports
+#'
+#' @return The disclaimer text, as a markdown string
+#'
+#' @export
+#'
+medical_disclaimer_note <- function() {
+
+  doc_md_file <- system.file(
+    "templates", "doc_notes_md", "medical_disclaimer.md", package = "pcgrr")
+  paste0(readLines(doc_md_file, warn = FALSE), collapse = "\n")
 
 }
 
@@ -200,4 +253,22 @@ twohit_doc_note <- function() {
 
   return(twohit_vaf_template)
 
+}
+
+#' Convert the HTML elements of a documentation note (markdown with inline
+#' HTML, as used in the HTML report) to markdown, for the PDF report
+#'
+#' @param x documentation note (character)
+#'
+#' @return documentation note with links (<a>) and <b>/<i> as markdown, and
+#' line breaks (<br>) removed
+#' @keywords internal
+doc_note_markdown <- function(x) {
+  x |>
+    ## HTML links as markdown links
+    stringr::str_replace_all(
+      "(?s)<a\\s+href=['\"]([^'\"]+)['\"][^>]*>(.*?)</a>", "[\\2](\\1)") |>
+    stringr::str_replace_all("(?s)<b[^>]*>(.*?)</b>", "**\\1**") |>
+    stringr::str_replace_all("(?s)<i>(.*?)</i>", "*\\1*") |>
+    stringr::str_replace_all("<br\\s*/?>", "")
 }

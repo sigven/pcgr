@@ -382,15 +382,24 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
             variant_data['ONCG_OM2'] = True
    
    ## check if variant is silent (synonymous|splice) and outside critical splice region
-   if "INTRON_POSITION" in variant_data.keys() and \
-      "EXON_POSITION" in variant_data.keys() and \
-      "DBNSFP_SPLICE_SITE_RF" in variant_data.keys() and \
-      "Consequence" in variant_data.keys():
-      
-      if (int(variant_data['INTRON_POSITION']) < 0 and int(variant_data['INTRON_POSITION']) < -3 or \
-         int(variant_data['INTRON_POSITION']) > 0 and int(variant_data['INTRON_POSITION']) > 6 or \
-         int(variant_data['EXON_POSITION']) < 0 and int(variant_data['EXON_POSITION']) < -2 or \
-         int(variant_data['EXON_POSITION']) > 0 and int(variant_data['EXON_POSITION']) > 1) and \
+   if "DBNSFP_SPLICE_SITE_RF" in variant_data.keys() and \
+      variant_data.get('Consequence') is not None:
+
+      ## INTRON_POSITION / EXON_POSITION are unset (None) for the vast majority of
+      ## variants - treat a missing/non-numeric position as 0, i.e. not near the
+      ## splice boundary, so the criterion is judged only on whichever position is
+      ## actually annotated (see issue #308).
+      try:
+         intron_position = int(variant_data.get('INTRON_POSITION'))
+      except (TypeError, ValueError):
+         intron_position = 0
+      try:
+         exon_position = int(variant_data.get('EXON_POSITION'))
+      except (TypeError, ValueError):
+         exon_position = 0
+
+      if (intron_position < -3 or intron_position > 6 or \
+         exon_position < -2 or exon_position > 1) and \
          variant_data['DBNSFP_SPLICE_SITE_RF'] != "AS" and \
          re.match(r'^(synonymous_variant|splice_region_variant)', variant_data['Consequence']):
             variant_data['ONCG_SBP2'] = True
@@ -680,8 +689,9 @@ def refine_oncogenicity_with_oncokb(
    for idx, row in tsv_df.iterrows():
       existing_code   = str(row['ONCOGENICITY_CODE'])   if pd.notna(row['ONCOGENICITY_CODE'])   else '.'
       existing_score  = float(row['ONCOGENICITY_SCORE']) if pd.notna(row['ONCOGENICITY_SCORE']) else 0.0
-      oncogenicity_okb    = str(row['ONCOGENICITY_OKB'])    if pd.notna(row['ONCOGENICITY_OKB'])    else None
-      mutation_effect_okb = str(row['MUTATION_EFFECT_OKB'])  if pd.notna(row['MUTATION_EFFECT_OKB'])  else None
+      # missing OncoKB annotations are '.' (written with na_rep='.') or NaN
+      oncogenicity_okb    = str(row['ONCOGENICITY_OKB'])    if pd.notna(row['ONCOGENICITY_OKB'])    and str(row['ONCOGENICITY_OKB'])   != '.' else None
+      mutation_effect_okb = str(row['MUTATION_EFFECT_OKB'])  if pd.notna(row['MUTATION_EFFECT_OKB'])  and str(row['MUTATION_EFFECT_OKB']) != '.' else None
       is_tsg = row['TSG'] is True or str(row['TSG']).lower() == 'true'
       var_id = str(row['VAR_ID']) if pd.notna(row['VAR_ID']) else None
 
@@ -772,5 +782,5 @@ def refine_oncogenicity_with_oncokb(
       tsv_df.at[idx, 'ONCOGENICITY']       = updated_class
       n_refined += 1
 
-   tsv_df.to_csv(tsv_gz_fname, sep="\t", compression="gzip", index=False)
+   tsv_df.to_csv(tsv_gz_fname, sep="\t", compression="gzip", index=False, na_rep=".")
    logger.info(f"OncoKB oncogenicity refinement complete: {n_refined} / {len(tsv_df)} variants updated")

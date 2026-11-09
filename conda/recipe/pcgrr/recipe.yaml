@@ -1,6 +1,6 @@
 context:
   name: r-pcgrr
-  version: 2.3.2 # bump
+  version: 2.3.2.9018 # bump
 
 package:
   name: ${{ name|lower }}
@@ -48,6 +48,7 @@ requirements:
     - r-reshape2
     - r-rlang
     - r-rrapply
+    - r-tinytable
     - bioconductor-s4vectors
     - r-scales
     - r-shiny
@@ -89,6 +90,7 @@ requirements:
     - r-reshape2
     - r-rlang
     - r-rrapply
+    - r-tinytable
     - bioconductor-s4vectors
     - r-scales
     - r-shiny

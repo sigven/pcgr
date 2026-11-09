@@ -273,7 +273,9 @@ load_reference_data <- function(
       genename = "name"
     ) |>
     dplyr::mutate(
-      entrezgene = as.character(.data$entrezgene)
+      entrezgene = as.character(.data$entrezgene),
+      cancergene_evidence = strip_na_from_gene_evidence(
+        .data$cancergene_evidence)
     ) |>
     dplyr::distinct() |>
     dplyr::mutate(
@@ -397,6 +399,24 @@ load_reference_data <- function(
   colnames(pcgr_ref_data[['variant']][['gwas']]) <-
     toupper(colnames(pcgr_ref_data[['variant']][['gwas']]))
 
+  #####--F. Pharmacogenomic alleles/guidelines (CPIC)--#####
+  ## - optional, not present in bundles prior to Oct 2026
+  for (pgx_tbl in c("pgx_allele", "pgx_phenotype", "pgx_guideline")) {
+    pgx_tsv_fname <-
+      file.path(
+        pcgr_db_assembly_dir, "variant", "tsv", "pgx",
+        paste0(pgx_tbl, ".tsv.gz")
+      )
+    if (file.exists(pgx_tsv_fname)) {
+      pcgr_ref_data[['variant']][[pgx_tbl]] <- as.data.frame(
+        readr::read_tsv(
+          pgx_tsv_fname,
+          na = c("."),
+          col_types = readr::cols(.default = "c"),
+          show_col_types = FALSE))
+    }
+  }
+
 
   pcgr_ref_data[['variant']][['varstats']] <- list()
   ## Get variant statistics
@@ -429,6 +449,7 @@ load_reference_data <- function(
   pcgr_ref_data[['phenotype']][['oncotree']] <- as.data.frame(
     readr::read_tsv(
       phenOncoX_tsv_fname, show_col_types = FALSE,
+      col_types = readr::cols(efo_obsolete_name = readr::col_character()),
       na = c(".","NA"))
   )
   pcgr_ref_data[['phenotype']][['cancer_groups']] <-
@@ -589,15 +610,23 @@ load_reference_data <- function(
   ####-- 9. Metadata ####
   pcgr_ref_data[['metadata']] <- data.frame()
   for (dtype in c('gene','gwas','hotspot','other',
-                 'phenotype','biomarker','drug')) {
+                 'phenotype','biomarker','drug','pgx')) {
 
     fname <- file.path(
       pcgr_db_assembly_dir, ".METADATA", "tsv",
       paste0(dtype,"_metadata.tsv")
     )
+    ## pharmacogenomic (CPIC) metadata - optional, not present in
+    ## bundles prior to Oct 2026
+    if (dtype == "pgx" && !file.exists(fname)) {
+      next
+    }
     check_file_exists(fname)
+    ## source_version as character - date-like versions (e.g. CPIC
+    ## '2026-08-03') are otherwise parsed as dates
     metadata_dtype <- as.data.frame(
       readr::read_tsv(fname, show_col_types = FALSE,
+                      col_types = readr::cols(source_version = "c"),
                       guess_max = 100000)) |>
       dplyr::mutate(datatype = dtype) |>
       dplyr::mutate(wflow = dplyr::case_when(
@@ -673,4 +702,33 @@ load_reference_data <- function(
   return(pcgr_ref_data)
 
 
+}
+
+#' Remove missing-value placeholders from gene evidence strings
+#'
+#' Entries in the bundle's cancer gene evidence strings can be literal "NA"
+#' tokens (e.g. CancerMine citations that lack a link). These are removed,
+#' along with any evidence label left with no entries. Text inside citation
+#' links is left untouched.
+#'
+#' @param evidence character vector of evidence strings
+#' @return character vector of cleaned strings (NA if nothing remains)
+#'
+#' @keywords internal
+#'
+strip_na_from_gene_evidence <- function(evidence = NULL) {
+
+  label <- "[^,:<>]+: "
+
+  ## labels where all entries are NA
+  cleaned <- gsub(
+    paste0("(^|, )", label, "NA(, NA)*(?=, [^,:<>]+: |$)"),
+    "\\1", as.character(evidence), perl = TRUE)
+  ## NA entries that lead or follow other entries of a label
+  cleaned <- gsub("(?<=: )(NA, )+", "", cleaned, perl = TRUE)
+  cleaned <- gsub("(?<=</a>)(, NA)+(?=, |$)", "", cleaned, perl = TRUE)
+  ## separators left behind by removed labels
+  cleaned <- gsub("^, |, $", "", gsub("(, ){2,}", ", ", cleaned))
+
+  dplyr::if_else(cleaned %in% c("", "NA"), NA_character_, cleaned)
 }
