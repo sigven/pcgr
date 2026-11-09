@@ -48,7 +48,8 @@ pdiakumis <- user("pdiakumis")
 
 ## v2.4.0
 
-- Date: **2026-11-XX**
+- Date: **2026-11-10**
+
 - Data bundle update (`20261106`) and software updates
   - Ensembl VEP `v116.3` / GENCODE v50 (GRCh38; v19 for GRCh37)
   - ClinVar (2026-11)

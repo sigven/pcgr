@@ -5,7 +5,7 @@ output: rmarkdown::html_document
 
 ## Output files {#pcgr-output-files}
 
-PCGR generates multiple output files with annotations of molecular aberrations, including an interactive report, an Excel workbook, and pure text-based annotation files (TSV).
+PCGR generates multiple output files with annotations of molecular aberrations, including an interactive HTML report, a PDF report, an Excel workbook, and pure text-based annotation files (TSV).
 
 ### HTML report - quarto-based
 
@@ -19,8 +19,10 @@ findings in the query cancer genome has the following naming convention:
 The report is structured in various sections, pending upon the input provided
 by the user. The following sections may be included in the report:
 
-1. __Settings__
-	* Lists key configurations for the analysis, including the genome assembly, type of sequencing assay (WES/WGS/TARGETED), the cancer type (as provided by the user), and the tumor purity and ploidy.
+1. __Key findings and settings__
+	* The top of the report shows sample details (cancer type, assay, subject sex and age, tumor purity and ploidy) and the input data provided
+	* _Key findings_: a templated summary of the main findings - therapeutically actionable alterations (Tier 1 and 2), diagnostic evidence and composite genomic biomarkers (TMB-high, MSI-high, HR-deficient) first, followed by supporting findings. The rules for content and ordering are described in the documentation section of the report
+	* Run configuration and report settings (collapsible) - key configurations for the analysis, including the genome assembly, type of sequencing assay (WES/WGS/TARGETED), and the cancer type (as provided by the user)
 	 
 2. __Somatic SNVs/InDels__
 	* Provides an overview of the somatic SNVs and InDels detected in the tumor sample
@@ -70,14 +72,58 @@ by the user. The following sections may be included in the report:
   * Datatable with correlation between gene expression in query sample and samples in other reference cohorts (TCGA, Treehouse Childhood Cancer Initiative, DepMap)
   * Immune contexture profiling
 
-11. __Documentation__
+11. __Germline findings__
+  * Shown if germline variants classified by [CPSR](https://github.com/sigven/cpsr) are provided as input (`--input_cpsr`, `--input_cpsr_yaml`)
+  * Pathogenic and likely pathogenic variants in the virtual panel of cancer predisposition genes screened, and optionally a focused subset of variants of uncertain significance (VUS)
+
+12. __Documentation__
   * Annotation resources - databases with version and licensing information
 	* Report contents - brief description of the main sections in the report
   * References - supporting scientific literature (key report elements)
 
 #### Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20795653.svg)](https://doi.org/10.5281/zenodo.20795653)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4022111.svg)](https://doi.org/10.5281/zenodo.4022111)
+
+### PDF report
+
+A focused PDF report (generated with [quarto](https://quarto.org/) and Typst) is provided by default in addition to the HTML report, and can be turned off with `--no_pdf`. It has the following naming convention:
+
+- `<sample_id>.pcgr.<genome_assembly>.pdf`
+
+Sections are included depending on the input provided by the user:
+
+1. __Cover page__
+	* Sample details and the _Key findings_ summary, shared with the HTML report
+
+2. __Clinical actionability__
+	* Tier 1 and 2 aberrations (SNVs/InDels, CNAs and RNA fusions), with the underlying biomarker evidence
+
+3. __Diagnostic and prognostic biomarkers__
+
+4. __Somatic SNVs/InDels__
+	* Variant statistics, oncogenic and likely oncogenic variants, and variant filtering
+
+5. __Somatic copy number aberrations__
+	* Amplified proto-oncogenes and deleted tumor suppressors, and the copy number profile
+
+6. __Composite genomic biomarkers__
+	* TMB, MSI and HRD status
+
+7. __Mutational features__
+	* Mutational signatures and kataegis events
+
+8. __Transcriptome findings__
+	* RNA fusions and gene expression
+
+9. __Germline findings__
+	* Pathogenic and likely pathogenic variants classified by CPSR (if provided as input)
+
+10. __Analysis configuration & data sources__
+	* Settings and versions of the data sources
+
+11. __Appendix__
+	* Documentation of report contents, references, and a medical disclaimer
 
 ### SNVs/InDels
 
