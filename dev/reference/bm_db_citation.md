@@ -21,4 +21,4 @@ bm_db_citation(report, fusion = FALSE)
 
 ## Value
 
-character, e.g. '@Griffith2017-do; @Tamborero2018-aj'
+character, e.g. `[@Griffith2017-do; @Tamborero2018-aj]`

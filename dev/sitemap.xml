@@ -16,6 +16,8 @@
 <url><loc>https://sigven.github.io/pcgr/dev/index.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/acmg_pill_tooltip.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/actionability_doc_note.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/actionability_tier_col_def.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/actionable_tier.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/af_distribution.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/append_alteration_name.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/append_annotation_links.html</loc></url>
@@ -136,6 +138,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/het_af_germline_status.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/hex_to_rgba.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/hom_af_status.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/hrd_doc_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/hrd_external_display.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/hrd_score_type_label.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/hrd_status_is_deficient.html</loc></url>
@@ -187,6 +190,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/map_biomarker_data.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/max_af_gnomad.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/md_escape_hl.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/medical_disclaimer_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/merge_oncokb_evidence_all_tumor_types.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/mitdb_site_count.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/mkdir.html</loc></url>
@@ -207,6 +211,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_query_all_tumor_types.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_resolve_catchall_sites.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_resolve_lineage_sites.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/order_oncogenicity_table.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/order_variants.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/ordinal_hl.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_bm_evidence.html</loc></url>
@@ -301,6 +306,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/stats_report_snv_indel.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/stats_type_snv_indel.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/strip_html.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/strip_na_from_gene_evidence.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/sync_biomarker_evidence.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/table_display_cols.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/tcga_cohorts.html</loc></url>

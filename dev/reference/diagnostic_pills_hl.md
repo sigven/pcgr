@@ -1,4 +1,4 @@
-# Diagnostic hits to highlight as pills in the key findings
+# Diagnostic hits to highlight in the key findings (section 'Diagnostic evidence')
 
 Only when a primary tumor site is specified: alterations (SNVs/InDels,
 copy number aberrations, RNA fusions) with *strong* diagnostic evidence
@@ -19,11 +19,13 @@ diagnostic_pills_hl(report, max_pills = 3)
 
 - report:
 
-  PCGR report object
+  PCGR report object Hits are ranked by the resolution of the biomarker
+  match (exact matches such as fusions before gene-level matches), see
+  BM_MAPPING_CONFIDENCE.
 
 - max_pills:
 
-  maximum number of pills (remaining hits stay in the supporting
+  maximum number of hits (remaining hits stay in the supporting
   findings)
 
 ## Value
@@ -31,4 +33,5 @@ diagnostic_pills_hl(report, max_pills = 3)
 list with 'pills' (plain-text pill labels, e.g. 'Diagnostic: EWSR1::FLI1
 fusion (Ewing sarcoma)') and 'labels' (the corresponding markdown labels
 of tiered_alterations_hl(), used to avoid listing the same alterations
-again among the supporting findings)
+again among the supporting findings) and 'items' (markdown list items:
+label with cancer types of the evidence)

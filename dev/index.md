@@ -19,7 +19,8 @@ molecular findings in an individual tumor.
     guidelines](https://pubmed.ncbi.nlm.nih.gov/27993330/))
 - Tumor mutational burden (TMB) estimation
 - Mutational signature analysis
-- Microsatellite instability (MSI) classification
+- Microsatellite instability (MSI) and homologous recombination
+  deficiency (HRD) assessment
 - RNA-seq support - gene expression outlier detection, sample similarity
   analysis, and immune contexture profiling
 

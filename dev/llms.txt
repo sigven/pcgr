@@ -19,7 +19,8 @@ molecular findings in an individual tumor.
     guidelines](https://pubmed.ncbi.nlm.nih.gov/27993330/))
 - Tumor mutational burden (TMB) estimation
 - Mutational signature analysis
-- Microsatellite instability (MSI) classification
+- Microsatellite instability (MSI) and homologous recombination
+  deficiency (HRD) assessment
 - RNA-seq support - gene expression outlier detection, sample similarity
   analysis, and immune contexture profiling
 
@@ -235,6 +236,11 @@ sigven AT ifi.uio.no
 - [`actionability_doc_note()`](https://sigven.github.io/pcgr/dev/reference/actionability_doc_note.md)
   : Get documentation string for AMP/ASCO/CAP clinical actionability
   tiers
+- [`actionability_tier_col_def()`](https://sigven.github.io/pcgr/dev/reference/actionability_tier_col_def.md)
+  : Column definition for the tier badge of the oncogenicity tables
+- [`actionable_tier()`](https://sigven.github.io/pcgr/dev/reference/actionable_tier.md)
+  : Keep only the therapeutically actionable tiers (1 and 2) of an
+  actionability tier vector
 - [`af_distribution()`](https://sigven.github.io/pcgr/dev/reference/af_distribution.md)
   : Function that plots a histogram of the the variant allelic support
   (tumor)
@@ -510,6 +516,9 @@ sigven AT ifi.uio.no
   : Function that assigns a logical (STATUS_LIKELY_GERMLINE_HOMOZYGOUS)
   reflecting whether a variant is likely homozygous (germline) - based
   on allelic fraction (VAF_TUMOR)
+- [`hrd_doc_note()`](https://sigven.github.io/pcgr/dev/reference/hrd_doc_note.md)
+  : Get documentation string for HRD status (external assay/tool, PCGR
+  genomic scar score)
 - [`hrd_external_display()`](https://sigven.github.io/pcgr/dev/reference/hrd_external_display.md)
   : Function that prepares display strings for an external HRD result
 - [`hrd_score_type_label()`](https://sigven.github.io/pcgr/dev/reference/hrd_score_type_label.md)
@@ -620,6 +629,8 @@ sigven AT ifi.uio.no
   : Function that assigns a maximum value to a variable (MAX_AF_GNOMAD)
   reflecting the maximum allele frequency for a given variant across
   gnomAD populations
+- [`medical_disclaimer_note()`](https://sigven.github.io/pcgr/dev/reference/medical_disclaimer_note.md)
+  : Get the medical disclaimer shown in PCGR and CPSR reports
 - [`merge_oncokb_evidence_all_tumor_types()`](https://sigven.github.io/pcgr/dev/reference/merge_oncokb_evidence_all_tumor_types.md)
   : Add OncoKB evidence items for other tumor types
 - [`mkdir()`](https://sigven.github.io/pcgr/dev/reference/mkdir.md) :
@@ -632,7 +643,8 @@ sigven AT ifi.uio.no
   : Function that compares the external MSI result with the PCGR MSI
   classifier
 - [`msi_doc_note()`](https://sigven.github.io/pcgr/dev/reference/msi_doc_note.md)
-  : Get documentation string for MSI status prediction
+  : Get documentation string for MSI status (external caller, PCGR
+  classifier)
 - [`msi_external_display()`](https://sigven.github.io/pcgr/dev/reference/msi_external_display.md)
   : Function that prepares display strings for an external MSI result
 - [`msi_indel_fraction_plot()`](https://sigven.github.io/pcgr/dev/reference/msi_indel_fraction_plot.md)
@@ -662,6 +674,8 @@ sigven AT ifi.uio.no
   tumor
 - [`oncokb_resolve_lineage_sites()`](https://sigven.github.io/pcgr/dev/reference/oncokb_resolve_lineage_sites.md)
   : Primary site of OncoKB evidence for the queried OncoTree code
+- [`order_oncogenicity_table()`](https://sigven.github.io/pcgr/dev/reference/order_oncogenicity_table.md)
+  : Order the variants of an oncogenicity table (SNVs/InDels)
 - [`order_variants()`](https://sigven.github.io/pcgr/dev/reference/order_variants.md)
   : Function that orders genomic aberrations according to order of
   chromosomes and chromosomal position
