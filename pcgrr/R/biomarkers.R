@@ -1183,7 +1183,7 @@ sort_evidence_levels <- function(levels) {
 #' @param report PCGR report object
 #' @param fusion logical, RNA fusions (CGI evidence is never used for fusions)
 #'
-#' @return character, e.g. '[@Griffith2017-do; @Tamborero2018-aj]'
+#' @return character, e.g. `[@Griffith2017-do; @Tamborero2018-aj]`
 #' @keywords internal
 bm_db_citation <- function(report, fusion = FALSE) {
   mode <- bm_db_mode(report)

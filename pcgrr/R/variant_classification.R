@@ -59,22 +59,22 @@ assign_amp_asco_cap_tiers <- function(
   )
 
   invisible(assertthat::assert_that(
-    clinical_significance %in% names(bm_categories),
+    clinical_significance %in% names(pcgrr::bm_categories),
     msg = paste0("Argument 'clinical_significance' needs to be one of: ",
-                 paste0(names(bm_categories), collapse = ", '")))
+                 paste0(names(pcgrr::bm_categories), collapse = ", '")))
   )
 
   etype_for_tiering <-
-    bm_categories[[clinical_significance]]$etype
+    pcgrr::bm_categories[[clinical_significance]]$etype
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(tumor_sites, collapse = ", ")))
+                 paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   clnsig_categories_for_tiering <-
-    bm_categories[[clinical_significance]]$clnsig
+    pcgrr::bm_categories[[clinical_significance]]$clnsig
 
   if (!is.null(biomarker_items)) {
 
@@ -454,10 +454,10 @@ assign_variant_tiers_cna <- function(
     only_colnames = FALSE, quiet = TRUE))
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0(
       "Argument 'primary_site' needs to be one of: ",
-      paste0(tumor_sites, collapse = ", ")))
+      paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   invisible(assertthat::assert_that(
@@ -603,9 +603,9 @@ assign_variant_tiers_fusion <- function(
     only_colnames = FALSE, quiet = TRUE))
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(tumor_sites, collapse = ", ")))
+                 paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   invisible(assertthat::assert_that(
@@ -742,9 +742,9 @@ assign_variant_tiers_complex_biomarker <- function(
     only_colnames = FALSE, quiet = TRUE))
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(tumor_sites, collapse = ", ")))
+                 paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   invisible(assertthat::assert_that(
@@ -852,9 +852,9 @@ assign_variant_tiers_snv_indel <- function(
     only_colnames = FALSE, quiet = TRUE))
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(tumor_sites, collapse = ", ")))
+                 paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   invisible(assertthat::assert_that(
@@ -1010,8 +1010,8 @@ assign_variant_top_tiers_ttagnostic <- function(
     etype_for_tiering = c("predictive")) {
 
   valid_etypes <-
-    bm_evidence$types[
-      !bm_evidence$types %in% c("oncogenic","functional")]
+    pcgrr::bm_evidence$types[
+      !pcgrr::bm_evidence$types %in% c("oncogenic","functional")]
 
   invisible(assertthat::assert_that(
     is.character(etype_for_tiering),
@@ -1106,7 +1106,7 @@ assign_variant_top_tiers_ttagnostic <- function(
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL,
-            bm_evidence$strong_regex
+            pcgrr::bm_evidence$strong_regex
           ) ~ as.integer(1),
 
         ## A) Biomarker site is _NOT_ pan-cancer ('Any')
@@ -1117,7 +1117,7 @@ assign_variant_top_tiers_ttagnostic <- function(
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL,
-            bm_evidence$strong_regex
+            pcgrr::bm_evidence$strong_regex
           ) ~ as.integer(2),
 
         ## A) weak evidence - evidence levels (C/D/E)
@@ -1127,7 +1127,7 @@ assign_variant_top_tiers_ttagnostic <- function(
         tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL,
-            bm_evidence$weak_regex
+            pcgrr::bm_evidence$weak_regex
           ) ~ as.integer(3),
         TRUE ~ as.integer(100)
 
@@ -1216,9 +1216,9 @@ assign_variant_top_tiers_ttspecific <- function(
     primary_site = "Lung") {
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(tumor_sites, collapse = ", ")))
+                 paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   ## check that primary_site is not 'Any' for tumor-specific tiering function
@@ -1229,8 +1229,8 @@ assign_variant_top_tiers_ttspecific <- function(
 
 
   valid_etypes <-
-    bm_evidence$types[
-      !bm_evidence$types %in% c("oncogenic","functional")]
+    pcgrr::bm_evidence$types[
+      !pcgrr::bm_evidence$types %in% c("oncogenic","functional")]
 
   invisible(assertthat::assert_that(
     is.character(etype_for_tiering),
@@ -1327,7 +1327,7 @@ assign_variant_top_tiers_ttspecific <- function(
            .data$BM_PRIMARY_SITE == 'Any') &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, bm_evidence$strong_regex
+            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$strong_regex
           ) ~ as.integer(1),
 
         ## A) Biomarker site _does not_ match primary site of query tumor
@@ -1338,7 +1338,7 @@ assign_variant_top_tiers_ttspecific <- function(
            .data$BM_PRIMARY_SITE != "Any") &
            tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
            stringr::str_detect(
-             .data$BM_EVIDENCE_LEVEL, bm_evidence$strong_regex
+             .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$strong_regex
            ) ~ as.integer(2),
 
         ## A) Biomarker site _matches_ primary site of query tumor
@@ -1347,7 +1347,7 @@ assign_variant_top_tiers_ttspecific <- function(
         .data$BM_PRIMARY_SITE == primary_site &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex
+            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex
           ) ~ as.integer(2),
 
         ## A) Biomarker site _does not_ match primary site of query tumor
@@ -1358,7 +1358,7 @@ assign_variant_top_tiers_ttspecific <- function(
            .data$BM_PRIMARY_SITE != "Any" &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex
+            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex
           ) ~ as.integer(3),
 
         ## A) Pan-cancer biomarker (BM_PRIMARY_SITE = 'Any')
@@ -1368,7 +1368,7 @@ assign_variant_top_tiers_ttspecific <- function(
         .data$BM_PRIMARY_SITE == "Any" &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex
+            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex
           ) ~ as.integer(3),
 
         TRUE ~ as.integer(100)
@@ -1478,9 +1478,9 @@ assign_bm_tier_support_ttspecific <- function(
   )
 
   invisible(assertthat::assert_that(
-    primary_site %in% tumor_sites,
+    primary_site %in% pcgrr::tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(tumor_sites, collapse = ", ")))
+                 paste0(pcgrr::tumor_sites, collapse = ", ")))
   )
 
   ## check that primary_site is not 'Any' for tumor-specific tiering function

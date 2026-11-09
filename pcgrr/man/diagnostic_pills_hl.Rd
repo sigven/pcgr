@@ -2,21 +2,25 @@
 % Please edit documentation in R/report_highlights.R
 \name{diagnostic_pills_hl}
 \alias{diagnostic_pills_hl}
-\title{Diagnostic hits to highlight as pills in the key findings}
+\title{Diagnostic hits to highlight in the key findings (section 'Diagnostic
+evidence')}
 \usage{
 diagnostic_pills_hl(report, max_pills = 3)
 }
 \arguments{
-\item{report}{PCGR report object}
+\item{report}{PCGR report object
+Hits are ranked by the resolution of the biomarker match (exact matches such
+as fusions before gene-level matches), see BM_MAPPING_CONFIDENCE.}
 
-\item{max_pills}{maximum number of pills (remaining hits stay in the
+\item{max_pills}{maximum number of hits (remaining hits stay in the
 supporting findings)}
 }
 \value{
 list with 'pills' (plain-text pill labels, e.g. 'Diagnostic:
 EWSR1::FLI1 fusion (Ewing sarcoma)') and 'labels' (the corresponding
 markdown labels of tiered_alterations_hl(), used to avoid listing the
-same alterations again among the supporting findings)
+same alterations again among the supporting findings) and 'items'
+(markdown list items: label with cancer types of the evidence)
 }
 \description{
 Only when a primary tumor site is specified: alterations (SNVs/InDels,

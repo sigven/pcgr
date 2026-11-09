@@ -194,7 +194,7 @@ stats_report_snv_indel <- function(
   }
 
   if ("bm_evidence" %in% names(callset)) {
-    for (class in names(bm_categories)) {
+    for (class in names(pcgrr::bm_categories)) {
       if (class %in% names(callset$bm_evidence)) {
 
         if("classification" %in% names(callset$bm_evidence[[class]]) &
@@ -507,7 +507,7 @@ stats_report_cna <- function(
   }
 
   if ("bm_evidence" %in% names(callset)) {
-    for (class in names(bm_categories)) {
+    for (class in names(pcgrr::bm_categories)) {
       if (class %in% names(callset$bm_evidence)) {
 
         if("classification" %in% names(callset$bm_evidence[[class]]) &
@@ -781,7 +781,7 @@ stats_report_fusion <- function(
   }
 
   if ("bm_evidence" %in% names(callset)) {
-    for (class in names(bm_categories)) {
+    for (class in names(pcgrr::bm_categories)) {
       if (class %in% names(callset$bm_evidence)) {
 
         if("classification" %in% names(callset$bm_evidence[[class]]) &
@@ -1010,7 +1010,7 @@ stats_report_germline <- function(
 #' @export
 init_vstats_actionable <- function(vartype = "snv_indel") {
   vstats <- list()
-  for (cat in names(bm_categories)) {
+  for (cat in names(pcgrr::bm_categories)) {
     vstats[[cat]] <- list()
     for (i in 1:6) {
       if(i > 3 & vartype != "snv_indel"){

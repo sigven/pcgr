@@ -200,11 +200,11 @@ generate_report_data_signatures <-
 
         # get reference signatures (COSMIC v3.4)
         all_reference_signatures <-
-          cosmic_sbs_signatures[['all']]
+          pcgrr::cosmic_sbs_signatures[['all']]
 
         if (as.logical(sig_settings$include_artefact_signatures) == FALSE) {
           all_reference_signatures <-
-            cosmic_sbs_signatures[['no_artefacts']]
+            pcgrr::cosmic_sbs_signatures[['no_artefacts']]
         }
 
         if (length(snv_grl[[1]]) >= n_snvs_required) {

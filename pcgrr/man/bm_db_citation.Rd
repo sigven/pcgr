@@ -13,7 +13,7 @@ bm_db_citation(report, fusion = FALSE)
 \item{fusion}{logical, RNA fusions (CGI evidence is never used for fusions)}
 }
 \value{
-character, e.g. '\link{@Griffith2017-do; @Tamborero2018-aj}'
+character, e.g. \verb{[@Griffith2017-do; @Tamborero2018-aj]}
 }
 \description{
 Citations of the biomarker databases used for actionability

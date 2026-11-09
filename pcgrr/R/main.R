@@ -71,7 +71,7 @@ generate_report <-
           fname_cpsr_tsv = settings$molecular_data$fname_germline_tsv,
           fname_cpsr_yaml = settings$molecular_data$fname_germline_yaml,
           ignore_vus = as.logical(settings$conf$germline$ignore_vus),
-          cols = data_coltype_defs$snv_indel_germline_cpsr,
+          cols = pcgrr::data_coltype_defs$snv_indel_germline_cpsr,
           ref_data = ref_data,
           settings = settings
         )
@@ -917,7 +917,7 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
       if (is.data.frame(report$content$cna$callset$variant)) {
         output_data <- as.data.frame(
           report$content$cna$callset$variant |>
-            dplyr::select(dplyr::any_of(tsv_cols$cna))
+            dplyr::select(dplyr::any_of(pcgrr::tsv_cols$cna))
         )
       }
     }
@@ -931,7 +931,7 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
       if (is.data.frame(report$content$fusion$callset$variant)) {
         output_data <- as.data.frame(
           report$content$fusion$callset$variant |>
-            dplyr::select(dplyr::any_of(tsv_cols$fusion))
+            dplyr::select(dplyr::any_of(pcgrr::tsv_cols$fusion))
         )
       }
     }
@@ -943,7 +943,7 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
      !is.null(report$content$snv_indel) &
      report$content$snv_indel$eval == TRUE) {
 
-    snv_indel_cols <- tsv_cols$snv_indel
+    snv_indel_cols <- pcgrr::tsv_cols$snv_indel
     if (report$settings$conf$other$retained_vcf_info_tags != "None") {
       snv_indel_cols <- c(
         snv_indel_cols,
@@ -968,7 +968,7 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
      !is.null(report$content$snv_indel) &
      report$content$snv_indel$eval == TRUE) {
 
-    snv_indel_cols <- tsv_cols$snv_indel_unfiltered
+    snv_indel_cols <- pcgrr::tsv_cols$snv_indel_unfiltered
     if (report$settings$conf$other$retained_vcf_info_tags != "None") {
       snv_indel_cols <- c(
         snv_indel_cols, report$settings$conf$other$retained_vcf_info_tags)

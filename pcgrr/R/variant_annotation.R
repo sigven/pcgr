@@ -12,14 +12,14 @@ append_annotation_links <- function(
     skip = NULL) {
 
   i <- 1
-  while (i <= nrow(variant_db_url)) {
+  while (i <= nrow(pcgrr::variant_db_url)) {
 
     name <-
-      variant_db_url[i, ]$name
+      pcgrr::variant_db_url[i, ]$name
     link_display_var <-
-      variant_db_url[i, ]$link_display_var
+      pcgrr::variant_db_url[i, ]$link_display_var
     rename <-
-      variant_db_url[i, ]$rename
+      pcgrr::variant_db_url[i, ]$rename
 
     if (rename == T &
        name %in% colnames(var_data_df) &
@@ -45,9 +45,9 @@ append_annotation_links <- function(
       if (vartype == "exp") {
         group_by_var <- "ENTREZGENE"
       }
-      url_prefix <- variant_db_url[i, ]$url_prefix
-      link_key_var <- variant_db_url[i, ]$link_key_var
-      link_display_var <- variant_db_url[i, ]$link_display_var
+      url_prefix <- pcgrr::variant_db_url[i, ]$url_prefix
+      link_key_var <- pcgrr::variant_db_url[i, ]$link_key_var
+      link_display_var <- pcgrr::variant_db_url[i, ]$link_display_var
       if (!(name %in% colnames(var_data_df)) &
           link_key_var %in% colnames(var_data_df) &
           link_display_var %in% colnames(var_data_df) &
@@ -308,7 +308,7 @@ append_tcga_var_link <- function(var_df,
             "affected", "cohort_size"),
           sep = "\\|", convert = TRUE) |>
         dplyr::left_join(
-          tcga_cohorts, by = "tcga_cancer_code") |>
+          pcgrr::tcga_cohorts, by = "tcga_cancer_code") |>
         dplyr::arrange(
           .data$VAR_ID,
           dplyr::desc(.data$percentage))
@@ -561,15 +561,15 @@ append_dbnsfp_var_link <- function(var_df) {
         .data$PREDICTED_EFFECT, ":PD,", ":ProbablyDamaging,"
       ))
     i <- 1
-    while (i <= nrow(effect_prediction_algos)) {
+    while (i <= nrow(pcgrr::effect_prediction_algos)) {
       str_to_replace <-
-        paste0(effect_prediction_algos[i, "algorithm"], ":")
+        paste0(pcgrr::effect_prediction_algos[i, "algorithm"], ":")
       replacement_str <-
         paste0("<a href='",
-               effect_prediction_algos[i, "url"], "' target='_blank'>",
-               effect_prediction_algos[i, "display_name"], "</a>:")
+               pcgrr::effect_prediction_algos[i, "url"], "' target='_blank'>",
+               pcgrr::effect_prediction_algos[i, "display_name"], "</a>:")
       algorithm_display <-
-        paste0(effect_prediction_algos[i, "display_name"], ":")
+        paste0(pcgrr::effect_prediction_algos[i, "display_name"], ":")
       var_df <- var_df |>
         dplyr::mutate(
           PREDICTED_EFFECT =

@@ -447,6 +447,7 @@ load_reference_data <- function(
   pcgr_ref_data[['phenotype']][['oncotree']] <- as.data.frame(
     readr::read_tsv(
       phenOncoX_tsv_fname, show_col_types = FALSE,
+      col_types = readr::cols(efo_obsolete_name = readr::col_character()),
       na = c(".","NA"))
   )
   pcgr_ref_data[['phenotype']][['cancer_groups']] <-

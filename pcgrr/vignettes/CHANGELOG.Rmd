@@ -54,6 +54,7 @@ pdiakumis <- user("pdiakumis")
   - ClinVar (2026-11)
   - CIViC (2026-11-05)
   - dbNSFP (v5.4, August 2026)
+  - CancerMine (v52, October 2026)
   - UniProt/SwissProt KnowledgeBase (2026_04)
   - Open Targets Platform (2026.09)
   - Pfam - v38.2 - 2026-01

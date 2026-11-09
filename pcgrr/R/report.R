@@ -505,7 +505,7 @@ init_biomarker_content <- function() {
   bm_evidence <- list()
   bm_evidence[['eitems']] <- data.frame()
   bm_evidence[['classification']] <- data.frame()
-  for (cat in names(bm_categories)) {
+  for (cat in names(pcgrr::bm_categories)) {
     bm_evidence[[cat]] <- list()
     for (e in c('classification','eitems')) {
       bm_evidence[[cat]][[e]] <- data.frame()

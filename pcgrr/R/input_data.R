@@ -40,7 +40,7 @@ load_somatic_cna <- function(
   )
 
   compulsary_cols <-
-    names(data_coltype_defs$cna_somatic_segment_raw$cols)
+    names(pcgrr::data_coltype_defs$cna_somatic_segment_raw$cols)
 
   raw_col_check <-
     rlang::has_name(segments_raw, compulsary_cols)
@@ -58,7 +58,7 @@ load_somatic_cna <- function(
       readr::read_tsv(
         file = fname_cna_segment,
         col_types =
-          data_coltype_defs$cna_somatic_segment_raw$cols,
+          pcgrr::data_coltype_defs$cna_somatic_segment_raw$cols,
         na = c(".","NA"),
         progress = F
       )
@@ -90,7 +90,7 @@ load_somatic_cna <- function(
 
   callset_cna <- load_dna_variants(
     fname = fname_cna_gene,
-    cols = data_coltype_defs$cna_somatic_gene_raw,
+    cols = pcgrr::data_coltype_defs$cna_somatic_gene_raw,
     ref_data = ref_data,
     settings = settings,
     vartype = 'cna',
@@ -217,7 +217,7 @@ load_somatic_snv_indel <- function(
 
   callset <- load_dna_variants(
     fname = fname,
-    cols = data_coltype_defs$snv_indel_somatic_raw,
+    cols = pcgrr::data_coltype_defs$snv_indel_somatic_raw,
     ref_data = ref_data,
     settings = settings,
     vartype = 'snv_indel',
@@ -1003,7 +1003,7 @@ load_dna_variants <- function(
                " - somatic actionability guidelines (AMP/ASCO/CAP)"))
 
       amp_asco_cap_classified_variant <- list()
-      for (clnsig in names(bm_categories)) {
+      for (clnsig in names(pcgrr::bm_categories)) {
         amp_asco_cap_classified_variant[[clnsig]] <-
           assign_amp_asco_cap_tiers(
             vartype = vartype,
@@ -1020,7 +1020,7 @@ load_dna_variants <- function(
           )
       }
 
-      for (clnsig in names(bm_categories)) {
+      for (clnsig in names(pcgrr::bm_categories)) {
         for (elem in c("classification",
                        "eitems")) {
           if(!is.null(amp_asco_cap_classified_variant[[clnsig]]$bm_evidence[[elem]])){
@@ -1362,7 +1362,7 @@ load_rna_fusions <- function(
   ## check that all columns are present among columns
   ## read from file
   compulsary_cols <-
-    names(data_coltype_defs$rna_fusion_raw$cols)
+    names(pcgrr::data_coltype_defs$rna_fusion_raw$cols)
 
   raw_col_check <-
     rlang::has_name(rna_fusion_calls_raw, compulsary_cols)
@@ -1375,7 +1375,7 @@ load_rna_fusions <- function(
              paste(missing_cols, collapse=", ")))
   }
 
-  cols_including_optional <- data_coltype_defs$rna_fusion_raw
+  cols_including_optional <- pcgrr::data_coltype_defs$rna_fusion_raw
   if ("FUSION_SCORE" %in% colnames(rna_fusion_calls_raw)) {
     score_col <- readr::cols_only(
       FUSION_SCORE = readr::col_number())
@@ -1407,7 +1407,7 @@ load_rna_fusions <- function(
         "VAR_ID",
         "VARIANT_CLASS",
         dplyr::any_of(
-          oncokb_annotations
+          pcgrr::oncokb_annotations
         )
       )
     }
@@ -2172,8 +2172,8 @@ load_rna_fusions <- function(
              " - somatic actionability guidelines (AMP/ASCO/CAP)"))
 
     amp_asco_cap_classified_variant <- list()
-    for (clnsig in names(bm_categories)) {
-      etype_for_tiering <- bm_categories[[clnsig]]$etype
+    for (clnsig in names(pcgrr::bm_categories)) {
+      etype_for_tiering <- pcgrr::bm_categories[[clnsig]]$etype
       amp_asco_cap_classified_variant[[clnsig]] <-
         assign_amp_asco_cap_tiers(
           vartype = "fusion",
@@ -2190,7 +2190,7 @@ load_rna_fusions <- function(
         )
     }
 
-    for (clnsig in names(bm_categories)) {
+    for (clnsig in names(pcgrr::bm_categories)) {
       for (elem in c("classification",
                     "eitems")) {
         results$bm_evidence[[clnsig]][[elem]] <-
@@ -2213,11 +2213,11 @@ load_rna_fusions <- function(
       }
     }
 
-    OTP_GENE_URL <- variant_db_url[
-      which(variant_db_url[,"name"] == "GENENAME"),"url_prefix"]
+    OTP_GENE_URL <- pcgrr::variant_db_url[
+      which(pcgrr::variant_db_url[,"name"] == "GENENAME"),"url_prefix"]
 
-    ENSEMBL_GENE_URL <- variant_db_url[
-      which(variant_db_url[,"name"] == "ENSEMBL_GENE_ID"),"url_prefix"]
+    ENSEMBL_GENE_URL <- pcgrr::variant_db_url[
+      which(pcgrr::variant_db_url[,"name"] == "ENSEMBL_GENE_ID"),"url_prefix"]
 
     results[['variant_display']] <- results[['variant']] |>
       dplyr::select(
@@ -2272,7 +2272,7 @@ load_rna_fusions <- function(
         )) |>
       dplyr::select(
         dplyr::any_of(
-          tsv_cols$fusion)) |>
+          pcgrr::tsv_cols$fusion)) |>
       dplyr::distinct()
 
   }else{

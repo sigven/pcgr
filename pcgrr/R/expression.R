@@ -89,7 +89,7 @@ generate_report_data_expression <-
               dplyr::mutate(fraction = round(
                 .data$fraction, digits = 3)) |>
               dplyr::left_join(
-                immune_celltypes, by = "method_cell_type") |>
+                pcgrr::immune_celltypes, by = "method_cell_type") |>
               dplyr::distinct()
 
           }

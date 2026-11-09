@@ -544,7 +544,7 @@ get_excel_sheets <- function(report = NULL) {
     if (NROW(callsets[['cna']]$variant) > 0) {
       excel_sheets[['SOMATIC_CNA']] <- as.data.frame(
         callsets[['cna']]$variant |>
-          dplyr::select(dplyr::any_of(tsv_cols$cna)) |>
+          dplyr::select(dplyr::any_of(pcgrr::tsv_cols$cna)) |>
           dplyr::select(-dplyr::any_of("BIOMARKER_MATCH")) |>
           dplyr::filter(!is.na(.data$ACTIONABILITY_TIER)) |>
           dplyr::arrange(
@@ -555,7 +555,7 @@ get_excel_sheets <- function(report = NULL) {
       ## Evidence items - biomarkers
       excel_sheets[['SOMATIC_CNA_BIOMARKER']] <- data.frame()
 
-      for (clnsig in names(bm_categories)) {
+      for (clnsig in names(pcgrr::bm_categories)) {
         if(clnsig == "diagnostic_negative") {
           next
         }
@@ -644,7 +644,7 @@ get_excel_sheets <- function(report = NULL) {
     if (NROW(callsets[['fusion']]$variant) > 0) {
       excel_sheets[['RNA_FUSION']] <- as.data.frame(
         callsets[['fusion']]$variant |>
-          dplyr::select(dplyr::any_of(tsv_cols$fusion)) |>
+          dplyr::select(dplyr::any_of(pcgrr::tsv_cols$fusion)) |>
           dplyr::select(-dplyr::any_of("BIOMARKER_MATCH")) |>
           dplyr::filter(!is.na(.data$ACTIONABILITY_TIER)) |>
           dplyr::arrange(
@@ -654,7 +654,7 @@ get_excel_sheets <- function(report = NULL) {
       ## Evidence items - biomarkers
       excel_sheets[['RNA_FUSION_BIOMARKER']] <- data.frame()
 
-      for (clnsig in names(bm_categories)) {
+      for (clnsig in names(pcgrr::bm_categories)) {
         if(clnsig == "diagnostic_negative") {
           next
         }
@@ -749,7 +749,7 @@ get_excel_sheets <- function(report = NULL) {
       !is.null(callsets$snv_indel) &&
      isTRUE(report$content$snv_indel$eval)) {
 
-    snv_indel_cols <- tsv_cols$snv_indel
+    snv_indel_cols <- pcgrr::tsv_cols$snv_indel
     if (report$settings$conf$other$retained_vcf_info_tags != "None") {
       snv_indel_cols <- c(
         snv_indel_cols,
@@ -789,7 +789,7 @@ get_excel_sheets <- function(report = NULL) {
       ## Evidence items - biomarkers
       excel_sheets[['SOMATIC_SNV_INDEL_BIOMARKER']] <- data.frame()
 
-      for (clnsig in names(bm_categories)) {
+      for (clnsig in names(pcgrr::bm_categories)) {
         if(clnsig == "diagnostic_negative") {
           next
         }

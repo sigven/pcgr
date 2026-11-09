@@ -17,10 +17,10 @@ e.g. 'pcgr-cna'); each finding is only included when its section is part
 of the report}
 }
 \value{
-list with 'lead' (markdown on actionable alterations), 'pills'
-(diagnostic hits - site specified, strong evidence - and positive composite
-biomarkers), 'pill_targets' (section label per pill), 'pill_kinds'
-('diagnostic' or 'composite' per pill),
+list with 'lead' (markdown on therapeutically actionable alterations
+and, when a tumor site is specified, diagnostic evidence - strong evidence
+only), 'pills' (positive composite biomarkers), 'pill_targets' (section
+label per pill), 'pill_kinds' ('composite' per pill),
 'warnings' (markdown on actionable
 variants removed by variant filtering, "" if none) and 'supporting'
 (markdown bullet list, "" if none)
