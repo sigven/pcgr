@@ -20,20 +20,20 @@ PCGR requires the following data to run successfully:
 PCGR supports both the GRCh37 and GRCh38 human genome assemblies. All
 the data above need to match the chosen assembly.
 
-### 1. Reference Bundle
+### 1. Reference bundle
 
 Reference bundles are generated semi-automatically (by the PCGR author)
 and are versioned based on their release date. Keep in mind that the
 bundles support only certain Ensembl VEP versions, and importantly also
 specific software versions of PCGR. Upgrading the PCGR software without
 upgrading the bundle specified here is thus *not* a recommended
-installation strategy. The latest (**v20260620**) genome-specific
+installation strategy. The latest (**v20261106**) genome-specific
 bundles can be downloaded directly from below (size: ~7.1Gb per bundle):
 
 | Assembly | Download Link |
 |:---|:---|
-| GRCh38 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260620.grch38.tgz> |
-| GRCh37 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260620.grch37.tgz> |
+| GRCh38 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20261106.grch38.tgz> |
+| GRCh37 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20261106.grch37.tgz> |
 
 **Tip 1**: The `data/grch3x/.PCGR_BUNDLE_VERSION` file within the
 downloaded bundle indicates the bundle version for reporting purposes.
@@ -42,9 +42,12 @@ downloaded bundle indicates the bundle version for reporting purposes.
 report with an overview and statistics of the key resources included in
 the reference bundle.
 
-#### Bash Example
+You can also view the content reports of the latest reference bundles
+here: <https://sigven.github.io/pcgrdb/>
 
-    BUNDLE_VERSION="20260620"
+#### Bash example
+
+    BUNDLE_VERSION="20261106"
 
 ``` bash
 GENOME="grch38" # or "grch37"
@@ -56,17 +59,17 @@ mkdir ${BUNDLE_VERSION}
 mv data/ ${BUNDLE_VERSION}
 ```
 
-### 2. VEP Cache
+### 2. VEP cache
 
 [VEP](https://www.ensembl.org/info/docs/tools/vep/index.html) requires a
 data cache which is available from the Ensembl [FTP
-site](https://ftp.ensembl.org/pub/release-115/variation/indexed_vep_cache/)
+site](https://ftp.ensembl.org/pub/release-116/variation/indexed_vep_cache/)
 (search there for files starting with `homo_sapiens_vep_`). The latest
-Ensembl VEP version we support is **v115**.
+Ensembl VEP version we support is **v116**.
 
 #### Bash Example
 
-    VEP_VERSION="115"
+    VEP_VERSION="116"
 
 ``` bash
 GENOME="GRCh38" # or "GRCh37"
@@ -77,11 +80,11 @@ gzip -dc ${CACHE} | tar xvf -
 ```
 
 **Important**: PCGR needs to be pointed to the *parent* directory
-containing the downloaded `homo_sapiens/115_GRCh3x/` cache.
+containing the downloaded `homo_sapiens/116_GRCh3x/` cache.
 Historically, this parent directory has been named `.vep`, but the name
 of this directory can be arbitrarily set.
 
-### 3. Sample Inputs
+### 3. Sample inputs
 
 See the [Inputs](https://sigven.github.io/pcgr/articles/input.md)
 article.
@@ -108,7 +111,7 @@ the time is spent on downloading the `{BSgenome.Hsapiens.UCSC.hg19}` and
 `{BSgenome.Hsapiens.UCSC.hg38}` R packages (which happens at the very
 end of the conda environment creation).
 
-    PCGR_VERSION="2.3.2"
+    PCGR_VERSION="2.4.0"
 
 ``` bash
 # set up variables
@@ -129,11 +132,11 @@ pcgr --help
 
 The PCGR Docker image is available from the GitHub Container Registry at
 <https://github.com/sigven/pcgr/pkgs/container/pcgr>. Pull the latest
-**v2.3.2** image with:
+**v2.4.0** image with:
 
-    docker pull ghcr.io/sigven/pcgr:2.3.2
+    docker pull ghcr.io/sigven/pcgr:2.4.0
 
-#### Example Run
+#### Example run
 
 In the example below, we assume that you have the following directory
 structure:
@@ -142,7 +145,7 @@ structure:
 - `/Users/you/dir1/VEP_cache` - the directory where you have downloaded
   the [VEP cache](#vep-cache) (**Note**: this directory should contain
   the `homo_sapiens` directory as its child directory
-- `/Users/you/dir1/20260620` - the directory where you have downloaded
+- `/Users/you/dir1/20261106` - the directory where you have downloaded
   the PCGR reference bundle (**Note**: this directory should contain a
   directory named `data` as its child directory)
 - `/Users/you/dir1/pcgr_inputs` - the directory where you have your
@@ -152,8 +155,8 @@ structure:
 
 &nbsp;
 
-    PCGR_VERSION="2.3.2"
-    BUNDLE_VERSION="20260620"
+    PCGR_VERSION="2.4.0"
+    BUNDLE_VERSION="20261106"
 
 ``` bash
 docker container run -it --rm \
@@ -178,25 +181,25 @@ docker container run -it --rm \
 non-root user, you may need to explicitly add options for quarto to work
 properly, i.e. `--env "XDG_CACHE_HOME=/tmp/quarto_cache_home"` (same as
 for Singularity/Apptainer below, see also [issue
-\#246](https://github.com/sigven/pcgr/issues/246)).  
-  
+\#246](https://github.com/sigven/pcgr/issues/246)).\
+\
 
 ### C. Singularity/Apptainer
 
 The PCGR Singularity/Apptainer image is available on [GitHub Container
-Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.3.2** image
+Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.4.0** image
 with:
 
-    apptainer pull oras://ghcr.io/sigven/pcgr:2.3.2.singularity
+    apptainer pull oras://ghcr.io/sigven/pcgr:2.4.0.singularity
 
 This will download a Singularity Image File (SIF) called
-**pcgr_2.3.2.singularity.sif** that can be run with Singularity or
+**pcgr_2.4.0.singularity.sif** that can be run with Singularity or
 Apptainer.
 
-#### Example Run
+#### Example run
 
-    PCGR_VERSION="2.3.2"
-    BUNDLE_VERSION="20260620"
+    PCGR_VERSION="2.4.0"
+    BUNDLE_VERSION="20261106"
 
 ``` bash
 apptainer exec \

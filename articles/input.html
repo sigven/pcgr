@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -225,6 +225,33 @@ file that is formatted correctly according to PCGR’s requirements:</p>
   1 3218329 3550598 1 0
   1 3552451 4593614 1 1
   1 4593663 6433129 2 1</code></pre>
+<p>Optionally, the file may contain a column
+<code>nMajor_nMinor_Imputed</code> (values
+<code>TRUE</code>/<code>FALSE</code>, or <code>1</code>/<code>0</code>),
+flagging segments where the total copy number is observed, but the split
+into major and minor copy number is imputed (e.g. by a downstream rescue
+step for segments that the allele-specific caller left unresolved). If
+the column is absent, no segments are considered imputed. Imputed
+segments are handled as follows:</p>
+<ul>
+<li>total copy number-based analyses (amplification/gain/deletion calls,
+fraction of genome altered, tumor ploidy estimation) use them as any
+other segment</li>
+<li>loss-of-heterozygosity (LOH) is not called for imputed segments (and
+they are thus not considered for two-hit candidates)</li>
+<li>they are excluded from the whole-genome doubling call, and from the
+autosomal segment coverage requirement of
+<code>--estimate_hrd</code>
+</li>
+<li>for the HRD scores (<code>--estimate_hrd</code>), they are treated
+as segments of <em>unknown</em> allele-specific state (rather than being
+dropped, which would make their neighbouring segments adjacent): they
+are never merged with their neighbours, and never counted as LOH/allelic
+imbalance or as part of a state transition</li>
+<li>they are flagged in the output (<code>CN_MAJOR_MINOR_IMPUTED</code>)
+and drawn with a lighter minor copy number track in the copy number
+profile plot of the report</li>
+</ul>
 <p>Importantly, you can configure predefined thresholds for segments
 that are considered to be high-level copy-number amplifications through
 the following option:</p>
@@ -352,6 +379,506 @@ before submitting to PCGR.
 </li>
 </ul>
 </div>
+</div>
+</div>
+<div class="section level3">
+<h3 id="msi-result-from-an-external-caller">MSI result from an external caller<a class="anchor" aria-label="anchor" href="#msi-result-from-an-external-caller"></a>
+</h3>
+<p>If microsatellite instability (MSI) has been assessed with a
+dedicated MSI caller, the result can be provided as an alternative (or
+addition) to the MSI classifier in PCGR
+(<code>--estimate_msi</code>):</p>
+<ul>
+<li>
+<code>--input_msi &lt;FILE&gt;</code>: the summary result file of
+the MSI caller for the tumor sample</li>
+<li>
+<code>--input_msi_caller &lt;CALLER&gt;</code>: the caller that
+produced the file (<code>msisensor-pro</code> or <code>generic</code>;
+default: <code>generic</code>)</li>
+<li>
+<code>--input_msi_threshold &lt;PERCENT&gt;</code>: threshold on the
+MSI score for <em>MSI-H</em>, only for callers that report a score but
+no MSI status (currently <code>msisensor-pro</code>; default:
+<code>20</code>)</li>
+</ul>
+<p>The file name and extension are not used - the content of the file is
+checked. In contrast to <code>--estimate_msi</code>, an external MSI
+result can be used with any type of sequencing assay (including
+tumor-only and targeted panel data), and does not require a VCF file.
+Two formats are supported: the <strong>generic format</strong> (any MSI
+caller) and the summary file of <strong>MSIsensor-pro</strong>.</p>
+<div class="section level4">
+<h4 id="generic-format">Generic format<a class="anchor" aria-label="anchor" href="#generic-format"></a>
+</h4>
+<p>The generic format is a <strong>tab-separated</strong> file with a
+header line and <strong>exactly one data row</strong> (one sample). Only
+two columns are required, so the smallest valid file is:</p>
+<table class="table">
+<thead><tr class="header">
+<th>MSI_STATUS</th>
+<th>MSI_CALLER</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>MSI-H</td>
+<td>MyCaller</td>
+</tr></tbody>
+</table>
+<p>Optional columns provide further information that is shown in the
+report and in the output files:</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="32%">
+<col width="41%">
+</colgroup>
+<thead><tr class="header">
+<th>Column</th>
+<th>Required</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>MSI_STATUS</code></td>
+<td>yes</td>
+<td>MSI status of the tumor sample, see accepted values below</td>
+</tr>
+<tr class="even">
+<td><code>MSI_CALLER</code></td>
+<td>yes</td>
+<td>Name of the MSI caller</td>
+</tr>
+<tr class="odd">
+<td><code>CALLER_VERSION</code></td>
+<td>no</td>
+<td>Version of the MSI caller</td>
+</tr>
+<tr class="even">
+<td><code>MSI_SCORE</code></td>
+<td>no</td>
+<td>Numeric score, as reported by the caller</td>
+</tr>
+<tr class="odd">
+<td><code>MSI_SCORE_TYPE</code></td>
+<td>no</td>
+<td>Description of the score,
+e.g. <code>percent unstable sites</code>
+</td>
+</tr>
+<tr class="even">
+<td><code>MSI_SCORE_THRESHOLD_USED</code></td>
+<td>no</td>
+<td>Threshold on the score applied by the caller for MSI-H</td>
+</tr>
+<tr class="odd">
+<td><code>N_LOCI_EVALUATED</code></td>
+<td>no</td>
+<td>Number of microsatellite loci evaluated</td>
+</tr>
+<tr class="even">
+<td><code>N_LOCI_UNSTABLE</code></td>
+<td>no</td>
+<td>Number of unstable microsatellite loci</td>
+</tr>
+</tbody>
+</table>
+<p>A file with all columns could look like this (columns shown as a
+table; the file itself is tab-separated):</p>
+<table class="table">
+<colgroup>
+<col width="9%">
+<col width="9%">
+<col width="12%">
+<col width="8%">
+<col width="12%">
+<col width="20%">
+<col width="14%">
+<col width="13%">
+</colgroup>
+<thead><tr class="header">
+<th>MSI_STATUS</th>
+<th>MSI_CALLER</th>
+<th>CALLER_VERSION</th>
+<th>MSI_SCORE</th>
+<th>MSI_SCORE_TYPE</th>
+<th>MSI_SCORE_THRESHOLD_USED</th>
+<th>N_LOCI_EVALUATED</th>
+<th>N_LOCI_UNSTABLE</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>MSI-H</td>
+<td>MANTIS</td>
+<td>1.0.5</td>
+<td>0.52</td>
+<td>step-wise difference</td>
+<td>0.4</td>
+<td></td>
+<td></td>
+</tr></tbody>
+</table>
+<p>Further rules:</p>
+<ul>
+<li>Accepted values for <code>MSI_STATUS</code> (not case-sensitive) are
+listed below. Other values give an error.</li>
+<li>The score, threshold and loci columns are for information only: they
+are reported as given, and never change the
+<code>MSI_STATUS</code>.</li>
+<li>Missing values of optional columns can be left empty or set to
+<code>.</code> or <code>NA</code>.</li>
+<li>Additional columns are ignored.</li>
+</ul>
+<table class="table">
+<colgroup>
+<col width="48%">
+<col width="51%">
+</colgroup>
+<thead><tr class="header">
+<th>Value in file</th>
+<th>Interpreted as</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>
+<code>MSI-H</code>, <code>MSIH</code>, <code>MSI-High</code>,
+<code>MSI</code>, <code>Unstable</code>
+</td>
+<td><em>MSI-H</em></td>
+</tr>
+<tr class="even">
+<td>
+<code>MSS</code>, <code>Stable</code>, <code>MSI-L</code>,
+<code>MSIL</code>, <code>MSI-Low</code>
+</td>
+<td>
+<em>MSS</em> (note that <em>MSI-L</em> is regarded as microsatellite
+stable)</td>
+</tr>
+<tr class="odd">
+<td>
+<code>Indeterminate</code>, <code>Undetermined</code>,
+<code>Equivocal</code>, <code>Inconclusive</code>,
+<code>Unknown</code>
+</td>
+<td><em>Indeterminate</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level4">
+<h4 id="msisensor-pro">MSIsensor-pro<a class="anchor" aria-label="anchor" href="#msisensor-pro"></a>
+</h4>
+<p>Use <code>--input_msi_caller msisensor-pro</code> for the main
+summary file (not the <code>_all</code>, <code>_unstable</code> or
+<code>_dis</code> files) written by the <code>msisensor-pro pro</code>
+(tumor-only) or <code>msisensor-pro msi</code> (tumor-normal) command.
+It has a header line (<code>Total_Number_of_Sites</code>,
+<code>Number_of_Unstable_Sites</code>, <code>%</code>) and a single data
+row. MSIsensor-pro does not report an MSI status. The status is
+therefore derived by PCGR from the percentage of unstable sites:
+<em>MSI-H</em> if the percentage is at or above the threshold (default
+20, see below), otherwise <em>MSS</em> (and <em>Indeterminate</em> if no
+sites were evaluated). The report indicates that the status was derived,
+and which threshold was used.</p>
+</div>
+<div class="section level4">
+<h4 id="threshold-for-msi-h">Threshold for MSI-H<a class="anchor" aria-label="anchor" href="#threshold-for-msi-h"></a>
+</h4>
+<p>For the generic format, the MSI status given by the caller is used as
+is. The threshold on the score is only applied for a caller that reports
+a score but no status (MSIsensor-pro), where PCGR derives the status
+from the score. Practice for the threshold varies (e.g. with the
+sequencing assay, tumor-only versus tumor-normal analysis, and how
+conservative the call should be). PCGR therefore uses a default (20%
+unstable sites for MSIsensor-pro), which can be changed with
+<code>--input_msi_threshold</code>. The threshold is shown in the report
+and in the output files, and it determines whether MSI-High biomarker
+evidence is shown. The option cannot be used with callers that report
+their own status; for a different decision rule, convert the result to
+the generic format with the status of your choice.</p>
+</div>
+<div class="section level4">
+<h4 id="combining-with-the-msi-classifier">Combining with the MSI classifier<a class="anchor" aria-label="anchor" href="#combining-with-the-msi-classifier"></a>
+</h4>
+<p>If both <code>--input_msi</code> and <code>--estimate_msi</code> are
+used, the report shows the two results side by side (tabs <em>External
+caller</em> and <em>PCGR classifier</em>) and indicates if they are
+discordant. The external result takes precedence for the assessment of
+MSI-High biomarker evidence.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="hrd-result-from-an-external-assaytool">HRD result from an external assay/tool<a class="anchor" aria-label="anchor" href="#hrd-result-from-an-external-assaytool"></a>
+</h3>
+<p>If homologous recombination deficiency (HRD) has been assessed with a
+dedicated HRD assay or tool (e.g. a genomic instability score from an
+SNP panel, or a mutational signature-based classifier), the result can
+be provided to PCGR, as an alternative (or addition) to the genomic scar
+score estimated by PCGR from the copy number segments
+(<code>--estimate_hrd</code>):</p>
+<ul>
+<li>
+<code>--input_hrd &lt;FILE&gt;</code>: the HRD result for the tumor
+sample (format below)</li>
+<li>
+<code>--input_hrd_threshold &lt;SCORE&gt;</code>: threshold on the
+score (<code>HRD_SCORE</code>) at or above which the tumor is classified
+as <em>HR-deficient</em> (see below)</li>
+</ul>
+<p>The file name and extension are not used - the content of the file is
+checked. An external HRD result can be used with any type of sequencing
+assay (including tumor-only and targeted panel data), and does not
+require copy number data.</p>
+<div class="section level4">
+<h4 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a>
+</h4>
+<p>A tab-separated file with a header line and a single data row (one
+sample). Minimal examples, with an HRD status reported by the
+assay/tool, or with a score only (status derived by PCGR with
+<code>--input_hrd_threshold</code>):</p>
+<table class="table">
+<thead><tr class="header">
+<th>HRD_CALLER</th>
+<th>HRD_SCORE_TYPE</th>
+<th>HRD_STATUS</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>MyAssay</td>
+<td>genomic_scar</td>
+<td>HR-deficient</td>
+</tr></tbody>
+</table>
+<table class="table">
+<thead><tr class="header">
+<th>HRD_CALLER</th>
+<th>HRD_SCORE_TYPE</th>
+<th>HRD_SCORE</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>HiSNP Ultra</td>
+<td>genomic_scar</td>
+<td>47</td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="32%">
+<col width="41%">
+</colgroup>
+<thead><tr class="header">
+<th>Column</th>
+<th>Required</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>HRD_CALLER</code></td>
+<td>yes</td>
+<td>Name of the HRD assay/tool</td>
+</tr>
+<tr class="even">
+<td><code>HRD_SCORE_TYPE</code></td>
+<td>yes</td>
+<td>Kind of HRD score, see the categories below</td>
+</tr>
+<tr class="odd">
+<td><code>HRD_STATUS</code></td>
+<td>yes, unless <code>HRD_SCORE</code> is given</td>
+<td>HRD status of the tumor sample, see accepted values below</td>
+</tr>
+<tr class="even">
+<td><code>HRD_SCORE</code></td>
+<td>yes, unless <code>HRD_STATUS</code> is given</td>
+<td>Numeric score, as reported by the assay/tool (higher values
+indicating HR deficiency)</td>
+</tr>
+<tr class="odd">
+<td><code>CALLER_VERSION</code></td>
+<td>no</td>
+<td>Version of the HRD assay/tool</td>
+</tr>
+<tr class="even">
+<td><code>HRD_SCORE_DESCRIPTION</code></td>
+<td>no</td>
+<td>Description of the score,
+e.g. <code>GIS (HRD-LOH + LST + TAI)</code> or
+<code>probability of HRD</code>
+</td>
+</tr>
+<tr class="odd">
+<td><code>HRD_SCORE_THRESHOLD_USED</code></td>
+<td>no</td>
+<td>Threshold on the score applied by the assay/tool for
+<code>HRD_STATUS</code>
+</td>
+</tr>
+<tr class="even">
+<td>
+<code>HRD_LOH</code>, <code>HRD_LST</code>,
+<code>HRD_TAI</code>
+</td>
+<td>no</td>
+<td>Genomic scar components (counts), if reported</td>
+</tr>
+</tbody>
+</table>
+<p>A full example:</p>
+<table class="table">
+<colgroup>
+<col width="8%">
+<col width="11%">
+<col width="8%">
+<col width="7%">
+<col width="11%">
+<col width="16%">
+<col width="18%">
+<col width="6%">
+<col width="6%">
+<col width="6%">
+</colgroup>
+<thead><tr class="header">
+<th>HRD_CALLER</th>
+<th>HRD_SCORE_TYPE</th>
+<th>HRD_STATUS</th>
+<th>HRD_SCORE</th>
+<th>CALLER_VERSION</th>
+<th>HRD_SCORE_DESCRIPTION</th>
+<th>HRD_SCORE_THRESHOLD_USED</th>
+<th>HRD_LOH</th>
+<th>HRD_LST</th>
+<th>HRD_TAI</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>MyAssay</td>
+<td>genomic_scar</td>
+<td>HR-deficient</td>
+<td>47</td>
+<td>1.2</td>
+<td>GIS (HRD-LOH + LST + TAI)</td>
+<td>42</td>
+<td>15</td>
+<td>20</td>
+<td>12</td>
+</tr></tbody>
+</table>
+<p>Additional columns are ignored, and missing optional values may be
+left empty or set to <code>.</code>/<code>NA</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="score-types">Score types<a class="anchor" aria-label="anchor" href="#score-types"></a>
+</h4>
+<p>‘HRD’ covers measurements of different kinds, on different scales.
+PCGR does not infer the kind of score - it is stated with
+<code>HRD_SCORE_TYPE</code>, and shown in the report (values are not
+case-sensitive):</p>
+<table class="table">
+<colgroup>
+<col width="41%">
+<col width="34%">
+<col width="23%">
+</colgroup>
+<thead><tr class="header">
+<th><code>HRD_SCORE_TYPE</code></th>
+<th>Kind of score</th>
+<th>Examples</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>genomic_scar</code></td>
+<td>Genomic scar score from copy number/allelic imbalance profiles</td>
+<td>Genomic instability score (HRD-LOH + LST + TAI, e.g. Myriad myChoice
+CDx, scarHRD), genome-wide LOH</td>
+</tr>
+<tr class="even">
+<td><code>mutational_signature</code></td>
+<td>Classifier based on mutational patterns</td>
+<td>CHORD, SigMA</td>
+</tr>
+<tr class="odd">
+<td><code>composite</code></td>
+<td>Model combining genomic scars and mutational signatures</td>
+<td>HRDetect</td>
+</tr>
+<tr class="even">
+<td><code>other</code></td>
+<td>Other or proprietary scores</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level4">
+<h4 id="hrd-status">HRD status<a class="anchor" aria-label="anchor" href="#hrd-status"></a>
+</h4>
+<p>Accepted values for <code>HRD_STATUS</code> (not case-sensitive) are
+listed below. Other values give an error.</p>
+<table class="table">
+<colgroup>
+<col width="38%">
+<col width="61%">
+</colgroup>
+<thead><tr class="header">
+<th>Value(s)</th>
+<th>Interpreted as</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>
+<code>HR-deficient</code>, <code>Deficient</code>, <code>HRD</code>,
+<code>HRD-positive</code>, <code>HRD+</code>, <code>Positive</code>
+</td>
+<td><em>HR-deficient</em></td>
+</tr>
+<tr class="even">
+<td>
+<code>HR-proficient</code>, <code>Proficient</code>,
+<code>HRP</code>, <code>HRD-negative</code>, <code>HRD-</code>,
+<code>Negative</code>
+</td>
+<td><em>HR-proficient</em></td>
+</tr>
+<tr class="odd">
+<td>
+<code>Indeterminate</code>, <code>Undetermined</code>,
+<code>Equivocal</code>, <code>Inconclusive</code>, <code>Unknown</code>,
+<code>Borderline</code>
+</td>
+<td><em>Indeterminate</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level4">
+<h4 id="threshold-for-hr-deficiency">Threshold for HR deficiency<a class="anchor" aria-label="anchor" href="#threshold-for-hr-deficiency"></a>
+</h4>
+<p>Thresholds for HR deficiency are specific to the assay/tool (and
+often to the tumor type, e.g. a genomic instability score of 42 or above
+for the Myriad myChoice CDx assay in ovarian cancer), so PCGR has no
+default threshold, and the user is responsible for the threshold
+used:</p>
+<ul>
+<li>without <code>--input_hrd_threshold</code>, the
+<code>HRD_STATUS</code> given in the file is used as is (the file must
+then have an <code>HRD_STATUS</code>)</li>
+<li>with <code>--input_hrd_threshold</code>, the status is derived from
+<code>HRD_SCORE</code> (required): <em>HR-deficient</em> if the score is
+at or above the threshold, otherwise <em>HR-proficient</em>. An
+<code>HRD_STATUS</code> in the file is then not used (a warning is given
+if it differs from the derived status)</li>
+</ul>
+<p>The report indicates how the status was obtained, and which threshold
+was used.</p>
+</div>
+<div class="section level4">
+<h4 id="combining-with-the-pcgr-genomic-scar-score">Combining with the PCGR genomic scar score<a class="anchor" aria-label="anchor" href="#combining-with-the-pcgr-genomic-scar-score"></a>
+</h4>
+<p>If both <code>--input_hrd</code> and <code>--estimate_hrd</code> are
+used, the report shows the two results side by side (tabs <em>External
+assay/tool</em> and <em>PCGR genomic scar score</em>). The two are not
+compared: even two genomic scar scores may differ in definition, scale
+and calibration, so the threshold of the external assay/tool does not
+apply to the PCGR score. The external HRD result is not (yet) used for
+the assessment of biomarker evidence.</p>
 </div>
 </div>
 <div class="section level3">

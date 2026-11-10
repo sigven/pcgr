@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -206,7 +206,11 @@ the actionable biomarkers detected in the sample. Note that the default
 value is <strong>0</strong> (implies <strong>Any</strong> tissue/site) -
 only pan-cancer biomarkers will be considered for Tier I assignment, and
 all tumor-specific biomarkers will be considered as non-matching site
-evidence for Tier II/III assignment.</p>
+evidence for Tier II/III assignment. Prognostic, diagnostic and
+resistance evidence is not tiered in this way: with a tumor site
+specified, only evidence matching that site is reported, whereas with
+the default value, evidence from any tumor type is considered (including
+weak evidence), and listed with the cancer types of the evidence.</p>
 <p>The following lists the possible encodings, and the corresponding
 primary tissues/sites:</p>
 <pre><code>0 = Any
@@ -288,6 +292,12 @@ requirements for sequencing coverage and allelic fraction, i.e.:</p>
 <li><code>--tmb_dp_min &lt;value&gt;</code></li>
 <li><code>--tmb_af_min &lt;value&gt;</code></li>
 </ul>
+<p>The threshold for classifying a tumor as TMB-high
+(<code>--tmb_high_threshold &lt;value&gt;</code>, in mutations/Mb) is
+applied to the TMB measure shown in the report
+(<code>--tmb_display</code>). The default (10 mutations/Mb) corresponds
+to the FDA/OncoKB definition of TMB-H, and can be changed by the
+user.</p>
 </div>
 <div class="section level3">
 <h3 id="large-input-sets-vcf">Large input sets (VCF)<a class="anchor" aria-label="anchor" href="#large-input-sets-vcf"></a>
@@ -384,6 +394,30 @@ a CNA event:</p>
 mean percent overlap between the copy number segment and gene
 transcripts required to report a gene as affected (default: 50)</li>
 </ul>
+<p>The fraction of the genome altered (adapted from the cBioPortal
+definition: autosomal segments with total copy number other than 2) is
+always calculated and can be found in the <code>cna_summary.tsv</code>
+output file.</p>
+<p>A separate, opt-in option estimates a homologous recombination
+deficiency (HRD) score from the same allele-specific copy number
+segments:</p>
+<ul>
+<li>
+<code>--estimate_hrd</code> — compute HRD-LOH + LST + TAI (following
+the scarHRD/Sztupinszki et al. algorithm) from the CNA segments, shown
+in the HRD section of the report. <strong>Research use only</strong> -
+not a validated diagnostic measure, and only clinically thresholded (as
+the Myriad myChoice CDx assay) for ovarian cancer. Requires genome-wide
+(WGS/WES) CNA segments - not supported with
+<code>--assay TARGETED</code>, and the segments must span at least 50%
+of the autosomal genome (checked at the start of the run). The score is
+derived from the CNA segments only, so it is allowed with
+<code>--tumor_only</code> (which concerns the SNV/InDel calls), with a
+warning: it is reliable only if the CNA segments were called with a
+matched control, since germline runs of homozygosity are otherwise
+indistinguishable from somatic LOH, and may inflate HRD-LOH (and
+TAI).</li>
+</ul>
 </div>
 <div class="section level3">
 <h3 id="oncokb-biomarker-integration">OncoKB biomarker integration<a class="anchor" aria-label="anchor" href="#oncokb-biomarker-integration"></a>
@@ -406,12 +440,41 @@ with access to the internet.</p>
 <p>If no OncoTree code is provided, PCGR will map the primary tumor site
 to its corresponding OncoTree code based on a predefined mapping. If the
 tumor site is set to “Any” (code 0), OncoKB queries will be performed
-without specifying a tumor type.</p>
+without specifying a tumor type. A recognized OncoTree code is used even
+if its OncoTree primary site differs from <code>--tumor_site</code> (a
+warning is issued). In that case, OncoKB evidence for the code’s cancer
+type and its OncoTree ancestors is tiered as evidence for
+<code>--tumor_site</code>, while other evidence is tiered relative to
+<code>--tumor_site</code> as usual.</p>
+<p>When queried for a tumor type, OncoKB returns the treatments for that
+tumor type, but only a subset of its evidence for other tumor types.
+PCGR therefore also queries OncoKB without tumor type, and adds the
+evidence for other tumor types (labelled by cancer type, and tiered as
+evidence from other tumor sites - as for CIViC/CGI, which are matched
+across all cancer types). To limit OncoKB evidence to what is returned
+for the tumor type (which halves the number of OncoKB web API queries),
+use:</p>
+<ul>
+<li><code>--oncokb_tumor_type_only</code></li>
+</ul>
 <p>By default, PCGR integrates biomarker evidence from multiple
-knowledge sources (CIViC, CGI, OncoKB). If you want to limit biomarker
-reporting to OncoKB only and skip CIViC and CGI, use:</p>
+knowledge sources (CIViC, CGI, OncoKB). When OncoKB is used, CGI
+evidence is still shown for variants with a tier, but tiers are assigned
+from CIViC and OncoKB evidence only (on equal terms): the CGI biomarker
+set is no longer updated, and is partly mapped to generic cancer types
+(e.g. <em>Cancer</em>), which would otherwise count as pan-cancer
+evidence. If you want to limit biomarker reporting to OncoKB only and
+skip CIViC and CGI, use:</p>
 <ul>
 <li><code>--oncokb_exclusive</code></li>
+</ul>
+<p>Intermediate files produced during OncoKB annotation (query inputs,
+raw annotator output, clinical file and annotator logs -
+<code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.oncokb*</code>) are
+removed once the OncoKB annotations have been integrated into the PCGR
+output. To keep these files in the output directory, use:</p>
+<ul>
+<li><code>--oncokb_keep_files</code></li>
 </ul>
 <div style="border-left: 4px solid #e69f00; background-color: #fff8e6; padding: 0.75em 1em; margin: 1em 0;">
 <p><strong>Licensing notice — OncoKB terms of use:</strong> OncoKB is
@@ -445,6 +508,56 @@ minimum: 2)</li>
 details on the required file format.</p>
 </div>
 <div class="section level3">
+<h3 id="external-msi-result">External MSI result<a class="anchor" aria-label="anchor" href="#external-msi-result"></a>
+</h3>
+<p>If MSI has been assessed with a dedicated MSI caller, the result can
+be provided via:</p>
+<ul>
+<li>
+<code>--input_msi &lt;FILE&gt;</code> - the summary result file of
+the MSI caller</li>
+<li>
+<code>--input_msi_caller &lt;CALLER&gt;</code> -
+<code>msisensor-pro</code> or <code>generic</code> (default)</li>
+<li>
+<code>--input_msi_threshold &lt;PERCENT&gt;</code> - threshold on
+the MSI score for MSI-H (percentage of unstable sites), for callers that
+report a score but no MSI status (<code>msisensor-pro</code>; default:
+20)</li>
+</ul>
+<p>This can be used instead of, or together with, the MSI classifier of
+PCGR (<code>--estimate_msi</code>). In the latter case, the report shows
+both results, with the external result taking precedence. An external
+MSI result can be used for any type of assay, including tumor-only and
+targeted panel data. See the <a href="input.html#msi-result-from-an-external-caller">input section</a>
+for details on the supported formats.</p>
+</div>
+<div class="section level3">
+<h3 id="external-hrd-result">External HRD result<a class="anchor" aria-label="anchor" href="#external-hrd-result"></a>
+</h3>
+<p>If HRD has been assessed with a dedicated HRD assay or tool, the
+result can be provided via:</p>
+<ul>
+<li>
+<code>--input_hrd &lt;FILE&gt;</code> - the HRD result file (one
+row; <code>HRD_CALLER</code>, <code>HRD_SCORE_TYPE</code>, and
+<code>HRD_STATUS</code> and/or <code>HRD_SCORE</code>)</li>
+<li>
+<code>--input_hrd_threshold &lt;SCORE&gt;</code> - threshold on the
+score for HR-deficient (score &gt;= threshold). Required if the file has
+no <code>HRD_STATUS</code>; if given, the status is derived from the
+score. There is no default, as thresholds are specific to the
+assay/tool</li>
+</ul>
+<p>The kind of score (genomic scar score, mutational signature-based
+classifier, composite model, or other) is stated in the file
+(<code>HRD_SCORE_TYPE</code>). This can be used instead of, or together
+with, the genomic scar score of PCGR (<code>--estimate_hrd</code>), and
+for any type of assay, including tumor-only and targeted panel data. See
+the <a href="input.html#hrd-result-from-an-external-assaytool">input
+section</a> for details on the format.</p>
+</div>
+<div class="section level3">
 <h3 id="configuration-of-output-files">Configuration of output files<a class="anchor" aria-label="anchor" href="#configuration-of-output-files"></a>
 </h3>
 <p>If you only want the Excel/TSV output (with all variant
@@ -472,6 +585,8 @@ options:</p>
   [--input_cna &lt;INPUT_CNA&gt;]
   [--input_rna_fusion &lt;INPUT_RNA_FUSION&gt;]
   [--input_rna_expression &lt;INPUT_RNA_EXPRESSION&gt;]
+  [--input_msi &lt;INPUT_MSI&gt;]
+  [--input_hrd &lt;INPUT_HRD&gt;]
   [--vep_dir &lt;VEP_DIR&gt;]
   --refdata_dir &lt;REFDATA_DIR&gt;
   --output_dir &lt;OUTPUT_DIR&gt;
@@ -500,6 +615,12 @@ Input file options:
                         File with RNA fusion transcripts detected in tumor (tab-separated values)
   --input_rna_expression INPUT_RNA_EXP
                         File with bulk RNA expression counts (TPM) of transcripts in tumor (tab-separated values)
+  --input_msi INPUT_MSI
+                        Summary result file from an external MSI caller (MSIsensor-pro, or generic format) - see
+                        --input_msi_caller
+  --input_hrd INPUT_HRD
+                        Result file from an external HRD assay/tool (tab-separated, one row; HRD_CALLER,
+                        HRD_SCORE_TYPE, and HRD_STATUS and/or HRD_SCORE)
 
 SNV/InDel analysis options:
   --vep_dir VEP_DIR     Directory of VEP cache, e.g. $HOME/.vep (required when --input_vcf is provided)
@@ -529,9 +650,12 @@ SNV/InDel analysis options:
   --vep_regulatory      Add VEP regulatory annotations (VEP option '--regulatory'), default: False
   --vep_gencode_basic   Consider basic GENCODE transcript set only (VEP option '--gencode_basic')
 
-Tumor sample options:
+Subject options:
   --sex {FEMALE,MALE,UNKNOWN}
-                        Sex of cancer case/sample (default: UNKNOWN)
+                        Sex of the subject (default: UNKNOWN)
+  --age AGE             Age of the subject (whole years) at the time of tumor sampling (default: None)
+
+Tumor sample options:
   --tumor_site TSITE    Optional integer code to specify primary tumor type/site of query sample,
                         choose any of the following identifiers:
                         0 = Any
@@ -627,12 +751,23 @@ Tumor mutational burden (TMB) and MSI options:
                         size, default: False
   --tmb_display {coding_and_silent,coding_non_silent,missense_only}
                         Type of TMB measure to show in report, default: coding_and_silent
+  --tmb_high_threshold TMB_HIGH_THRESHOLD
+                        Threshold (mutations/Mb) for classifying the tumor as TMB-high, applied to the TMB
+                        measure shown in the report (--tmb_display), default: 10.0 (FDA/OncoKB definition of
+                        TMB-H)
   --tmb_dp_min TMB_DP_MIN
                         Minimum sequencing depth (tumor) for TMB calculation (default: None)
   --tmb_af_min TMB_AF_MIN
                         Minimum allelic fraction (tumor) for TMB calculation (default: None)
   --tmb_ad_min TMB_AD_MIN
                         Minimum allelic depth (tumor) for TMB calculation (default: None)
+  --input_msi_caller {generic,msisensor-pro}
+                        Caller that produced the file provided with --input_msi (default: generic, i.e. tab-
+                        separated file with MSI_STATUS and MSI_CALLER columns)
+  --input_msi_threshold INPUT_MSI_THRESHOLD
+                        Threshold on the MSI score for MSI-H (percentage of unstable sites), for MSI
+                        callers that report a score but no MSI status (--input_msi_caller msisensor-pro;
+                        default: 20)
   --estimate_msi        Predict microsatellite instability status from somatic mutation patterns,
                         default: False
 
@@ -643,9 +778,10 @@ Mutational signature options:
   --min_mutations_signatures MIN_MUTATIONS_SIGNATURES
                         Minimum number of SNVs required for signature re-fitting (SBS)
                         (default: 200, minimum n = 100)
-  --all_reference_signatures
-                        Use all reference mutational signatures (SBS) during re-fitting rather than
-                        only those attributed to the tumor type (default: False)
+  --tumor_type_reference_signatures
+                        Restrict signature re-fitting to reference mutational signatures (SBS) already
+                        attributed to the tumor type, rather than the full reference set - default: False
+                        (i.e. all reference signatures are used by default)
   --include_artefact_signatures
                         Include sequencing artefacts in the reference signature collection
                         (default: False)
@@ -675,6 +811,13 @@ Somatic CNA analysis options:
   --cna_transcript_overlap_pct CNA_TRANSCRIPT_OVERLAP_PCT
                         Minimum mean percent overlap between copy number segment and gene transcripts
                         for reporting of gains/losses in oncogenes/tumor suppressors (default: 50)
+  --estimate_hrd        Estimate a genomic instability ('HRD') score (HRD-LOH + LST + TAI) from the
+                        allele-specific copy number segments - research use only, requires
+                        genome-wide (WGS/WES) segments, default: False
+  --input_hrd_threshold INPUT_HRD_THRESHOLD
+                        Threshold on the score of the external HRD result (HRD_SCORE in --input_hrd) for
+                        HR-deficient (score &gt;= threshold). Required if the file has no HRD_STATUS; if
+                        given, the status is derived from the score (no default)
 
 RNA expression and fusion options:
   --fusion_min_split_reads FUSION_MIN_SPLIT_READS
@@ -704,12 +847,22 @@ Biomarker and tiering options:
                         OncoTree code specifying the tumor type for OncoKB queries (default: None)
   --oncokb_exclusive    Limit biomarker reporting to OncoKB only - skip CIViC and CGI sources
                         (default: False)
+  --oncokb_tumor_type_only
+                        Limit OncoKB evidence to what OncoKB returns for the tumor type. By
+                        default, OncoKB is also queried without tumor type, adding evidence for
+                        other tumor types (labelled by cancer type, tiered as evidence from other
+                        tumor sites) - this halves the number of OncoKB web API queries
+                        (default: False)
   --oncokb_maf_query_all
                         Query OncoKB for all variant classes, including non-coding variants
                         (IGR, Intron, UTR, flanking regions). By default, non-coding variants
                         are filtered out before OncoKB annotation to reduce processing time.
                         Intended for TARGETED/WES assays only - enabling for WGS may result in
                         very long MafAnnotator.py runtimes (default: False)
+  --oncokb_keep_files   Keep intermediate OncoKB annotator files (input queries, raw annotator
+                        output, clinical file and logs) in the output directory. By default,
+                        these files are removed once OncoKB annotations have been integrated
+                        into the PCGR output (default: False)
 
 Other options:
   --force_overwrite     Force overwrite of existing result files (default: False)
@@ -717,6 +870,7 @@ Other options:
   --no_reporting        Run VEP/vcfanno annotation only; skip tier assignment, MSI, TMB, signatures,
                         and report generation (default: False)
   --no_html             Do not generate HTML report (default: False)
+  --no_pdf              Do not generate PDF report (Quarto/Typst) (default: False)
   --debug               Print full commands to log
   --pcgrr_conda PCGRR_CONDA
                         pcgrr conda environment name (default: pcgrr)</code></pre>
@@ -724,8 +878,9 @@ Other options:
 <div class="section level2">
 <h2 id="example-run">Example run<a class="anchor" aria-label="anchor" href="#example-run"></a>
 </h2>
-<p>The <em>examples</em> folder contains input VCF files from two tumor
-samples sequenced within TCGA. A molecular interpretation report for a
+<p>The <em>examples</em> folder contains input files (VCF, copy number
+segments, RNA fusions and gene expression) from two tumor samples
+sequenced within TCGA. A molecular interpretation report for a
 colorectal tumor sample can be generated by running the following
 command in your terminal window (this assumes you have installed PCGR
 through Conda, and that you have downloaded the necessary reference data
@@ -774,80 +929,112 @@ following files in the <em>/Users/you/dir4/pcgr_outputs</em> folder:</p>
 </tr>
 <tr class="even">
 <td>2</td>
+<td><strong>&lt;sample_id&gt;.pcgr.grch37.pdf</strong></td>
+<td>A PDF report (quarto/typst-based), written unless
+<code>--no_pdf</code> is set</td>
+</tr>
+<tr class="odd">
+<td>3</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.xlsx</strong></td>
 <td>An excel workbook with multiple sheets of annotations (Assay &amp;
 sample info/SNVs &amp; InDels/CNAs/biomarkers/TMB/MSI), suitable for
 aggregation analysis across multiple samples</td>
 </tr>
-<tr class="odd">
-<td>3</td>
+<tr class="even">
+<td>4</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.vcf.gz (.tbi)</strong></td>
 <td>Bgzipped VCF file with rich set of variant annotations to support
 interpretation</td>
 </tr>
-<tr class="even">
-<td>4</td>
+<tr class="odd">
+<td>5</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.pass.vcf.gz
 (.tbi)</strong></td>
 <td>Bgzipped VCF file with rich set of variant annotations to support
 interpretation (PASS variants only)</td>
 </tr>
-<tr class="odd">
-<td>5</td>
+<tr class="even">
+<td>6</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.pass.tsv.gz</strong></td>
 <td>Compressed vcf2tsv-converted file with rich set of variant
 annotations to support interpretation</td>
 </tr>
-<tr class="even">
-<td>6</td>
+<tr class="odd">
+<td>7</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.conf.yaml</strong></td>
 <td>PCGR configuration data file (YAML), as generated by pre-reporting
 annotation workflow</td>
 </tr>
-<tr class="odd">
-<td>7</td>
-<td><strong>&lt;sample_id&gt;.pcgr.grch37.cna_segment.tsv.gz</strong></td>
-<td>Tab-separated values file with raw copy number segments, per
-affected transcript</td>
-</tr>
 <tr class="even">
 <td>8</td>
-<td><strong>&lt;sample_id&gt;.pcgr.grch37.cna_gene_ann.tsv.gz</strong></td>
-<td>Tab-separated values file with annotated gene copy number alteration
-events, including actionability assessment</td>
+<td><strong>&lt;sample_id&gt;.pcgr.grch37.cna_segment.tsv.gz</strong></td>
+<td>Tab-separated values file with the copy number segments, each
+classified by event type (e.g. focal/broad amplification or deletion)
+and annotated with chromosome arm and cytoband</td>
 </tr>
 <tr class="odd">
 <td>9</td>
-<td><strong>&lt;sample_id&gt;.pcgr.grch37.fusion_ann.tsv.gz</strong></td>
-<td>Tab-separated values file with annotated RNA fusion events,
-including actionability assessment</td>
+<td><strong>&lt;sample_id&gt;.pcgr.grch37.cna_summary.tsv</strong></td>
+<td>Tab-separated values file with summary information on sample-level
+copy number alteration statistics, including fraction of genome altered
+(FGA) and whole-genome doubling (WGD) status</td>
 </tr>
 <tr class="even">
 <td>10</td>
+<td><strong>&lt;sample_id&gt;.pcgr.grch37.cna_gene_ann.tsv.gz</strong></td>
+<td>Tab-separated values file with annotated gene copy number alteration
+events, including actionability assessment. Note that a file named
+<code>&lt;sample_id&gt;.pcgr.grch37.cna_gene.tsv.gz</code> is also
+written - this is a pipeline intermediate (segments mapped to
+overlapping transcripts/genes, with raw biomarker matches), and
+<code>cna_gene_ann.tsv.gz</code> is the file to use for downstream
+analysis</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td><strong>&lt;sample_id&gt;.pcgr.grch37.fusion_ann.tsv.gz</strong></td>
+<td>Tab-separated values file with annotated RNA fusion events,
+including actionability assessment. Note that a file named
+<code>&lt;sample_id&gt;.pcgr.grch37.rna_fusion.tsv.gz</code> is also
+written - this is a pipeline intermediate (input fusions matched against
+biomarker evidence), and <code>fusion_ann.tsv.gz</code> is the file to
+use for downstream analysis</td>
+</tr>
+<tr class="even">
+<td>12</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.tmb.tsv</strong></td>
 <td>Tab-separated values file with information on tumor mutational
 burden (TMB) estimates</td>
 </tr>
 <tr class="odd">
-<td>11</td>
+<td>13</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.maf</strong></td>
 <td>Annotated SNVs/InDels, converted to the Mutation Annotation Format
 (MAF)</td>
 </tr>
 <tr class="even">
-<td>12</td>
+<td>14</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.msigs.tsv.gz</strong></td>
 <td>Tab-separated values file with information on the contribution of
 mutational signatures in the tumor sample</td>
 </tr>
 <tr class="odd">
-<td>13</td>
+<td>15</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.snv_indel_ann.tsv.gz</strong></td>
 <td>Tab-separated values file with key SNV/InDel variant annotations,
 including oncogenicity and clinical actionability assessment</td>
 </tr>
 </tbody>
 </table>
+<p>Depending on the input and options used, further files are written,
+e.g. for RNA expression data
+(<code>&lt;sample_id&gt;.pcgr.grch37.expression.tsv.gz</code>,
+<code>expression_outliers.tsv.gz</code> and
+<code>expression_similarity.tsv.gz</code>) and for an external MSI
+result provided with <code>--input_msi</code>
+(<code>&lt;sample_id&gt;.pcgr.grch37.msi.tsv</code>), and for an
+external HRD result provided with <code>--input_hrd</code>
+(<code>&lt;sample_id&gt;.pcgr.grch37.hrd.tsv</code>). See the <a href="output.html">output section</a> for details.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

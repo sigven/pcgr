@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -245,10 +245,15 @@ strongest (<code>tier-defining</code>) or a corroborating
 Prognostic (PP1/PB1), diagnostic (D1/D2), and resistance (R1/R2) markers
 are listed in the biomarker sheets for completeness and transparency,
 but they do not contribute to the <code>T1</code>–<code>T4</code>
-variant rank. To identify which biomarkers actually drove the tier
-assignment of a given variant, focus on rows where <code>TIER</code> is
-<code>T1</code>–<code>T3</code> and the evidence type is treatment
-sensitivity.</em></p>
+variant rank. Note that the AMP/ASCO/CAP tiers apply to therapeutic
+evidence only: for prognostic and diagnostic evidence, the codes
+<code>PP</code>/<code>PB</code>/<code>D</code> followed by a number are
+internal evidence-strength ranks (lower = stronger evidence, as used to
+select what is shown in the report) - not tiers, and the report itself
+shows no tiers for prognostic and diagnostic evidence. To identify which
+biomarkers actually drove the tier assignment of a given variant, focus
+on rows where <code>TIER</code> is <code>T1</code>–<code>T3</code> and
+the evidence type is treatment sensitivity.</em></p>
   </main>
 </div>
 

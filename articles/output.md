@@ -3,8 +3,8 @@
 ## Output files
 
 PCGR generates multiple output files with annotations of molecular
-aberrations, including an interactive report, an Excel workbook, and
-pure text-based annotation files (TSV).
+aberrations, including an interactive HTML report, a PDF report, an
+Excel workbook, and pure text-based annotation files (TSV).
 
 ### HTML report - quarto-based
 
@@ -19,10 +19,20 @@ The report is structured in various sections, pending upon the input
 provided by the user. The following sections may be included in the
 report:
 
-1.  **Settings**
-    - Lists key configurations for the analysis, including the genome
-      assembly, type of sequencing assay (WES/WGS/TARGETED), the cancer
-      type (as provided by the user), and the tumor purity and ploidy.
+1.  **Key findings and settings**
+    - The top of the report shows sample details (cancer type, assay,
+      subject sex and age, tumor purity and ploidy) and the input data
+      provided
+    - *Key findings*: a templated summary of the main findings -
+      therapeutically actionable alterations (Tier 1 and 2), diagnostic
+      evidence and composite genomic biomarkers (TMB-high, MSI-high,
+      HR-deficient) first, followed by supporting findings. The rules
+      for content and ordering are described in the documentation
+      section of the report
+    - Run configuration and report settings (collapsible) - key
+      configurations for the analysis, including the genome assembly,
+      type of sequencing assay (WES/WGS/TARGETED), and the cancer type
+      (as provided by the user)
 2.  **Somatic SNVs/InDels**
     - Provides an overview of the somatic SNVs and InDels detected in
       the tumor sample
@@ -60,16 +70,37 @@ report:
 - Indicates predicted microsatellite stability from the somatic mutation
   profile and supporting evidence (details of the underlying MSI
   statistical classifier can be found
-  [here](http://rpubs.com/sigven/msi_classification_v3))
+  [here](https://sigven-pcgr-msi-classifier.share.connect.posit.cloud/))
 - The MSI classifier was trained on TCGA exome samples.
+- If an MSI result from an external MSI caller is provided
+  (`--input_msi`), this is regarded as the primary result. In the HTML
+  report, the external result and the classifier prediction (if
+  available) are shown in separate tabs (*External caller* and *PCGR
+  classifier*), with a note on concordance in the first tab. In the PDF
+  report, only the external result is shown in detail, with a note on
+  concordance with the classifier prediction
 
-5.  **Tumor mutational burden (TMB)**
+5.  **HRD status**
+
+- Result of an external HRD assay/tool (`--input_hrd`): HRD status
+  (*HR-deficient*, *HR-proficient* or *Indeterminate*), score and kind
+  of score (as stated in the input file), and how the status was
+  obtained (reported by the assay/tool, or derived by PCGR with
+  `--input_hrd_threshold`)
+- Genomic scar (HRD) score estimated by PCGR from the allele-specific
+  copy number segments (`--estimate_hrd`; HRD-LOH, LST, TAI and their
+  sum - research use only)
+- If both are available, they are shown in separate tabs (*External
+  assay/tool* and *PCGR genomic scar score*) in the HTML report; in the
+  PDF report, HRD is part of the *Composite genomic biomarkers* section
+
+6.  **Tumor mutational burden (TMB)**
     - given a coding target region size specified by the user (ideally
       the **callable target size**), an estimate of the mutational
       burden is provided
     - The estimated TMB is shown in the context of TMB distributions
       from different primary sites in TCGA
-6.  **Mutational signatures**
+7.  **Mutational signatures**
 
 - Estimation of relative contribution of [known mutational
   signatures](http://cancer.sanger.ac.uk/cosmic/signatures) in tumor
@@ -78,19 +109,19 @@ report:
   as the underlying framework)
 - Datatable with signatures found and proposed underlying etiologies
 
-7.  **Kataegis events**
+8.  **Kataegis events**
 
 - Kataegis events are clusters of particular SNV types. The report
   includes a datatable with all detected kataegis events.
 
-8.  **RNA fusions**
+9.  **RNA fusions**
 
 - Fusion partners are annotated with respect to oncogene status and
   overlap in the Mitelman database of chromosomal aberrations in cancer
 - Clinical actionability evidence linked to fusion events is shown where
   available (AMP/ASCO/CAP guidelines)
 
-9.  **RNA expression analysis**
+10. **RNA expression analysis**
 
 - Datatable with expression outliers - as compared to distribution in
   reference cohorts
@@ -99,7 +130,16 @@ report:
   Initiative, DepMap)
 - Immune contexture profiling
 
-10. **Documentation**
+11. **Germline findings**
+
+- Shown if germline variants classified by
+  [CPSR](https://github.com/sigven/cpsr) are provided as input
+  (`--input_cpsr`, `--input_cpsr_yaml`)
+- Pathogenic and likely pathogenic variants in the virtual panel of
+  cancer predisposition genes screened, and optionally a focused subset
+  of variants of uncertain significance (VUS)
+
+12. **Documentation**
 
 - Annotation resources - databases with version and licensing
   information
@@ -109,7 +149,65 @@ report:
 
 #### Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20795653.svg)](https://doi.org/10.5281/zenodo.20795653)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4022111.svg)](https://doi.org/10.5281/zenodo.4022111)
+
+### PDF report
+
+A focused PDF report (generated with [quarto](https://quarto.org/) and
+Typst) is provided by default in addition to the HTML report, and can be
+turned off with `--no_pdf`. It has the following naming convention:
+
+- `<sample_id>.pcgr.<genome_assembly>.pdf`
+
+Sections are included depending on the input provided by the user:
+
+1.  **Cover page**
+
+    - Sample details and the *Key findings* summary, shared with the
+      HTML report
+
+2.  **Clinical actionability**
+
+    - Tier 1 and 2 aberrations (SNVs/InDels, CNAs and RNA fusions), with
+      the underlying biomarker evidence
+
+3.  **Diagnostic and prognostic biomarkers**
+
+4.  **Somatic SNVs/InDels**
+
+    - Variant statistics, oncogenic and likely oncogenic variants, and
+      variant filtering
+
+5.  **Somatic copy number aberrations**
+
+    - Amplified proto-oncogenes and deleted tumor suppressors, and the
+      copy number profile
+
+6.  **Composite genomic biomarkers**
+
+    - TMB, MSI and HRD status
+
+7.  **Mutational features**
+
+    - Mutational signatures and kataegis events
+
+8.  **Transcriptome findings**
+
+    - RNA fusions and gene expression
+
+9.  **Germline findings**
+
+    - Pathogenic and likely pathogenic variants classified by CPSR (if
+      provided as input)
+
+10. **Analysis configuration & data sources**
+
+    - Settings and versions of the data sources
+
+11. **Appendix**
+
+    - Documentation of report contents, references, and a medical
+      disclaimer
 
 ### SNVs/InDels
 
@@ -244,9 +342,8 @@ convention:
 | `MUTATION_HOTSPOT_CANCERTYPE` | hotspot-associated cancer types (from cancerhotspots.org) |
 | `PFAM_DOMAIN` | Pfam domain identifier (from VEP) |
 | `INTOGEN_DRIVER_MUT` | Indicates if existing variant is predicted as driver mutation from IntoGen Catalog of Driver Mutations |
-| `EFFECT_PREDICTIONS` | In silico predictions of variant effect on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v5.0](https://www.dbnsfp.org/). Predicted effects are provided by different sources/algorithms (separated by `&`), `T` = Tolerated, `N` = Neutral, `D` = Damaging |
-| `SPLICE_EFFECT` | Effect of splicing, from MutSpliceDB and/or MaxEntScan. Format: |
-| MES |  |
+| `EFFECT_PREDICTIONS` | In silico predictions of variant effect on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP](https://www.dbnsfp.org/). Predicted effects are provided by different sources/algorithms (separated by `&`), `T` = Tolerated, `N` = Neutral, `D` = Damaging |
+| `SPLICE_EFFECT` | Effect of splicing, from MutSpliceDB and/or MaxEntScan, combined into a single comma-separated string. MutSpliceDB component format: `<ENTREZGENE>|<SYMBOL>|<REFSEQ_TRANSCRIPT_ID>|<HGVSc>|<EFFECT>|<AFFECTED_EXONS>|<SOURCE>`. MaxEntScan component format: `MaxEntScan|<stratum>|<evidence_tier>` (see `MAXENTSCAN` below for details) |
 | `DBNSFP_BAYESDEL_ADDAF` | predicted effect from BayesDel (dbNSFP) |
 | `DBNSFP_LIST_S2` | predicted effect from LIST-S2 (dbNSFP) |
 | `DBNSFP_SIFT` | predicted effect from SIFT (dbNSFP) |
@@ -357,7 +454,7 @@ via `--oncokb_api_token`.
 | 14\. `HGVSp` | HGVS protein sequence name |
 | 15\. `HGVSP` | Protein change in one-letter amino-acid HGVS notation (HGVSp_short) |
 | 16\. `SPLICE_EFFECT` | Splice effect annotations from MutSpliceDB and MaxEntScan (see details above) |
-| 17\. `MAXENTSCAN` | MaxEntScan splice site impact summary. Format: `MaxEntScan|<stratum>|<evidence_tier>` |
+| 17\. `MAXENTSCAN` | MaxEntScan splice site impact summary for canonical (±1/±2 bp) and non-canonical (donor +3 to +6, acceptor -3 to -20) splice positions. Format: `MaxEntScan|<stratum>|<evidence_tier>`. `<stratum>` identifies the splice-site position category (e.g. `Donor_+5`, `Acceptor_PPT_Close`, `Canonical_Site`). `<evidence_tier>` reflects predicted impact strength, from strongest to weakest: `Strong` \> `Moderate` \> `Supporting` \> `No_Call` \> `Uninformative` (`.` for canonical sites, which are always high-confidence). Only variants with a `Strong` tier at non-canonical positions are additionally flagged as loss-of-function |
 | 18\. `EFFECT_PREDICTIONS` | Variant effect predictions - from dbNSFP |
 | 19\. `EXON` | Exon number (out of total number of exons) |
 | 20\. `CONSEQUENCE` | Variant consequence - from VEP |
@@ -466,6 +563,56 @@ The format of the TSV file is the following:
 | 9\. `TMB_ESTIMATE` | TMB estimate |
 | 10\. `TMB_UNIT` | TMB unit (i.e. mutations/Mb) |
 
+### MSI result from external caller (TSV)
+
+If an MSI result from an external MSI caller is provided
+(`--input_msi`), a normalised copy of the result is written to a
+tab-separated values (TSV) file, with the following naming convention:
+
+- `<sample_id>.pcgr.<genome_assembly>.msi.tsv`
+
+The file has one data row, and the following columns (missing values are
+denoted `.`):
+
+| Variable | Description |
+|----|----|
+| 1\. `SAMPLE_ID` | Sample identifier |
+| 2\. `MSI_STATUS` | MSI status: `MSI-H`, `MSS` or `Indeterminate` |
+| 3\. `MSI_STATUS_BASIS` | How the MSI status was obtained: `caller` (reported by the MSI caller) or `derived` (derived by PCGR from the score) |
+| 4\. `MSI_CALLER` | Name of the MSI caller |
+| 5\. `CALLER_VERSION` | Version of the MSI caller |
+| 6\. `MSI_SCORE` | Score, as reported by the MSI caller |
+| 7\. `MSI_SCORE_TYPE` | Description of the score |
+| 8\. `MSI_SCORE_THRESHOLD_USED` | Threshold on the score applied for MSI-H (by the caller, or by PCGR if the status was derived: default or set with `--input_msi_threshold`) |
+| 9\. `N_LOCI_EVALUATED` | Number of microsatellite loci evaluated |
+| 10\. `N_LOCI_UNSTABLE` | Number of unstable microsatellite loci |
+
+### HRD result from external assay/tool (TSV)
+
+If an HRD result from an external assay/tool is provided
+(`--input_hrd`), a normalised copy of the result is written to a
+tab-separated values (TSV) file, with the following naming convention:
+
+- `<sample_id>.pcgr.<genome_assembly>.hrd.tsv`
+
+The file has one data row, and the following columns (missing values are
+denoted `.`):
+
+| Variable | Description |
+|----|----|
+| 1\. `SAMPLE_ID` | Sample identifier |
+| 2\. `HRD_STATUS` | HRD status: `HR-deficient`, `HR-proficient` or `Indeterminate` |
+| 3\. `HRD_STATUS_BASIS` | How the HRD status was obtained: `caller` (given in the input file) or `derived` (derived by PCGR from the score with `--input_hrd_threshold`) |
+| 4\. `HRD_CALLER` | Name of the HRD assay/tool |
+| 5\. `CALLER_VERSION` | Version of the HRD assay/tool |
+| 6\. `HRD_SCORE_TYPE` | Kind of score: `genomic_scar`, `mutational_signature`, `composite` or `other` |
+| 7\. `HRD_SCORE_DESCRIPTION` | Description of the score |
+| 8\. `HRD_SCORE` | Score, as reported by the assay/tool |
+| 9\. `HRD_SCORE_THRESHOLD_USED` | Threshold on the score for HR-deficient (by the assay/tool, or by PCGR if the status was derived) |
+| 10\. `HRD_LOH` | Genomic scar component: HRD-LOH |
+| 11\. `HRD_LST` | Genomic scar component: LST |
+| 12\. `HRD_TAI` | Genomic scar component: TAI |
+
 ### Mutational signature contributions (TSV)
 
 We provide a tab-separated values (TSV) file with information about
@@ -512,6 +659,15 @@ follows:
     overlapping with any transcripts will thus not be included in this
     files).
 
+Note that a second file,
+`<sample_id>.pcgr.<genome_assembly>.cna_gene.tsv.gz`, is also written to
+the output directory. This is a pipeline intermediate (copy number
+segments mapped to overlapping transcripts and genes, with
+`BIOMARKER_MATCH` in raw format, and two-hit candidate flags and OncoKB
+columns appended when available) that is read when generating the
+report. The `cna_gene_ann.tsv.gz` file described here is the final
+annotated result and should be used for downstream analysis.
+
 The format of the compressed `cna_gene_ann.tsv.gz` is the following.
 Columns suffixed with `_OKB` are only present when OncoKB annotation is
 enabled via `--oncokb_api_token`. Note that `HOTSPOT_OKB` and `VUS_OKB`
@@ -524,38 +680,62 @@ are not included for CNA output.
 | 3\. `GENOME_VERSION` | Assembly version, e.g. GRCh38 |
 | 4\. `CN_MAJOR` | Major copy number |
 | 5\. `CN_MINOR` | Minor copy number |
-| 6\. `LOH` | Loss of heterozygosity flag |
-| 7\. `TWOHIT_CANDIDATE_SOMATIC` | Comma-separated somatic loss-of-function variants overlapping the segment (TSG with allele-specific LOH: deletion or copy-neutral). Each entry has the format `VAR_ID;CONSEQUENCE;VAF_FLAG;ALTERATION;VAF_TUMOR;DP_TUMOR;ONCOGENICITY`, where `VAF_FLAG` is one of: `VAF_CONSISTENT` (observed VAF consistent with variant on retained allele given tumor purity), `VAF_LOW` (VAF below purity-adjusted expectation — variant may reside on the deleted allele or be subclonal to the LOH event), or `VAF_UNKNOWN` (tumor purity not provided); `ALTERATION` is the protein-level consequence (or `.` if absent); `VAF_TUMOR` is the allele fraction in the tumor; `DP_TUMOR` is the read depth; and `ONCOGENICITY` is the OncoKB classification (or `.` if OncoKB is not enabled). |
-| 8\. `TWOHIT_CANDIDATE_GERMLINE` | Comma-separated germline pathogenic/likely-pathogenic loss-of-function variants matching by gene symbol (TSG with allele-specific LOH: deletion or copy-neutral; requires CPSR input). Each entry has the format `VAR_ID;CONSEQUENCE`. |
-| 9\. `FOLD_CHANGE` | Fold change of segment copy number relative to tumor ploidy |
-| 10\. `TUMOR_PLOIDY` | Tumor ploidy estimate |
-| 11\. `TUMOR_PLOIDY_SOURCE` | Source of tumor ploidy estimate |
-| 12\. `TUMOR_PURITY` | Tumor purity estimate |
-| 13\. `SEGMENT_LENGTH_MB` | Length of segment in Mb |
-| 14\. `CYTOBAND` | Associated cytoband |
-| 15\. `EVENT_TYPE` | Focal or broad (covering more than 25% of chromosome arm) |
-| 16\. `VARIANT_CLASS` | *amplification*: total copy number \>= user-defined threshold; *homdel*: total copy number equal to zero; *hetdel*: total copy number equal to one; *gain*: copy number gain below amplification threshold; *undefined*: other copy number states |
-| 17\. `VARIANT_CLASS_DISPLAY` | Display label for variant class |
-| 18\. `SYMBOL` | Gene symbol |
-| 19\. `ENTREZGENE` | Entrez gene identifier |
-| 20\. `GENENAME` | Gene name |
-| 21\. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
-| 22\. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
-| 23\. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
-| 24\. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
-| 25\. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
-| 26\. `MUTATION_EFFECT_OKB` | *(OncoKB only)* OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
-| 27\. `MUTATION_EFFECT_CITATIONS_OKB` | *(OncoKB only)* OncoKB mutation effect citations |
-| 28\. `MUTATION_EFFECT_DESCRIPTION_OKB` | *(OncoKB only)* OncoKB mutation effect description |
-| 29\. `ONCOGENICITY_OKB` | *(OncoKB only)* OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
-| 30\. `TUMOR_TYPE_SUMMARY_OKB` | *(OncoKB only)* OncoKB tumor type summary |
-| 31\. `VARIANT_SUMMARY_OKB` | *(OncoKB only)* OncoKB variant summary |
-| 32\. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
-| 33\. `TRANSCRIPT_OVERLAP_PERCENT` | Percentage overlap between copy number segment and transcript |
-| 34\. `ACTIONABILITY_TIER` | Variant actionability tier - AMP/ASCO/CAP |
-| 35\. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP |
-| 36\. `BIOMARKER_MATCH` | Biomarker match |
-| 37\. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type |
+| 6\. `CN_MAJOR_MINOR_IMPUTED` | `TRUE` if the major/minor split of the segment is imputed (total copy number observed), from the optional input column `nMajor_nMinor_Imputed`. `FALSE` otherwise |
+| 7\. `LOH` | Loss of heterozygosity flag (not called for segments with an imputed major/minor split) |
+| 8\. `TWOHIT_CANDIDATE_SOMATIC` | Comma-separated somatic loss-of-function variants overlapping the segment (TSG with allele-specific LOH: deletion or copy-neutral). Each entry has the format `VAR_ID;CONSEQUENCE;VAF_FLAG;ALTERATION;VAF_TUMOR;DP_TUMOR;ONCOGENICITY`, where `VAF_FLAG` is one of: `VAF_CONSISTENT` (observed VAF consistent with variant on retained allele given tumor purity), `VAF_LOW` (VAF below purity-adjusted expectation — variant may reside on the deleted allele or be subclonal to the LOH event), or `VAF_UNKNOWN` (tumor purity not provided); `ALTERATION` is the protein-level consequence (or `.` if absent); `VAF_TUMOR` is the allele fraction in the tumor; `DP_TUMOR` is the read depth; and `ONCOGENICITY` is the OncoKB classification (or `.` if OncoKB is not enabled). |
+| 9\. `TWOHIT_CANDIDATE_GERMLINE` | Comma-separated germline pathogenic/likely-pathogenic loss-of-function variants matching by gene symbol (TSG with allele-specific LOH: deletion or copy-neutral; requires CPSR input). Each entry has the format `VAR_ID;CONSEQUENCE`. |
+| 10\. `FOLD_CHANGE` | Fold change of segment copy number relative to tumor ploidy |
+| 11\. `TUMOR_PLOIDY` | Tumor ploidy estimate |
+| 12\. `TUMOR_PLOIDY_SOURCE` | Source of tumor ploidy estimate: `provided` (`--tumor_ploidy`, e.g. estimated with ASCAT or other tools) or `estimated` (genome-wide weighted median of the segment copy numbers, estimated by PCGR when `--tumor_ploidy` is not provided) |
+| 13\. `TUMOR_PURITY` | Tumor purity estimate |
+| 14\. `SEGMENT_LENGTH_MB` | Length of segment in Mb |
+| 15\. `CYTOBAND` | Associated cytoband |
+| 16\. `EVENT_TYPE` | Focal or broad (covering more than 25% of chromosome arm) |
+| 17\. `VARIANT_CLASS` | *amplification*: total copy number \>= user-defined threshold; *homdel*: total copy number equal to zero; *hetdel*: total copy number equal to one; *gain*: copy number gain below amplification threshold; *undefined*: other copy number states |
+| 18\. `VARIANT_CLASS_DISPLAY` | Display label for variant class |
+| 19\. `SYMBOL` | Gene symbol |
+| 20\. `ENTREZGENE` | Entrez gene identifier |
+| 21\. `GENENAME` | Gene name |
+| 22\. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
+| 23\. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
+| 24\. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
+| 25\. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
+| 26\. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
+| 27\. `MUTATION_EFFECT_OKB` | *(OncoKB only)* OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
+| 28\. `MUTATION_EFFECT_CITATIONS_OKB` | *(OncoKB only)* OncoKB mutation effect citations |
+| 29\. `MUTATION_EFFECT_DESCRIPTION_OKB` | *(OncoKB only)* OncoKB mutation effect description |
+| 30\. `ONCOGENICITY_OKB` | *(OncoKB only)* OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
+| 31\. `TUMOR_TYPE_SUMMARY_OKB` | *(OncoKB only)* OncoKB tumor type summary |
+| 32\. `VARIANT_SUMMARY_OKB` | *(OncoKB only)* OncoKB variant summary |
+| 33\. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
+| 34\. `TRANSCRIPT_OVERLAP_PERCENT` | Percentage overlap between copy number segment and transcript |
+| 35\. `ACTIONABILITY_TIER` | Variant actionability tier - AMP/ASCO/CAP |
+| 36\. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP |
+| 37\. `BIOMARKER_MATCH` | Biomarker match |
+| 38\. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type |
+
+#### 2. Sample-level CNA summary (TSV)
+
+Sample-level scores derived from the allele-specific copy number
+segments are provided in a separate, single-row TSV file (the
+per-segment and per-transcript files above hold one record per
+segment/transcript, and thus have no place for sample-level values):
+
+- `<sample_id>.pcgr.<genome_assembly>.cna_summary.tsv`
+
+| Variable | Description |
+|----|----|
+| 1\. `SAMPLE_ID` | Sample identifier |
+| 2\. `FRACTION_GENOME_ALTERED` | Fraction of the segmented autosomal genome (chromosomes 1-22) with a total copy number (`nMajor` + `nMinor`) different from 2. This adapts the [cBioPortal](https://www.cbioportal.org) fraction-genome-altered metric (genome fraction with an absolute segment mean log2 ratio of at least 0.2) to integer copy numbers: a diploid baseline is used rather than the tumor ploidy, so the value approaches 1 in near-tetraploid/genome-doubled tumors |
+| 3\. `WGD_FRACTION` | Fraction of the segmented autosomal genome with a major allele copy number (`nMajor`) of two or more |
+| 4\. `GENOME_DOUBLED` | Whole-genome doubling status (`TRUE`/`FALSE`): `TRUE` when `WGD_FRACTION` is at least 0.5, following [Bielski et al. 2018](https://pubmed.ncbi.nlm.nih.gov/30013179/) |
+| 5\. `HRD_LOH` | *(`--estimate_hrd` only)* Number of loss-of-heterozygosity regions longer than 15 Mb that do not span a whole chromosome |
+| 6\. `HRD_LST` | *(`--estimate_hrd` only)* Number of large-scale state transitions - chromosomal breakpoints between adjacent regions of at least 10 Mb |
+| 7\. `HRD_TAI` | *(`--estimate_hrd` only)* Number of telomeric allelic imbalances - regions with allelic imbalance extending to the telomere without crossing the centromere |
+| 8\. `HRD_SUM` | *(`--estimate_hrd` only)* Sum of `HRD_LOH`, `HRD_LST` and `HRD_TAI` (research use only - see [running PCGR](https://sigven.github.io/pcgr/articles/running.md)) |
+
+Missing values (e.g. the HRD columns when `--estimate_hrd` is not set)
+are denoted `.`.
 
 ### RNA fusions
 
@@ -566,6 +746,15 @@ Mitelman database evidence, and clinical actionability. The output file
 has the following naming convention:
 
 - `<sample_id>.pcgr.<genome_assembly>.fusion_ann.tsv.gz`
+
+Note that a second file,
+`<sample_id>.pcgr.<genome_assembly>.rna_fusion.tsv.gz`, is also written
+to the output directory. This is a pipeline intermediate (the input
+fusion calls matched against biomarker evidence, with `BIOMARKER_MATCH`
+in raw format, and OncoKB columns appended when enabled) that is read
+when generating the report. The `fusion_ann.tsv.gz` file described here
+is the final annotated result and should be used for downstream
+analysis.
 
 Columns suffixed with `_OKB` are only present when OncoKB annotation is
 enabled via `--oncokb_api_token`. Note that `HOTSPOT_OKB` and `VUS_OKB`
@@ -686,7 +875,7 @@ The Excel workbook has the following naming convention:
 
 - `<sample_id>.pcgr.<genome_assembly>.xlsx`
 
-It contains up to 16 sheets, each populated conditionally on the type of
+It contains up to 20 sheets, each populated conditionally on the type of
 input data provided and the analysis performed. Sheets with no data are
 omitted entirely. Any sheet exceeding 30,000 rows is truncated to the
 first 30,000 rows (a warning is emitted in that case; the full data is
@@ -700,15 +889,20 @@ manageable.
 |----|----|----|
 | `SETTINGS` | Always | Key parameters used for the analysis, including filtering thresholds |
 | `DATA_VERSIONS` | Always | Version information for all databases used in the annotation and analysis |
-| `SAMPLE_ASSAY` | Always | Sample and assay properties: tumor site, sex, purity, ploidy, assay type (WGS/WES/TARGETED), tumor-normal/tumor-only mode, and effective target size |
+| `SAMPLE_ASSAY` | Always | Subject, sample and assay properties (`CATEGORY` column: `SUBJECT`, `SAMPLE` or `ASSAY`): subject sex and age at tumor sampling, tumor site, purity, ploidy (each with its source - `provided`: value from `--tumor_purity`/`--tumor_ploidy`; `estimated`: ploidy estimated by PCGR from the copy number segments; purity is never estimated by PCGR), assay type (WGS/WES/TARGETED), tumor-normal/tumor-only mode, and effective target size |
 | `SOMATIC_SNV_INDEL` | `--input_vcf` provided | Somatic SNV/InDel annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH` and `VEP_ALL_CSQ`. **Filtered** to exonic variants (`EXONIC_STATUS == "exonic"`) plus any non-exonic variant with an actionability tier ≤ 3. User-retained VCF INFO tags (`--retained_info_tags`) are appended as additional columns. `HGVSP` is renamed to `HGVSp_short` to avoid column name conflicts |
-| `SOMATIC_SNV_INDEL_BIOMARKER` | `--input_vcf` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic SNV/InDel. A `TIER` column encodes evidence category and actionability tier (e.g. `T1`/`T2`/`T3` = therapeutic sensitivity, `R1`/`R2`/`R3` = therapeutic resistance, `PP1`–`PP2` = poor prognosis, `PB1`–`PB2` = better prognosis, `D1`–`D2` = diagnostic positive). Diagnostic-negative evidence is excluded |
+| `SOMATIC_SNV_INDEL_BIOMARKER` | `--input_vcf` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic SNV/InDel. A `TIER` column encodes evidence category and rank (e.g. `T1`/`T2`/`T3` = therapeutic sensitivity, `R1`/`R2`/`R3` = therapeutic resistance, `PP1`–`PP2` = poor prognosis, `PB1`–`PB2` = better prognosis, `D1`–`D2` = diagnostic positive). Only the therapeutic categories (`T`, `R`) are AMP/ASCO/CAP actionability tiers; for prognostic and diagnostic evidence (`PP`, `PB`, `D`) the number is an internal evidence-strength rank (lower = stronger evidence), not a tier. Diagnostic-negative evidence is excluded |
 | `SOMATIC_CNA` | `--input_cna` provided | CNA gene-level annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to genes with a non-missing `ACTIONABILITY_TIER` |
+| `CNA_SUMMARY` | `--input_cna` provided | Sample-level scores derived from the copy number segments - fraction of genome altered and (with `--estimate_hrd`) the HRD score components (same content as the `.cna_summary.tsv` file) |
+| `MSI_BIOMARKER` | tumor classified as MSI-High | Biomarker evidence items (CIViC; OncoKB if enabled) for MSI-High, with AMP/ASCO/CAP tier |
+| `TMB_BIOMARKER` | tumor classified as TMB-High | Biomarker evidence items (CIViC; OncoKB if enabled) for TMB-High, with AMP/ASCO/CAP tier |
 | `SOMATIC_CNA_BIOMARKER` | `--input_cna` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic CNA, using the same `TIER` encoding and sorting as `SOMATIC_SNV_INDEL_BIOMARKER` |
 | `RNA_FUSION` | `--input_rna_fusion` provided | RNA fusion annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to fusions with a non-missing `ACTIONABILITY_TIER` |
 | `RNA_FUSION_BIOMARKER` | `--input_rna_fusion` provided and biomarker hits exist | One row per biomarker evidence item matched to an RNA fusion, using the same `TIER` encoding and sorting as `SOMATIC_SNV_INDEL_BIOMARKER` |
 | `TMB` | `--input_vcf` provided | Tumor mutational burden estimates (same content as the `.tmb.tsv` file) |
-| `MSI` | `--input_vcf` provided and MSI estimation enabled | MSI classifier statistics and predicted stability status |
+| `MSI` | `--input_msi` provided | MSI result from an external MSI caller (same content as the `.msi.tsv` file) |
+| `MSI_INTERNAL` | `--input_vcf` provided and MSI estimation enabled | MSI classifier statistics and predicted stability status |
+| `HRD` | `--input_hrd` provided | HRD result from an external HRD assay/tool (same content as the `.hrd.tsv` file) |
 | `MUTATIONAL_SIGNATURE` | `--input_vcf` provided and signature estimation enabled | Mutational signature contributions (same content as the `.msigs.tsv.gz` file) |
 | `KATAEGIS_EVENTS` | `--input_vcf` provided and kataegis events detected | Kataegis loci identified from the somatic mutation profile |
 | `RNA_EXPRESSION_OUTLIERS` | `--input_rna_expression` provided and outlier detection enabled | Expression outlier genes/transcripts compared to reference cohorts. A subset of display-only columns (`GENENAME`, `CANCERGENE_EVIDENCE`, `TARGETED_INHIBITORS_ALL`, `ENSEMBL_GENE_ID`) are removed to reduce width |

@@ -34,7 +34,7 @@ extract_complete_annotation(
 
 - vartype:
 
-  variant type (e.g., "snv_indel", "fusion", "cna")
+  variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb")
 
 - oncotree_code:
 

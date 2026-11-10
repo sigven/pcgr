@@ -32,7 +32,7 @@ extract_therapeutic_evidence(
 
 - vartype:
 
-  Variant type (e.g., "snv_indel", "fusion", "cna")
+  Variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb")
 
 - oncotree_code:
 

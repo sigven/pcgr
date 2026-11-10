@@ -32,8 +32,8 @@ extract_prognostic_evidence(
 
 - vartype:
 
-  Variant type (e.g., "snv_indel", "fusion", "cna") (e.g., HGVSp short
-  format for SNVs/InDels)
+  Variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb") (e.g.,
+  HGVSp short format for SNVs/InDels)
 
 - oncotree_code:
 

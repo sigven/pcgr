@@ -36,7 +36,7 @@ clean_oncokb_evidence(
 
 - vartype:
 
-  variant type (e.g., "snv_indel", "fusion", "cna")
+  variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb")
 
 - profile_name:
 

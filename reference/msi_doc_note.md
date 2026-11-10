@@ -1,6 +1,7 @@
-# Get documentation string for MSI status prediction
+# Get documentation string for MSI status (external caller, PCGR classifier)
 
-Get documentation string for MSI status prediction
+Get documentation string for MSI status (external caller, PCGR
+classifier)
 
 ## Usage
 

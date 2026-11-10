@@ -3,14 +3,14 @@
 ### Basic variant consequence annotation
 
 - [VEP](http://www.ensembl.org/info/docs/tools/vep/index.md) - Variant
-  Effect Predictor release 115 ([GENCODE
-  v49](https://www.gencodegenes.org/human/) as gene reference database
+  Effect Predictor release 116 ([GENCODE
+  v50](https://www.gencodegenes.org/human/) as gene reference database
   (v19 for grch37))
 
 ### *In silico* predictions of effect of coding variants
 
 - [dBNSFP](https://sites.google.com/site/jpopgen/dbNSFP) - database of
-  non-synonymous functional predictions (v5.3, October 2025)
+  non-synonymous functional predictions (v5.4, August 2026)
 
 ### Variant frequency databases
 
@@ -21,14 +21,14 @@
 - [Cancer Hotspots](http://cancerhotspots.org) - a resource for
   statistically significant mutations in cancer (v2/v3, 2017/2026)
 - [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered
-  across 33 tumor type cohorts (release 45.0, December 2025)
+  across 33 tumor type cohorts (release 46.0, August 2026)
 
 ### Variant databases of clinical utility
 
 - [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of
-  clinically related variants (June 2026)
+  clinically related variants (November 2026)
 - [CIViC](https://civicdb.org) - clinical interpretations of variants in
-  cancer (June 20th 2026)
+  cancer (November 5th 2026)
 - [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer
   Genome Interpreter Cancer Biomarkers Database (CGI) (October 18th
   2022)
@@ -36,18 +36,18 @@
 ### Protein domains/functional features
 
 - [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - resource
-  on protein sequence and functional information (2026_01)
-- [Pfam](https://www.ebi.ac.uk/interpro/entry/pfam/#table) - database of
-  protein families and domains (v37.0)
+  on protein sequence and functional information (2026_04)
+- [Pfam](http://pfam.xfam.org) - database of protein families and
+  domains (v38.2, 2026-01)
 
 ### Knowledge resources on gene and protein targets
 
-- [CancerMine](https://zenodo.org/records/16849846) - Literature-mined
-  database of tumor suppressor genes/proto-oncogenes (v51, August 2025)
+- [CancerMine](https://zenodo.org/records/23597453) - Literature-mined
+  database of tumor suppressor genes/proto-oncogenes (v52, October 2026)
 - [Open Targets Platform](https://www.targetvalidation.org/) - Database
   on disease-target associations, molecularly targeted drugs and
   tractability aggregated from multiple sources (literature, pathways,
-  mutations) (2026.03)
+  mutations) (2026.09)
 
 ### Notes on variant annotation datasets
 

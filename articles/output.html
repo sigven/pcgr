@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,8 +87,8 @@
 <h2 id="pcgr-output-files">Output files<a class="anchor" aria-label="anchor" href="#pcgr-output-files"></a>
 </h2>
 <p>PCGR generates multiple output files with annotations of molecular
-aberrations, including an interactive report, an Excel workbook, and
-pure text-based annotation files (TSV).</p>
+aberrations, including an interactive HTML report, a PDF report, an
+Excel workbook, and pure text-based annotation files (TSV).</p>
 <div class="section level3">
 <h3 id="html-report---quarto-based">HTML report - quarto-based<a class="anchor" aria-label="anchor" href="#html-report---quarto-based"></a>
 </h3>
@@ -110,11 +110,22 @@ provided by the user. The following sections may be included in the
 report:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Settings</strong>
+<strong>Key findings and settings</strong>
 <ul>
-<li>Lists key configurations for the analysis, including the genome
-assembly, type of sequencing assay (WES/WGS/TARGETED), the cancer type
-(as provided by the user), and the tumor purity and ploidy.</li>
+<li>The top of the report shows sample details (cancer type, assay,
+subject sex and age, tumor purity and ploidy) and the input data
+provided</li>
+<li>
+<em>Key findings</em>: a templated summary of the main findings -
+therapeutically actionable alterations (Tier 1 and 2), diagnostic
+evidence and composite genomic biomarkers (TMB-high, MSI-high,
+HR-deficient) first, followed by supporting findings. The rules for
+content and ordering are described in the documentation section of the
+report</li>
+<li>Run configuration and report settings (collapsible) - key
+configurations for the analysis, including the genome assembly, type of
+sequencing assay (WES/WGS/TARGETED), and the cancer type (as provided by
+the user)</li>
 </ul>
 </li>
 <li>
@@ -175,10 +186,34 @@ provided as input)</li>
 <ul>
 <li>Indicates predicted microsatellite stability from the somatic
 mutation profile and supporting evidence (details of the underlying MSI
-statistical classifier can be found <a href="http://rpubs.com/sigven/msi_classification_v3" class="external-link">here</a>)</li>
+statistical classifier can be found <a href="https://sigven-pcgr-msi-classifier.share.connect.posit.cloud/" class="external-link">here</a>)</li>
 <li>The MSI classifier was trained on TCGA exome samples.</li>
+<li>If an MSI result from an external MSI caller is provided
+(<code>--input_msi</code>), this is regarded as the primary result. In
+the HTML report, the external result and the classifier prediction (if
+available) are shown in separate tabs (<em>External caller</em> and
+<em>PCGR classifier</em>), with a note on concordance in the first tab.
+In the PDF report, only the external result is shown in detail, with a
+note on concordance with the classifier prediction</li>
 </ul>
 <ol start="5" style="list-style-type: decimal">
+<li><strong>HRD status</strong></li>
+</ol>
+<ul>
+<li>Result of an external HRD assay/tool (<code>--input_hrd</code>): HRD
+status (<em>HR-deficient</em>, <em>HR-proficient</em> or
+<em>Indeterminate</em>), score and kind of score (as stated in the input
+file), and how the status was obtained (reported by the assay/tool, or
+derived by PCGR with <code>--input_hrd_threshold</code>)</li>
+<li>Genomic scar (HRD) score estimated by PCGR from the allele-specific
+copy number segments (<code>--estimate_hrd</code>; HRD-LOH, LST, TAI and
+their sum - research use only)</li>
+<li>If both are available, they are shown in separate tabs (<em>External
+assay/tool</em> and <em>PCGR genomic scar score</em>) in the HTML
+report; in the PDF report, HRD is part of the <em>Composite genomic
+biomarkers</em> section</li>
+</ul>
+<ol start="6" style="list-style-type: decimal">
 <li>
 <strong>Tumor mutational burden (TMB)</strong>
 <ul>
@@ -198,14 +233,14 @@ as the underlying framework)</li>
 <li>Datatable with signatures found and proposed underlying
 etiologies</li>
 </ul>
-<ol start="7" style="list-style-type: decimal">
+<ol start="8" style="list-style-type: decimal">
 <li><strong>Kataegis events</strong></li>
 </ol>
 <ul>
 <li>Kataegis events are clusters of particular SNV types. The report
 includes a datatable with all detected kataegis events.</li>
 </ul>
-<ol start="8" style="list-style-type: decimal">
+<ol start="9" style="list-style-type: decimal">
 <li><strong>RNA fusions</strong></li>
 </ol>
 <ul>
@@ -215,7 +250,7 @@ cancer</li>
 <li>Clinical actionability evidence linked to fusion events is shown
 where available (AMP/ASCO/CAP guidelines)</li>
 </ul>
-<ol start="9" style="list-style-type: decimal">
+<ol start="10" style="list-style-type: decimal">
 <li><strong>RNA expression analysis</strong></li>
 </ol>
 <ul>
@@ -226,7 +261,17 @@ and samples in other reference cohorts (TCGA, Treehouse Childhood Cancer
 Initiative, DepMap)</li>
 <li>Immune contexture profiling</li>
 </ul>
-<ol start="10" style="list-style-type: decimal">
+<ol start="11" style="list-style-type: decimal">
+<li><strong>Germline findings</strong></li>
+</ol>
+<ul>
+<li>Shown if germline variants classified by <a href="https://github.com/sigven/cpsr" class="external-link">CPSR</a> are provided as input
+(<code>--input_cpsr</code>, <code>--input_cpsr_yaml</code>)</li>
+<li>Pathogenic and likely pathogenic variants in the virtual panel of
+cancer predisposition genes screened, and optionally a focused subset of
+variants of uncertain significance (VUS)</li>
+</ul>
+<ol start="12" style="list-style-type: decimal">
 <li><strong>Documentation</strong></li>
 </ol>
 <ul>
@@ -243,8 +288,89 @@ elements)</li>
 <div class="section level4">
 <h4 id="example-reports">Example reports<a class="anchor" aria-label="anchor" href="#example-reports"></a>
 </h4>
-<p><a href="https://doi.org/10.5281/zenodo.20795653" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.20795653.svg" alt="DOI"></a></p>
+<p><a href="https://doi.org/10.5281/zenodo.4022111" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4022111.svg" alt="DOI"></a></p>
 </div>
+</div>
+<div class="section level3">
+<h3 id="pdf-report">PDF report<a class="anchor" aria-label="anchor" href="#pdf-report"></a>
+</h3>
+<p>A focused PDF report (generated with <a href="https://quarto.org/" class="external-link">quarto</a> and Typst) is provided by default
+in addition to the HTML report, and can be turned off with
+<code>--no_pdf</code>. It has the following naming convention:</p>
+<ul>
+<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.pdf</code></li>
+</ul>
+<p>Sections are included depending on the input provided by the
+user:</p>
+<ol style="list-style-type: decimal">
+<li>
+<p><strong>Cover page</strong></p>
+<ul>
+<li>Sample details and the <em>Key findings</em> summary, shared with
+the HTML report</li>
+</ul>
+</li>
+<li>
+<p><strong>Clinical actionability</strong></p>
+<ul>
+<li>Tier 1 and 2 aberrations (SNVs/InDels, CNAs and RNA fusions), with
+the underlying biomarker evidence</li>
+</ul>
+</li>
+<li><p><strong>Diagnostic and prognostic biomarkers</strong></p></li>
+<li>
+<p><strong>Somatic SNVs/InDels</strong></p>
+<ul>
+<li>Variant statistics, oncogenic and likely oncogenic variants, and
+variant filtering</li>
+</ul>
+</li>
+<li>
+<p><strong>Somatic copy number aberrations</strong></p>
+<ul>
+<li>Amplified proto-oncogenes and deleted tumor suppressors, and the
+copy number profile</li>
+</ul>
+</li>
+<li>
+<p><strong>Composite genomic biomarkers</strong></p>
+<ul>
+<li>TMB, MSI and HRD status</li>
+</ul>
+</li>
+<li>
+<p><strong>Mutational features</strong></p>
+<ul>
+<li>Mutational signatures and kataegis events</li>
+</ul>
+</li>
+<li>
+<p><strong>Transcriptome findings</strong></p>
+<ul>
+<li>RNA fusions and gene expression</li>
+</ul>
+</li>
+<li>
+<p><strong>Germline findings</strong></p>
+<ul>
+<li>Pathogenic and likely pathogenic variants classified by CPSR (if
+provided as input)</li>
+</ul>
+</li>
+<li>
+<p><strong>Analysis configuration &amp; data sources</strong></p>
+<ul>
+<li>Settings and versions of the data sources</li>
+</ul>
+</li>
+<li>
+<p><strong>Appendix</strong></p>
+<ul>
+<li>Documentation of report contents, references, and a medical
+disclaimer</li>
+</ul>
+</li>
+</ol>
 </div>
 <div class="section level3">
 <h3 id="snvsindels">SNVs/InDels<a class="anchor" aria-label="anchor" href="#snvsindels"></a>
@@ -927,116 +1053,115 @@ IntoGen Catalog of Driver Mutations</td>
 <td><code>EFFECT_PREDICTIONS</code></td>
 <td>In silico predictions of variant effect on protein function and
 pre-mRNA splicing from <a href="https://www.dbnsfp.org/" class="external-link">database of
-non-synonymous functional predictions - dbNSFP v5.0</a>. Predicted
-effects are provided by different sources/algorithms (separated by
+non-synonymous functional predictions - dbNSFP</a>. Predicted effects
+are provided by different sources/algorithms (separated by
 <code>&amp;</code>), <code>T</code> = Tolerated, <code>N</code> =
 Neutral, <code>D</code> = Damaging</td>
 </tr>
 <tr class="odd">
 <td><code>SPLICE_EFFECT</code></td>
-<td>Effect of splicing, from MutSpliceDB and/or MaxEntScan. Format:
-<entrezgene></entrezgene>
-</td>
+<td>Effect of splicing, from MutSpliceDB and/or MaxEntScan, combined
+into a single comma-separated string. MutSpliceDB component format:
+<code>&lt;ENTREZGENE&gt;|&lt;SYMBOL&gt;|&lt;REFSEQ_TRANSCRIPT_ID&gt;|&lt;HGVSc&gt;|&lt;EFFECT&gt;|&lt;AFFECTED_EXONS&gt;|&lt;SOURCE&gt;</code>.
+MaxEntScan component format:
+<code>MaxEntScan|&lt;stratum&gt;|&lt;evidence_tier&gt;</code> (see
+<code>MAXENTSCAN</code> below for details)</td>
 </tr>
 <tr class="even">
-<td>MES</td>
-<td><score_diff></score_diff></td>
-</tr>
-<tr class="odd">
 <td><code>DBNSFP_BAYESDEL_ADDAF</code></td>
 <td>predicted effect from BayesDel (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_LIST_S2</code></td>
 <td>predicted effect from LIST-S2 (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_SIFT</code></td>
 <td>predicted effect from SIFT (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_POLYPHEN2_HVAR</code></td>
 <td>predicted effect from PolyPhen2 (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_PROVEAN</code></td>
 <td>predicted effect from PROVEAN (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_MUTATIONTASTER</code></td>
 <td>predicted effect from MUTATIONTASTER (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_MUTATIONASSESSOR</code></td>
 <td>predicted effect from MUTATIONASSESSOR (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_M_CAP</code></td>
 <td>predicted effect from M-CAP (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_MUTPRED</code></td>
 <td>score from MUTPRED (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_CLINPRED</code></td>
 <td>predicted effect from ClinPred (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_FATHMM</code></td>
 <td>predicted effect from FATHMM-XF (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_PRIMATEAI</code></td>
 <td>predicted effect from PRIMATEAI (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_DEOGEN2</code></td>
 <td>predicted effect from DEOGEN2 (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_PHACTBOOST</code></td>
 <td>predicted effect from PHACTboost (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_ALPHA_MISSENSE</code></td>
 <td>predicted effect from AlphaMissense (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_MUTFORMER</code></td>
 <td>predicted effect from MutFormer (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_ESM1B</code></td>
 <td>predicted effect from ESM1b (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_GERP</code></td>
 <td>evolutionary constraint measure from GERP (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_CADD</code></td>
 <td>Combined Annotation Dependent Depletion (CADD) score (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_VEST4</code></td>
 <td>VEST4 score (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_FATHMM_XF</code></td>
 <td>predicted effect from FATHMM-XF (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_META_RNN</code></td>
 <td>predicted effect from ensemble prediction (deep learning -
 dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_SPLICE_SITE_RF</code></td>
 <td>predicted effect of splice site disruption, using random forest
 (dbscSNV)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_SPLICE_SITE_ADA</code></td>
 <td>predicted effect of splice site disruption, using boosting
 (dbscSNV)</td>
@@ -1399,9 +1524,19 @@ details above)</td>
 <tr class="odd">
 <td>17. <code>MAXENTSCAN</code>
 </td>
-<td>MaxEntScan splice site impact summary. Format:
-<code>MaxEntScan|&lt;stratum&gt;|&lt;evidence_tier&gt;</code>
-</td>
+<td>MaxEntScan splice site impact summary for canonical (±1/±2 bp) and
+non-canonical (donor +3 to +6, acceptor -3 to -20) splice positions.
+Format: <code>MaxEntScan|&lt;stratum&gt;|&lt;evidence_tier&gt;</code>.
+<code>&lt;stratum&gt;</code> identifies the splice-site position
+category (e.g. <code>Donor_+5</code>, <code>Acceptor_PPT_Close</code>,
+<code>Canonical_Site</code>). <code>&lt;evidence_tier&gt;</code>
+reflects predicted impact strength, from strongest to weakest:
+<code>Strong</code> &gt; <code>Moderate</code> &gt;
+<code>Supporting</code> &gt; <code>No_Call</code> &gt;
+<code>Uninformative</code> (<code>.</code> for canonical sites, which
+are always high-confidence). Only variants with a <code>Strong</code>
+tier at non-canonical positions are additionally flagged as
+loss-of-function</td>
 </tr>
 <tr class="even">
 <td>18. <code>EFFECT_PREDICTIONS</code>
@@ -1833,6 +1968,180 @@ calculation</td>
 </table>
 </div>
 <div class="section level3">
+<h3 id="msi-result-from-external-caller-tsv">MSI result from external caller (TSV)<a class="anchor" aria-label="anchor" href="#msi-result-from-external-caller-tsv"></a>
+</h3>
+<p>If an MSI result from an external MSI caller is provided
+(<code>--input_msi</code>), a normalised copy of the result is written
+to a tab-separated values (TSV) file, with the following naming
+convention:</p>
+<ul>
+<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.msi.tsv</code></li>
+</ul>
+<p>The file has one data row, and the following columns (missing values
+are denoted <code>.</code>):</p>
+<table class="table">
+<colgroup>
+<col width="43%">
+<col width="56%">
+</colgroup>
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>1. <code>SAMPLE_ID</code>
+</td>
+<td>Sample identifier</td>
+</tr>
+<tr class="even">
+<td>2. <code>MSI_STATUS</code>
+</td>
+<td>MSI status: <code>MSI-H</code>, <code>MSS</code> or
+<code>Indeterminate</code>
+</td>
+</tr>
+<tr class="odd">
+<td>3. <code>MSI_STATUS_BASIS</code>
+</td>
+<td>How the MSI status was obtained: <code>caller</code> (reported by
+the MSI caller) or <code>derived</code> (derived by PCGR from the
+score)</td>
+</tr>
+<tr class="even">
+<td>4. <code>MSI_CALLER</code>
+</td>
+<td>Name of the MSI caller</td>
+</tr>
+<tr class="odd">
+<td>5. <code>CALLER_VERSION</code>
+</td>
+<td>Version of the MSI caller</td>
+</tr>
+<tr class="even">
+<td>6. <code>MSI_SCORE</code>
+</td>
+<td>Score, as reported by the MSI caller</td>
+</tr>
+<tr class="odd">
+<td>7. <code>MSI_SCORE_TYPE</code>
+</td>
+<td>Description of the score</td>
+</tr>
+<tr class="even">
+<td>8. <code>MSI_SCORE_THRESHOLD_USED</code>
+</td>
+<td>Threshold on the score applied for MSI-H (by the caller, or by PCGR
+if the status was derived: default or set with
+<code>--input_msi_threshold</code>)</td>
+</tr>
+<tr class="odd">
+<td>9. <code>N_LOCI_EVALUATED</code>
+</td>
+<td>Number of microsatellite loci evaluated</td>
+</tr>
+<tr class="even">
+<td>10. <code>N_LOCI_UNSTABLE</code>
+</td>
+<td>Number of unstable microsatellite loci</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="hrd-result-from-external-assaytool-tsv">HRD result from external assay/tool (TSV)<a class="anchor" aria-label="anchor" href="#hrd-result-from-external-assaytool-tsv"></a>
+</h3>
+<p>If an HRD result from an external assay/tool is provided
+(<code>--input_hrd</code>), a normalised copy of the result is written
+to a tab-separated values (TSV) file, with the following naming
+convention:</p>
+<ul>
+<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.hrd.tsv</code></li>
+</ul>
+<p>The file has one data row, and the following columns (missing values
+are denoted <code>.</code>):</p>
+<table class="table">
+<colgroup>
+<col width="43%">
+<col width="56%">
+</colgroup>
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>1. <code>SAMPLE_ID</code>
+</td>
+<td>Sample identifier</td>
+</tr>
+<tr class="even">
+<td>2. <code>HRD_STATUS</code>
+</td>
+<td>HRD status: <code>HR-deficient</code>, <code>HR-proficient</code> or
+<code>Indeterminate</code>
+</td>
+</tr>
+<tr class="odd">
+<td>3. <code>HRD_STATUS_BASIS</code>
+</td>
+<td>How the HRD status was obtained: <code>caller</code> (given in the
+input file) or <code>derived</code> (derived by PCGR from the score with
+<code>--input_hrd_threshold</code>)</td>
+</tr>
+<tr class="even">
+<td>4. <code>HRD_CALLER</code>
+</td>
+<td>Name of the HRD assay/tool</td>
+</tr>
+<tr class="odd">
+<td>5. <code>CALLER_VERSION</code>
+</td>
+<td>Version of the HRD assay/tool</td>
+</tr>
+<tr class="even">
+<td>6. <code>HRD_SCORE_TYPE</code>
+</td>
+<td>Kind of score: <code>genomic_scar</code>,
+<code>mutational_signature</code>, <code>composite</code> or
+<code>other</code>
+</td>
+</tr>
+<tr class="odd">
+<td>7. <code>HRD_SCORE_DESCRIPTION</code>
+</td>
+<td>Description of the score</td>
+</tr>
+<tr class="even">
+<td>8. <code>HRD_SCORE</code>
+</td>
+<td>Score, as reported by the assay/tool</td>
+</tr>
+<tr class="odd">
+<td>9. <code>HRD_SCORE_THRESHOLD_USED</code>
+</td>
+<td>Threshold on the score for HR-deficient (by the assay/tool, or by
+PCGR if the status was derived)</td>
+</tr>
+<tr class="even">
+<td>10. <code>HRD_LOH</code>
+</td>
+<td>Genomic scar component: HRD-LOH</td>
+</tr>
+<tr class="odd">
+<td>11. <code>HRD_LST</code>
+</td>
+<td>Genomic scar component: LST</td>
+</tr>
+<tr class="even">
+<td>12. <code>HRD_TAI</code>
+</td>
+<td>Genomic scar component: TAI</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
 <h3 id="mutational-signature-contributions-tsv">Mutational signature contributions (TSV)<a class="anchor" aria-label="anchor" href="#mutational-signature-contributions-tsv"></a>
 </h3>
 <p>We provide a tab-separated values (TSV) file with information about
@@ -1956,6 +2265,15 @@ files).</li>
 </ul>
 </li>
 </ul>
+<p>Note that a second file,
+<code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.cna_gene.tsv.gz</code>,
+is also written to the output directory. This is a pipeline intermediate
+(copy number segments mapped to overlapping transcripts and genes, with
+<code>BIOMARKER_MATCH</code> in raw format, and two-hit candidate flags
+and OncoKB columns appended when available) that is read when generating
+the report. The <code>cna_gene_ann.tsv.gz</code> file described here is
+the final annotated result and should be used for downstream
+analysis.</p>
 <p>The format of the compressed <code>cna_gene_ann.tsv.gz</code> is the
 following. Columns suffixed with <code>_OKB</code> are only present when
 OncoKB annotation is enabled via <code>--oncokb_api_token</code>. Note
@@ -1999,12 +2317,21 @@ for CNA output.</p>
 <td>Minor copy number</td>
 </tr>
 <tr class="even">
-<td>6. <code>LOH</code>
+<td>6. <code>CN_MAJOR_MINOR_IMPUTED</code>
 </td>
-<td>Loss of heterozygosity flag</td>
+<td>
+<code>TRUE</code> if the major/minor split of the segment is imputed
+(total copy number observed), from the optional input column
+<code>nMajor_nMinor_Imputed</code>. <code>FALSE</code> otherwise</td>
 </tr>
 <tr class="odd">
-<td>7. <code>TWOHIT_CANDIDATE_SOMATIC</code>
+<td>7. <code>LOH</code>
+</td>
+<td>Loss of heterozygosity flag (not called for segments with an imputed
+major/minor split)</td>
+</tr>
+<tr class="even">
+<td>8. <code>TWOHIT_CANDIDATE_SOMATIC</code>
 </td>
 <td>Comma-separated somatic loss-of-function variants overlapping the
 segment (TSG with allele-specific LOH: deletion or copy-neutral). Each
@@ -2021,51 +2348,55 @@ in the tumor; <code>DP_TUMOR</code> is the read depth; and
 <code>ONCOGENICITY</code> is the OncoKB classification (or
 <code>.</code> if OncoKB is not enabled).</td>
 </tr>
-<tr class="even">
-<td>8. <code>TWOHIT_CANDIDATE_GERMLINE</code>
+<tr class="odd">
+<td>9. <code>TWOHIT_CANDIDATE_GERMLINE</code>
 </td>
 <td>Comma-separated germline pathogenic/likely-pathogenic
 loss-of-function variants matching by gene symbol (TSG with
 allele-specific LOH: deletion or copy-neutral; requires CPSR input).
 Each entry has the format <code>VAR_ID;CONSEQUENCE</code>.</td>
 </tr>
-<tr class="odd">
-<td>9. <code>FOLD_CHANGE</code>
+<tr class="even">
+<td>10. <code>FOLD_CHANGE</code>
 </td>
 <td>Fold change of segment copy number relative to tumor ploidy</td>
 </tr>
-<tr class="even">
-<td>10. <code>TUMOR_PLOIDY</code>
+<tr class="odd">
+<td>11. <code>TUMOR_PLOIDY</code>
 </td>
 <td>Tumor ploidy estimate</td>
 </tr>
-<tr class="odd">
-<td>11. <code>TUMOR_PLOIDY_SOURCE</code>
-</td>
-<td>Source of tumor ploidy estimate</td>
-</tr>
 <tr class="even">
-<td>12. <code>TUMOR_PURITY</code>
+<td>12. <code>TUMOR_PLOIDY_SOURCE</code>
+</td>
+<td>Source of tumor ploidy estimate: <code>provided</code>
+(<code>--tumor_ploidy</code>, e.g. estimated with ASCAT or other tools)
+or <code>estimated</code> (genome-wide weighted median of the segment
+copy numbers, estimated by PCGR when <code>--tumor_ploidy</code> is not
+provided)</td>
+</tr>
+<tr class="odd">
+<td>13. <code>TUMOR_PURITY</code>
 </td>
 <td>Tumor purity estimate</td>
 </tr>
-<tr class="odd">
-<td>13. <code>SEGMENT_LENGTH_MB</code>
+<tr class="even">
+<td>14. <code>SEGMENT_LENGTH_MB</code>
 </td>
 <td>Length of segment in Mb</td>
 </tr>
-<tr class="even">
-<td>14. <code>CYTOBAND</code>
+<tr class="odd">
+<td>15. <code>CYTOBAND</code>
 </td>
 <td>Associated cytoband</td>
 </tr>
-<tr class="odd">
-<td>15. <code>EVENT_TYPE</code>
+<tr class="even">
+<td>16. <code>EVENT_TYPE</code>
 </td>
 <td>Focal or broad (covering more than 25% of chromosome arm)</td>
 </tr>
-<tr class="even">
-<td>16. <code>VARIANT_CLASS</code>
+<tr class="odd">
+<td>17. <code>VARIANT_CLASS</code>
 </td>
 <td>
 <em>amplification</em>: total copy number &gt;= user-defined
@@ -2074,122 +2405,210 @@ threshold; <em>homdel</em>: total copy number equal to zero;
 number gain below amplification threshold; <em>undefined</em>: other
 copy number states</td>
 </tr>
-<tr class="odd">
-<td>17. <code>VARIANT_CLASS_DISPLAY</code>
+<tr class="even">
+<td>18. <code>VARIANT_CLASS_DISPLAY</code>
 </td>
 <td>Display label for variant class</td>
 </tr>
-<tr class="even">
-<td>18. <code>SYMBOL</code>
+<tr class="odd">
+<td>19. <code>SYMBOL</code>
 </td>
 <td>Gene symbol</td>
 </tr>
-<tr class="odd">
-<td>19. <code>ENTREZGENE</code>
+<tr class="even">
+<td>20. <code>ENTREZGENE</code>
 </td>
 <td>Entrez gene identifier</td>
 </tr>
-<tr class="even">
-<td>20. <code>GENENAME</code>
+<tr class="odd">
+<td>21. <code>GENENAME</code>
 </td>
 <td>Gene name</td>
 </tr>
-<tr class="odd">
-<td>21. <code>ENSEMBL_GENE_ID</code>
+<tr class="even">
+<td>22. <code>ENSEMBL_GENE_ID</code>
 </td>
 <td>Ensembl gene identifier</td>
 </tr>
-<tr class="even">
-<td>22. <code>TUMOR_SUPPRESSOR</code>
+<tr class="odd">
+<td>23. <code>TUMOR_SUPPRESSOR</code>
 </td>
 <td>Flag indicating if gene is tumor suppressor (CancerMine/NCG)</td>
 </tr>
-<tr class="odd">
-<td>23. <code>TUMOR_SUPPRESSOR_SUPPORT</code>
+<tr class="even">
+<td>24. <code>TUMOR_SUPPRESSOR_SUPPORT</code>
 </td>
 <td>Tumor suppressor annotation support (CancerMine/NCG)</td>
 </tr>
-<tr class="even">
-<td>24. <code>ONCOGENE</code>
+<tr class="odd">
+<td>25. <code>ONCOGENE</code>
 </td>
 <td>Flag indicating if gene is oncogene (CancerMine/NCG)</td>
 </tr>
-<tr class="odd">
-<td>25. <code>ONCOGENE_SUPPORT</code>
+<tr class="even">
+<td>26. <code>ONCOGENE_SUPPORT</code>
 </td>
 <td>Oncogene annotation support (CancerMine/NCG)</td>
 </tr>
-<tr class="even">
-<td>26. <code>MUTATION_EFFECT_OKB</code>
+<tr class="odd">
+<td>27. <code>MUTATION_EFFECT_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB mutation effect annotation
 (e.g. Loss-of-function, Gain-of-function)</td>
 </tr>
-<tr class="odd">
-<td>27. <code>MUTATION_EFFECT_CITATIONS_OKB</code>
+<tr class="even">
+<td>28. <code>MUTATION_EFFECT_CITATIONS_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB mutation effect citations</td>
 </tr>
-<tr class="even">
-<td>28. <code>MUTATION_EFFECT_DESCRIPTION_OKB</code>
+<tr class="odd">
+<td>29. <code>MUTATION_EFFECT_DESCRIPTION_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB mutation effect description</td>
 </tr>
-<tr class="odd">
-<td>29. <code>ONCOGENICITY_OKB</code>
+<tr class="even">
+<td>30. <code>ONCOGENICITY_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB oncogenicity annotation
 (e.g. Oncogenic, Likely Oncogenic)</td>
 </tr>
-<tr class="even">
-<td>30. <code>TUMOR_TYPE_SUMMARY_OKB</code>
+<tr class="odd">
+<td>31. <code>TUMOR_TYPE_SUMMARY_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB tumor type summary</td>
 </tr>
-<tr class="odd">
-<td>31. <code>VARIANT_SUMMARY_OKB</code>
+<tr class="even">
+<td>32. <code>VARIANT_SUMMARY_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB variant summary</td>
 </tr>
-<tr class="even">
-<td>32. <code>TRANSCRIPT_OVERLAP</code>
+<tr class="odd">
+<td>33. <code>TRANSCRIPT_OVERLAP</code>
 </td>
 <td>Comma-separated list of associated transcripts, including percentage
 of transcript overlap</td>
 </tr>
-<tr class="odd">
-<td>33. <code>TRANSCRIPT_OVERLAP_PERCENT</code>
+<tr class="even">
+<td>34. <code>TRANSCRIPT_OVERLAP_PERCENT</code>
 </td>
 <td>Percentage overlap between copy number segment and transcript</td>
 </tr>
-<tr class="even">
-<td>34. <code>ACTIONABILITY_TIER</code>
+<tr class="odd">
+<td>35. <code>ACTIONABILITY_TIER</code>
 </td>
 <td>Variant actionability tier - AMP/ASCO/CAP</td>
 </tr>
-<tr class="odd">
-<td>35. <code>ACTIONABILITY</code>
+<tr class="even">
+<td>36. <code>ACTIONABILITY</code>
 </td>
 <td>Variant clinical actionability significance - AMP/ASCO/CAP</td>
 </tr>
-<tr class="even">
-<td>36. <code>BIOMARKER_MATCH</code>
+<tr class="odd">
+<td>37. <code>BIOMARKER_MATCH</code>
 </td>
 <td>Biomarker match</td>
 </tr>
-<tr class="odd">
-<td>37. <code>TARGETED_INHIBITORS_ALL2</code>
+<tr class="even">
+<td>38. <code>TARGETED_INHIBITORS_ALL2</code>
 </td>
 <td>Molecularly targeted inhibitors - indicated for any tumor type</td>
 </tr>
 </tbody>
 </table>
+</div>
+<div class="section level4">
+<h4 id="sample-level-cna-summary-tsv">2. Sample-level CNA summary (TSV)<a class="anchor" aria-label="anchor" href="#sample-level-cna-summary-tsv"></a>
+</h4>
+<p>Sample-level scores derived from the allele-specific copy number
+segments are provided in a separate, single-row TSV file (the
+per-segment and per-transcript files above hold one record per
+segment/transcript, and thus have no place for sample-level values):</p>
+<ul>
+<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.cna_summary.tsv</code></li>
+</ul>
+<table class="table">
+<colgroup>
+<col width="43%">
+<col width="56%">
+</colgroup>
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>1. <code>SAMPLE_ID</code>
+</td>
+<td>Sample identifier</td>
+</tr>
+<tr class="even">
+<td>2. <code>FRACTION_GENOME_ALTERED</code>
+</td>
+<td>Fraction of the segmented autosomal genome (chromosomes 1-22) with a
+total copy number (<code>nMajor</code> + <code>nMinor</code>) different
+from 2. This adapts the <a href="https://www.cbioportal.org" class="external-link">cBioPortal</a> fraction-genome-altered
+metric (genome fraction with an absolute segment mean log2 ratio of at
+least 0.2) to integer copy numbers: a diploid baseline is used rather
+than the tumor ploidy, so the value approaches 1 in
+near-tetraploid/genome-doubled tumors</td>
+</tr>
+<tr class="odd">
+<td>3. <code>WGD_FRACTION</code>
+</td>
+<td>Fraction of the segmented autosomal genome with a major allele copy
+number (<code>nMajor</code>) of two or more</td>
+</tr>
+<tr class="even">
+<td>4. <code>GENOME_DOUBLED</code>
+</td>
+<td>Whole-genome doubling status (<code>TRUE</code>/<code>FALSE</code>):
+<code>TRUE</code> when <code>WGD_FRACTION</code> is at least 0.5,
+following <a href="https://pubmed.ncbi.nlm.nih.gov/30013179/" class="external-link">Bielski et
+al. 2018</a>
+</td>
+</tr>
+<tr class="odd">
+<td>5. <code>HRD_LOH</code>
+</td>
+<td>
+<em>(<code>--estimate_hrd</code> only)</em> Number of
+loss-of-heterozygosity regions longer than 15 Mb that do not span a
+whole chromosome</td>
+</tr>
+<tr class="even">
+<td>6. <code>HRD_LST</code>
+</td>
+<td>
+<em>(<code>--estimate_hrd</code> only)</em> Number of large-scale
+state transitions - chromosomal breakpoints between adjacent regions of
+at least 10 Mb</td>
+</tr>
+<tr class="odd">
+<td>7. <code>HRD_TAI</code>
+</td>
+<td>
+<em>(<code>--estimate_hrd</code> only)</em> Number of telomeric
+allelic imbalances - regions with allelic imbalance extending to the
+telomere without crossing the centromere</td>
+</tr>
+<tr class="even">
+<td>8. <code>HRD_SUM</code>
+</td>
+<td>
+<em>(<code>--estimate_hrd</code> only)</em> Sum of
+<code>HRD_LOH</code>, <code>HRD_LST</code> and <code>HRD_TAI</code>
+(research use only - see <a href="running.html">running PCGR</a>)</td>
+</tr>
+</tbody>
+</table>
+<p>Missing values (e.g. the HRD columns when <code>--estimate_hrd</code>
+is not set) are denoted <code>.</code>.</p>
 </div>
 </div>
 <div class="section level3">
@@ -2204,6 +2623,14 @@ has the following naming convention:</p>
 <ul>
 <li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.fusion_ann.tsv.gz</code></li>
 </ul>
+<p>Note that a second file,
+<code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.rna_fusion.tsv.gz</code>,
+is also written to the output directory. This is a pipeline intermediate
+(the input fusion calls matched against biomarker evidence, with
+<code>BIOMARKER_MATCH</code> in raw format, and OncoKB columns appended
+when enabled) that is read when generating the report. The
+<code>fusion_ann.tsv.gz</code> file described here is the final
+annotated result and should be used for downstream analysis.</p>
 <p>Columns suffixed with <code>_OKB</code> are only present when OncoKB
 annotation is enabled via <code>--oncokb_api_token</code>. Note that
 <code>HOTSPOT_OKB</code> and <code>VUS_OKB</code> are not included for
@@ -2670,7 +3097,7 @@ subtype)</td>
 <ul>
 <li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.xlsx</code></li>
 </ul>
-<p>It contains up to 16 sheets, each populated conditionally on the type
+<p>It contains up to 20 sheets, each populated conditionally on the type
 of input data provided and the analysis performed. Sheets with no data
 are omitted entirely. Any sheet exceeding 30,000 rows is truncated to
 the first 30,000 rows (a warning is emitted in that case; the full data
@@ -2705,9 +3132,15 @@ analysis</td>
 <tr class="odd">
 <td><code>SAMPLE_ASSAY</code></td>
 <td>Always</td>
-<td>Sample and assay properties: tumor site, sex, purity, ploidy, assay
-type (WGS/WES/TARGETED), tumor-normal/tumor-only mode, and effective
-target size</td>
+<td>Subject, sample and assay properties (<code>CATEGORY</code> column:
+<code>SUBJECT</code>, <code>SAMPLE</code> or <code>ASSAY</code>):
+subject sex and age at tumor sampling, tumor site, purity, ploidy (each
+with its source - <code>provided</code>: value from
+<code>--tumor_purity</code>/<code>--tumor_ploidy</code>;
+<code>estimated</code>: ploidy estimated by PCGR from the copy number
+segments; purity is never estimated by PCGR), assay type
+(WGS/WES/TARGETED), tumor-normal/tumor-only mode, and effective target
+size</td>
 </tr>
 <tr class="even">
 <td><code>SOMATIC_SNV_INDEL</code></td>
@@ -2727,12 +3160,16 @@ column name conflicts</td>
 <td>
 <code>--input_vcf</code> provided and biomarker hits exist</td>
 <td>One row per biomarker evidence item matched to a somatic SNV/InDel.
-A <code>TIER</code> column encodes evidence category and actionability
-tier (e.g. <code>T1</code>/<code>T2</code>/<code>T3</code> = therapeutic
+A <code>TIER</code> column encodes evidence category and rank
+(e.g. <code>T1</code>/<code>T2</code>/<code>T3</code> = therapeutic
 sensitivity, <code>R1</code>/<code>R2</code>/<code>R3</code> =
 therapeutic resistance, <code>PP1</code>–<code>PP2</code> = poor
 prognosis, <code>PB1</code>–<code>PB2</code> = better prognosis,
-<code>D1</code>–<code>D2</code> = diagnostic positive).
+<code>D1</code>–<code>D2</code> = diagnostic positive). Only the
+therapeutic categories (<code>T</code>, <code>R</code>) are AMP/ASCO/CAP
+actionability tiers; for prognostic and diagnostic evidence
+(<code>PP</code>, <code>PB</code>, <code>D</code>) the number is an
+internal evidence-strength rank (lower = stronger evidence), not a tier.
 Diagnostic-negative evidence is excluded</td>
 </tr>
 <tr class="even">
@@ -2745,6 +3182,26 @@ with a non-missing <code>ACTIONABILITY_TIER</code>
 </td>
 </tr>
 <tr class="odd">
+<td><code>CNA_SUMMARY</code></td>
+<td>
+<code>--input_cna</code> provided</td>
+<td>Sample-level scores derived from the copy number segments - fraction
+of genome altered and (with <code>--estimate_hrd</code>) the HRD score
+components (same content as the <code>.cna_summary.tsv</code> file)</td>
+</tr>
+<tr class="even">
+<td><code>MSI_BIOMARKER</code></td>
+<td>tumor classified as MSI-High</td>
+<td>Biomarker evidence items (CIViC; OncoKB if enabled) for MSI-High,
+with AMP/ASCO/CAP tier</td>
+</tr>
+<tr class="odd">
+<td><code>TMB_BIOMARKER</code></td>
+<td>tumor classified as TMB-High</td>
+<td>Biomarker evidence items (CIViC; OncoKB if enabled) for TMB-High,
+with AMP/ASCO/CAP tier</td>
+</tr>
+<tr class="even">
 <td><code>SOMATIC_CNA_BIOMARKER</code></td>
 <td>
 <code>--input_cna</code> provided and biomarker hits exist</td>
@@ -2753,7 +3210,7 @@ the same <code>TIER</code> encoding and sorting as
 <code>SOMATIC_SNV_INDEL_BIOMARKER</code>
 </td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>RNA_FUSION</code></td>
 <td>
 <code>--input_rna_fusion</code> provided</td>
@@ -2762,7 +3219,7 @@ minus <code>BIOMARKER_MATCH</code>. <strong>Filtered</strong> to fusions
 with a non-missing <code>ACTIONABILITY_TIER</code>
 </td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>RNA_FUSION_BIOMARKER</code></td>
 <td>
 <code>--input_rna_fusion</code> provided and biomarker hits
@@ -2772,20 +3229,34 @@ the same <code>TIER</code> encoding and sorting as
 <code>SOMATIC_SNV_INDEL_BIOMARKER</code>
 </td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>TMB</code></td>
 <td>
 <code>--input_vcf</code> provided</td>
 <td>Tumor mutational burden estimates (same content as the
 <code>.tmb.tsv</code> file)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>MSI</code></td>
+<td>
+<code>--input_msi</code> provided</td>
+<td>MSI result from an external MSI caller (same content as the
+<code>.msi.tsv</code> file)</td>
+</tr>
+<tr class="odd">
+<td><code>MSI_INTERNAL</code></td>
 <td>
 <code>--input_vcf</code> provided and MSI estimation enabled</td>
 <td>MSI classifier statistics and predicted stability status</td>
 </tr>
 <tr class="even">
+<td><code>HRD</code></td>
+<td>
+<code>--input_hrd</code> provided</td>
+<td>HRD result from an external HRD assay/tool (same content as the
+<code>.hrd.tsv</code> file)</td>
+</tr>
+<tr class="odd">
 <td><code>MUTATIONAL_SIGNATURE</code></td>
 <td>
 <code>--input_vcf</code> provided and signature estimation
@@ -2793,13 +3264,13 @@ enabled</td>
 <td>Mutational signature contributions (same content as the
 <code>.msigs.tsv.gz</code> file)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>KATAEGIS_EVENTS</code></td>
 <td>
 <code>--input_vcf</code> provided and kataegis events detected</td>
 <td>Kataegis loci identified from the somatic mutation profile</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>RNA_EXPRESSION_OUTLIERS</code></td>
 <td>
 <code>--input_rna_expression</code> provided and outlier detection
@@ -2809,7 +3280,7 @@ A subset of display-only columns (<code>GENENAME</code>,
 <code>CANCERGENE_EVIDENCE</code>, <code>TARGETED_INHIBITORS_ALL</code>,
 <code>ENSEMBL_GENE_ID</code>) are removed to reduce width</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>RNA_IMMUNE_CONTEXTURE</code></td>
 <td>
 <code>--input_rna_expression</code> provided</td>

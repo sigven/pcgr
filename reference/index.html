@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,6 +63,20 @@
 
         </dt>
         <dd>Get documentation string for AMP/ASCO/CAP clinical actionability tiers</dd>
+
+        <dt>
+
+          <code><a href="actionability_tier_col_def.html">actionability_tier_col_def()</a></code>
+
+        </dt>
+        <dd>Column definition for the tier badge of the oncogenicity tables</dd>
+
+        <dt>
+
+          <code><a href="actionable_tier.html">actionable_tier()</a></code>
+
+        </dt>
+        <dd>Keep only the therapeutically actionable tiers (1 and 2) of an actionability tier vector</dd>
 
         <dt>
 
@@ -234,6 +248,13 @@
 
         <dt>
 
+          <code><a href="assign_variant_tiers_complex_biomarker.html">assign_variant_tiers_complex_biomarker()</a></code>
+
+        </dt>
+        <dd>AMP/ASCO/CAP tier classification for complex biomarkers (MSI-H, TMB-H)</dd>
+
+        <dt>
+
           <code><a href="assign_variant_tiers_fusion.html">assign_variant_tiers_fusion()</a></code>
 
         </dt>
@@ -269,6 +290,13 @@
 
         <dt>
 
+          <code><a href="biomarker_sources_not_tiered.html">biomarker_sources_not_tiered()</a></code>
+
+        </dt>
+        <dd>Biomarker sources not used for tier assignment</dd>
+
+        <dt>
+
           <code><a href="bm_categories.html">bm_categories</a></code>
 
         </dt>
@@ -287,6 +315,13 @@
 
         </dt>
         <dd>Find transcripts covering given splice junction breakpoints</dd>
+
+        <dt>
+
+          <code><a href="build_germline_col_defs.html">build_germline_col_defs()</a></code>
+
+        </dt>
+        <dd>Build column definitions for the germline findings table with category-aware styling</dd>
 
         <dt>
 
@@ -315,13 +350,6 @@
 
         </dt>
         <dd>Emit the shared "biomarker types and report scope" callout note</dd>
-
-        <dt>
-
-          <code><a href="cancer_phenotypes_regex.html">cancer_phenotypes_regex</a></code>
-
-        </dt>
-        <dd>Regular expression of terms indicative of cancer-related phenotypes and syndromes</dd>
 
         <dt>
 
@@ -444,6 +472,13 @@
 
         <dt>
 
+          <code><a href="expression_similarity_sources.html">expression_similarity_sources()</a></code>
+
+        </dt>
+        <dd>Reference sources of the expression similarity analysis, as display labels (run configuration / report settings)</dd>
+
+        <dt>
+
           <code><a href="extract_complete_annotation.html">extract_complete_annotation()</a></code>
 
         </dt>
@@ -469,6 +504,20 @@
 
         </dt>
         <dd>Extract therapeutic evidence items from OncoKB annotation</dd>
+
+        <dt>
+
+          <code><a href="fetch_oncokb_biomarker_annotation.html">fetch_oncokb_biomarker_annotation()</a></code>
+
+        </dt>
+        <dd>Fetch OncoKB annotation for a complex biomarker (MSI-H or TMB-H)</dd>
+
+        <dt>
+
+          <code><a href="fetch_oncokb_biomarker_eitems.html">fetch_oncokb_biomarker_eitems()</a></code>
+
+        </dt>
+        <dd>Get OncoKB therapeutic evidence items for a complex biomarker (MSI-H or TMB-H)</dd>
 
         <dt>
 
@@ -500,6 +549,20 @@
 
         <dt>
 
+          <code><a href="fetch_oncokb_msi_annotation.html">fetch_oncokb_msi_annotation()</a></code>
+
+        </dt>
+        <dd>Fetch OncoKB annotation for MSI-H (microsatellite instability-high)</dd>
+
+        <dt>
+
+          <code><a href="fetch_oncokb_tmb_annotation.html">fetch_oncokb_tmb_annotation()</a></code>
+
+        </dt>
+        <dd>Fetch OncoKB annotation for TMB-H (tumor mutational burden-high)</dd>
+
+        <dt>
+
           <code><a href="filter_maf_file.html">filter_maf_file()</a></code>
 
         </dt>
@@ -511,6 +574,13 @@
 
         </dt>
         <dd>Function that filters variant set on depth and allelic fraction according to settings provided by user (tumor and control)</dd>
+
+        <dt>
+
+          <code><a href="format_sample_type.html">format_sample_type()</a></code>
+
+        </dt>
+        <dd>Readable sample type labels of external (reference) samples, e.g. 'cell_line' - 'Cell line', 'primary_solid_tumor' - 'Primary solid tumor'</dd>
 
         <dt>
 
@@ -535,6 +605,13 @@
 
         <dt>
 
+          <code><a href="generate_report_data_complex_biomarker.html">generate_report_data_complex_biomarker()</a></code>
+
+        </dt>
+        <dd>Function that generates biomarker data for a complex biomarker (MSI-H or TMB-H) for the PCGR report</dd>
+
+        <dt>
+
           <code><a href="generate_report_data_expression.html">generate_report_data_expression()</a></code>
 
         </dt>
@@ -542,10 +619,24 @@
 
         <dt>
 
+          <code><a href="generate_report_data_external.html">generate_report_data_external()</a></code>
+
+        </dt>
+        <dd>Function that generates report data for the result of an external assay/tool (MSI or HRD)</dd>
+
+        <dt>
+
           <code><a href="generate_report_data_fusion.html">generate_report_data_fusion()</a></code>
 
         </dt>
         <dd>Function that generates fusion data for PCGR report</dd>
+
+        <dt>
+
+          <code><a href="generate_report_data_hrd_external.html">generate_report_data_hrd_external()</a></code>
+
+        </dt>
+        <dd>Function that generates report data for an external HRD result</dd>
 
         <dt>
 
@@ -560,6 +651,13 @@
 
         </dt>
         <dd>Function that generates MSI prediction data for PCGR report</dd>
+
+        <dt>
+
+          <code><a href="generate_report_data_msi_external.html">generate_report_data_msi_external()</a></code>
+
+        </dt>
+        <dd>Function that generates report data for an external MSI result</dd>
 
         <dt>
 
@@ -668,6 +766,13 @@
 
         <dt>
 
+          <code><a href="has_progn_diagn_evidence.html">has_progn_diagn_evidence()</a></code>
+
+        </dt>
+        <dd>Whether there is prognostic or diagnostic biomarker evidence to show for a variant category (tiers as given by progn_diagn_tiers()) - based on the evidence items, as the tier classification also holds variants with a Tier 3 by gene role only (no evidence of this type)</dd>
+
+        <dt>
+
           <code><a href="het_af_germline_status.html">het_af_germline_status()</a></code>
 
         </dt>
@@ -686,6 +791,34 @@
 
         </dt>
         <dd>Function that assigns a logical (STATUS_LIKELY_GERMLINE_HOMOZYGOUS) reflecting whether a variant is likely homozygous (germline) - based on allelic fraction (VAF_TUMOR)</dd>
+
+        <dt>
+
+          <code><a href="hrd_doc_note.html">hrd_doc_note()</a></code>
+
+        </dt>
+        <dd>Get documentation string for HRD status (external assay/tool, PCGR genomic scar score)</dd>
+
+        <dt>
+
+          <code><a href="hrd_external_display.html">hrd_external_display()</a></code>
+
+        </dt>
+        <dd>Function that prepares display strings for an external HRD result</dd>
+
+        <dt>
+
+          <code><a href="hrd_score_type_label.html">hrd_score_type_label()</a></code>
+
+        </dt>
+        <dd>Broad categories of HRD scores (HRD_SCORE_TYPE of an external HRD result)</dd>
+
+        <dt>
+
+          <code><a href="hrd_status_is_deficient.html">hrd_status_is_deficient()</a></code>
+
+        </dt>
+        <dd>Function that checks whether the tumor is HR-deficient according to an external HRD result</dd>
 
         <dt>
 
@@ -710,6 +843,13 @@
 
         <dt>
 
+          <code><a href="init_external_result.html">init_external_result()</a></code>
+
+        </dt>
+        <dd>Function that initiates the report element of an external result</dd>
+
+        <dt>
+
           <code><a href="init_fusion_content.html">init_fusion_content()</a></code>
 
         </dt>
@@ -721,6 +861,13 @@
 
         </dt>
         <dd>Function that initiates report element with germline variant information (CPSR)</dd>
+
+        <dt>
+
+          <code><a href="init_hrd_content.html">init_hrd_content()</a></code>
+
+        </dt>
+        <dd>Function that initiates report element with HRD results</dd>
 
         <dt>
 
@@ -822,6 +969,13 @@
 
         <dt>
 
+          <code><a href="key_findings_doc_note.html">key_findings_doc_note()</a></code>
+
+        </dt>
+        <dd>Get documentation string for the key findings summary</dd>
+
+        <dt>
+
           <code><a href="list_of_list_to_df.html">list_of_list_to_df()</a></code>
 
         </dt>
@@ -861,6 +1015,27 @@
 
         </dt>
         <dd>Load expression similarity results</dd>
+
+        <dt>
+
+          <code><a href="load_external_hrd.html">load_external_hrd()</a></code>
+
+        </dt>
+        <dd>Function that loads the normalised result of an external HRD assay/tool</dd>
+
+        <dt>
+
+          <code><a href="load_external_msi.html">load_external_msi()</a></code>
+
+        </dt>
+        <dd>Function that loads the normalised result of an external MSI caller</dd>
+
+        <dt>
+
+          <code><a href="load_external_result.html">load_external_result()</a></code>
+
+        </dt>
+        <dd>Function that loads the normalised result of an external assay/tool</dd>
 
         <dt>
 
@@ -948,6 +1123,20 @@
 
         <dt>
 
+          <code><a href="medical_disclaimer_note.html">medical_disclaimer_note()</a></code>
+
+        </dt>
+        <dd>Get the medical disclaimer shown in PCGR and CPSR reports</dd>
+
+        <dt>
+
+          <code><a href="merge_oncokb_evidence_all_tumor_types.html">merge_oncokb_evidence_all_tumor_types()</a></code>
+
+        </dt>
+        <dd>Add OncoKB evidence items for other tumor types</dd>
+
+        <dt>
+
           <code><a href="mkdir.html">mkdir()</a></code>
 
         </dt>
@@ -955,10 +1144,31 @@
 
         <dt>
 
+          <code><a href="moi_display_text.html">moi_display_text()</a></code>
+
+        </dt>
+        <dd>CPG_MOI (mode of inheritance) code(s) with their full names, for display in the row details of the germline findings table (e.g. 'AD/AR' -&gt; 'AD/AR (autosomal dominant / autosomal recessive)')</dd>
+
+        <dt>
+
+          <code><a href="msi_concordance.html">msi_concordance()</a></code>
+
+        </dt>
+        <dd>Function that compares the external MSI result with the PCGR MSI classifier</dd>
+
+        <dt>
+
           <code><a href="msi_doc_note.html">msi_doc_note()</a></code>
 
         </dt>
-        <dd>Get documentation string for MSI status prediction</dd>
+        <dd>Get documentation string for MSI status (external caller, PCGR classifier)</dd>
+
+        <dt>
+
+          <code><a href="msi_external_display.html">msi_external_display()</a></code>
+
+        </dt>
+        <dd>Function that prepares display strings for an external MSI result</dd>
 
         <dt>
 
@@ -969,10 +1179,10 @@
 
         <dt>
 
-          <code><a href="msi_indel_load_plot.html">msi_indel_load_plot()</a></code>
+          <code><a href="msi_status_is_high.html">msi_status_is_high()</a></code>
 
         </dt>
-        <dd>Function that plots the indel load for a given sample and contrasts this with the distribution for MSI-H/MSS samples from TCGA</dd>
+        <dd>Function that tells if the MSI status of the sample is MSI-high</dd>
 
         <dt>
 
@@ -997,6 +1207,13 @@
 
         <dt>
 
+          <code><a href="oncogenicity_sort_value.html">oncogenicity_sort_value()</a></code>
+
+        </dt>
+        <dd>Oncogenicity classification as a sortable table value</dd>
+
+        <dt>
+
           <code><a href="oncokb_annotations.html">oncokb_annotations</a></code>
 
         </dt>
@@ -1011,10 +1228,87 @@
 
         <dt>
 
+          <code><a href="oncokb_query_all_tumor_types.html">oncokb_query_all_tumor_types()</a></code>
+
+        </dt>
+        <dd>Whether OncoKB should also be queried without a tumor type</dd>
+
+        <dt>
+
+          <code><a href="oncokb_resolve_catchall_sites.html">oncokb_resolve_catchall_sites()</a></code>
+
+        </dt>
+        <dd>Primary site of OncoKB catch-all cancer types, relative to the query tumor</dd>
+
+        <dt>
+
+          <code><a href="oncokb_resolve_lineage_sites.html">oncokb_resolve_lineage_sites()</a></code>
+
+        </dt>
+        <dd>Primary site of OncoKB evidence for the queried OncoTree code</dd>
+
+        <dt>
+
+          <code><a href="order_oncogenicity_table.html">order_oncogenicity_table()</a></code>
+
+        </dt>
+        <dd>Order the variants of an oncogenicity table (SNVs/InDels)</dd>
+
+        <dt>
+
           <code><a href="order_variants.html">order_variants()</a></code>
 
         </dt>
         <dd>Function that orders genomic aberrations according to order of chromosomes and chromosomal position</dd>
+
+        <dt>
+
+          <code><a href="pdf_gene_link.html">pdf_gene_link()</a></code>
+
+        </dt>
+        <dd>Gene symbols as links to the Open Targets Platform target page (by Ensembl gene id) in a PDF report table cell (raw Typst markup; the column must not be escaped by format_tt()). Symbols without a valid Ensembl gene id are shown as plain (escaped) text.</dd>
+
+        <dt>
+
+          <code><a href="pdf_legend.html">pdf_legend()</a></code>
+
+        </dt>
+        <dd>Legend line printed below a PDF report table (raw Typst block): the cancer hotspot symbol ('hotspot' - only when at least one of the variants is located in a hotspot), or the biomarker evidence source logos ('bm_sources')</dd>
+
+        <dt>
+
+          <code><a href="pdf_link.html">pdf_link()</a></code>
+
+        </dt>
+        <dd>Text as a link in a PDF report table cell (raw Typst markup; the column must not be escaped by format_tt())</dd>
+
+        <dt>
+
+          <code><a href="pdf_logo.html">pdf_logo()</a></code>
+
+        </dt>
+        <dd>Logo of an annotation source (CIViC, CGI, OncoKB, cancerhotspots.org) as inline Typst markup - images copied with the templates to the rendering directory (typst/logo_*.png); other sources as plain text</dd>
+
+        <dt>
+
+          <code><a href="pdf_note.html">pdf_note()</a></code>
+
+        </dt>
+        <dd>Note box in a PDF report section (raw Typst block)</dd>
+
+        <dt>
+
+          <code><a href="pdf_pill.html">pdf_pill()</a></code>
+
+        </dt>
+        <dd>Colored pill (rounded box with bold text) in a PDF report table cell - raw Typst markup; the column must not be escaped by format_tt()</dd>
+
+        <dt>
+
+          <code><a href="pdf_style_table.html">pdf_style_table()</a></code>
+
+        </dt>
+        <dd>Style the header row of a PDF report table</dd>
 
         <dt>
 
@@ -1067,13 +1361,6 @@
 
         <dt>
 
-          <code><a href="plot_value_boxes.html">plot_value_boxes()</a></code>
-
-        </dt>
-        <dd>Function that plots four value boxes with the most important findings in the cancer genome</dd>
-
-        <dt>
-
           <code><a href="plotly_pie_chart.html">plotly_pie_chart()</a></code>
 
         </dt>
@@ -1106,6 +1393,13 @@
 
         </dt>
         <dd>Function that gathers data tables on actionable variants for display in report (tier 1 + tier 2)</dd>
+
+        <dt>
+
+          <code><a href="prep_bm_display_tbl.html">prep_bm_display_tbl()</a></code>
+
+        </dt>
+        <dd>Function that gathers data tables on biomarker variants (predictive, prognostic or diagnostic) for display in report</dd>
 
         <dt>
 
@@ -1144,6 +1438,20 @@
 
         <dt>
 
+          <code><a href="progn_diagn_tier_note.html">progn_diagn_tier_note()</a></code>
+
+        </dt>
+        <dd>Note on the tiers of prognostic/diagnostic biomarker evidence shown, for reports without a primary site (see progn_diagn_tiers())</dd>
+
+        <dt>
+
+          <code><a href="progn_diagn_tiers.html">progn_diagn_tiers()</a></code>
+
+        </dt>
+        <dd>Internal evidence tiers of prognostic and diagnostic biomarker evidence shown in the reports (HTML/PDF sections, key findings)</dd>
+
+        <dt>
+
           <code><a href="remove_cols_from_df.html">remove_cols_from_df()</a></code>
 
         </dt>
@@ -1151,10 +1459,17 @@
 
         <dt>
 
+          <code><a href="render_acmg_pills_cell.html">render_acmg_pills_cell()</a></code>
+
+        </dt>
+        <dd>Render ACMG criteria as individual colored pills (Generated by Claude Sonnet 5)</dd>
+
+        <dt>
+
           <code><a href="render_actble_bm_table.html">render_actble_bm_table()</a></code>
 
         </dt>
-        <dd>Build biomarker reactable with category-aware styling Combines tier 1 and tier 2 records in one table. Header uses tier 1 color; THERAPY_MATCH cell background reflects the row's tier (1 or 2).</dd>
+        <dd>Build actionable (predictive) biomarker reactable</dd>
 
         <dt>
 
@@ -1162,6 +1477,13 @@
 
         </dt>
         <dd>Render sample alteration with confidence icon Uses filled circle + bold for high confidence, hollow circle + muted for medium confidence</dd>
+
+        <dt>
+
+          <code><a href="render_alteration_classification_style.html">render_alteration_classification_style()</a></code>
+
+        </dt>
+        <dd>Style germline alteration cell background based on the CPSR/ClinVar-derived clinical significance of the variant (Generated by Claude Sonnet 5)</dd>
 
         <dt>
 
@@ -1179,10 +1501,24 @@
 
         <dt>
 
+          <code><a href="render_bm_table.html">render_bm_table()</a></code>
+
+        </dt>
+        <dd>Build biomarker reactable with category-aware styling Combines tier 1 and tier 2 (and for predictive biomarkers, tier 3) records in one table. Header uses tier 1 color; the summary cell (THERAPY_MATCH, PROGNOSTIC_OUTCOME or DIAGNOSTIC_EVIDENCE) background reflects the row's tier.</dd>
+
+        <dt>
+
+          <code><a href="render_classification_cell.html">render_classification_cell()</a></code>
+
+        </dt>
+        <dd>Render germline clinical significance as a colored badge (Generated by Claude Sonnet 5)</dd>
+
+        <dt>
+
           <code><a href="render_diagn_bm_table.html">render_diagn_bm_table()</a></code>
 
         </dt>
-        <dd>Build biomarker reactable with category-aware styling Combines tier 1 and tier 2 records in one table. Header uses tier 1 color; THERAPY_MATCH cell background reflects the row's tier (1 or 2).</dd>
+        <dd>Build diagnostic biomarker reactable</dd>
 
         <dt>
 
@@ -1207,6 +1543,20 @@
 
         <dt>
 
+          <code><a href="render_genotype_style.html">render_genotype_style()</a></code>
+
+        </dt>
+        <dd>Flag germline GENOTYPE cell when backed by a low-depth control sample (Generated by Claude Sonnet 5)</dd>
+
+        <dt>
+
+          <code><a href="render_moi_cell.html">render_moi_cell()</a></code>
+
+        </dt>
+        <dd>Render CPG_MOI (cancer predisposition gene - mode of inheritance) with a tooltip spelling out the abbreviated code(s) (Generated by Claude Sonnet 5)</dd>
+
+        <dt>
+
           <code><a href="render_oncogenicity_cell.html">render_oncogenicity_cell()</a></code>
 
         </dt>
@@ -1217,14 +1567,14 @@
           <code><a href="render_progn_bm_table.html">render_progn_bm_table()</a></code>
 
         </dt>
-        <dd>Build biomarker reactable with category-aware styling Combines tier 1 and tier 2 records in one table. Header uses tier 1 color; THERAPY_MATCH cell background reflects the row's tier (1 or 2).</dd>
+        <dd>Build prognostic biomarker reactable</dd>
 
         <dt>
 
           <code><a href="render_prognostic_outcome.html">render_prognostic_outcome()</a></code>
 
         </dt>
-        <dd>Render prognostic outcome cell with background color based on actionability tier (Generated by Claude Opus 4.6 with some manual tweaks)</dd>
+        <dd>Render prognostic outcome (or diagnostic evidence) cell with background color based on actionability tier (Generated by Claude Opus 4.6 with some manual tweaks)</dd>
 
         <dt>
 
@@ -1256,6 +1606,13 @@
 
         <dt>
 
+          <code><a href="report_highlights.html">report_highlights()</a></code>
+
+        </dt>
+        <dd>Key findings of a PCGR report (highlights) as markdown</dd>
+
+        <dt>
+
           <code><a href="rna_fusion_recurrence_mitdb.html">rna_fusion_recurrence_mitdb()</a></code>
 
         </dt>
@@ -1267,6 +1624,13 @@
 
         </dt>
         <dd>Predefined reactable theme for PCGR/CPSR tables (Generated by Claude Opus 4.6 with some manual tweaks)</dd>
+
+        <dt>
+
+          <code><a href="set_bm_support_sources_not_tiered.html">set_bm_support_sources_not_tiered()</a></code>
+
+        </dt>
+        <dd>Evidence items from sources that are not used for tier assignment</dd>
 
         <dt>
 
@@ -1382,6 +1746,20 @@
 
         <dt>
 
+          <code><a href="typst_escape.html">typst_escape()</a></code>
+
+        </dt>
+        <dd>Escape Typst markup characters in plain text</dd>
+
+        <dt>
+
+          <code><a href="typst_str.html">typst_str()</a></code>
+
+        </dt>
+        <dd>Character vector as Typst string literal content (escapes backslashes and double quotes), for values passed to Typst functions</dd>
+
+        <dt>
+
           <code><a href="update_report.html">update_report()</a></code>
 
         </dt>
@@ -1421,6 +1799,13 @@
 
         </dt>
         <dd>Function that writes contents of PCGR object to an HTML report (quarto-based)</dd>
+
+        <dt>
+
+          <code><a href="write_report_pdf.html">write_report_pdf()</a></code>
+
+        </dt>
+        <dd>Function that writes contents of PCGR object to a PDF report (Quarto/Typst-based), focused on key findings</dd>
 
         <dt>
 

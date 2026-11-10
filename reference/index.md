@@ -5,6 +5,11 @@
 - [`actionability_doc_note()`](https://sigven.github.io/pcgr/reference/actionability_doc_note.md)
   : Get documentation string for AMP/ASCO/CAP clinical actionability
   tiers
+- [`actionability_tier_col_def()`](https://sigven.github.io/pcgr/reference/actionability_tier_col_def.md)
+  : Column definition for the tier badge of the oncogenicity tables
+- [`actionable_tier()`](https://sigven.github.io/pcgr/reference/actionable_tier.md)
+  : Keep only the therapeutically actionable tiers (1 and 2) of an
+  actionability tier vector
 - [`af_distribution()`](https://sigven.github.io/pcgr/reference/af_distribution.md)
   : Function that plots a histogram of the the variant allelic support
   (tumor)
@@ -77,6 +82,9 @@
 - [`assign_variant_tiers_cna()`](https://sigven.github.io/pcgr/reference/assign_variant_tiers_cna.md)
   : Assign tiers of clinical significance (AMP/ASCO/CAP framework) to
   somatic CNAs
+- [`assign_variant_tiers_complex_biomarker()`](https://sigven.github.io/pcgr/reference/assign_variant_tiers_complex_biomarker.md)
+  : AMP/ASCO/CAP tier classification for complex biomarkers (MSI-H,
+  TMB-H)
 - [`assign_variant_tiers_fusion()`](https://sigven.github.io/pcgr/reference/assign_variant_tiers_fusion.md)
   : Assign tiers of clinical significance (AMP/ASCO/CAP framework) to
   RNA fusions
@@ -93,6 +101,8 @@
   type-specific query)
 - [`biomarker_evidence`](https://sigven.github.io/pcgr/reference/biomarker_evidence.md)
   : Fixed data types and levels for biomarker evidence items
+- [`biomarker_sources_not_tiered()`](https://sigven.github.io/pcgr/reference/biomarker_sources_not_tiered.md)
+  : Biomarker sources not used for tier assignment
 - [`bm_categories`](https://sigven.github.io/pcgr/reference/bm_categories.md)
   : Named list of biomarker categories used for variant classification
 - [`bm_evidence`](https://sigven.github.io/pcgr/reference/bm_evidence.md)
@@ -100,6 +110,9 @@
   'types','levels' etc.
 - [`bp_junction_transcript_overlap()`](https://sigven.github.io/pcgr/reference/bp_junction_transcript_overlap.md)
   : Find transcripts covering given splice junction breakpoints
+- [`build_germline_col_defs()`](https://sigven.github.io/pcgr/reference/build_germline_col_defs.md)
+  : Build column definitions for the germline findings table with
+  category-aware styling
 - [`build_oncogenicity_col_defs()`](https://sigven.github.io/pcgr/reference/build_oncogenicity_col_defs.md)
   : Build column definitions for oncogenicity table with category-aware
   styling
@@ -110,9 +123,6 @@
   : Build display data for potential two-hit events (nested reactable)
 - [`callout_biomarker_scope()`](https://sigven.github.io/pcgr/reference/callout_biomarker_scope.md)
   : Emit the shared "biomarker types and report scope" callout note
-- [`cancer_phenotypes_regex`](https://sigven.github.io/pcgr/reference/cancer_phenotypes_regex.md)
-  : Regular expression of terms indicative of cancer-related phenotypes
-  and syndromes
 - [`check_common_colnames()`](https://sigven.github.io/pcgr/reference/check_common_colnames.md)
   : Function that checks whether a set of column names are present in
   two different data frames
@@ -158,6 +168,9 @@
 - [`expression_doc_note()`](https://sigven.github.io/pcgr/reference/expression_doc_note.md)
   : Get documentation string for RNA expression analysis (outlier,
   similarity)
+- [`expression_similarity_sources()`](https://sigven.github.io/pcgr/reference/expression_similarity_sources.md)
+  : Reference sources of the expression similarity analysis, as display
+  labels (run configuration / report settings)
 - [`extract_complete_annotation()`](https://sigven.github.io/pcgr/reference/extract_complete_annotation.md)
   : Extract mutation effect information
 - [`extract_diagnostic_evidence()`](https://sigven.github.io/pcgr/reference/extract_diagnostic_evidence.md)
@@ -166,6 +179,11 @@
   : Extract prognostic implications from OncoKB annotation
 - [`extract_therapeutic_evidence()`](https://sigven.github.io/pcgr/reference/extract_therapeutic_evidence.md)
   : Extract therapeutic evidence items from OncoKB annotation
+- [`fetch_oncokb_biomarker_annotation()`](https://sigven.github.io/pcgr/reference/fetch_oncokb_biomarker_annotation.md)
+  : Fetch OncoKB annotation for a complex biomarker (MSI-H or TMB-H)
+- [`fetch_oncokb_biomarker_eitems()`](https://sigven.github.io/pcgr/reference/fetch_oncokb_biomarker_eitems.md)
+  : Get OncoKB therapeutic evidence items for a complex biomarker (MSI-H
+  or TMB-H)
 - [`fetch_oncokb_cna_annotation()`](https://sigven.github.io/pcgr/reference/fetch_oncokb_cna_annotation.md)
   : Fetch OncoKB annotation for copy number alteration
 - [`fetch_oncokb_fusion_annotation()`](https://sigven.github.io/pcgr/reference/fetch_oncokb_fusion_annotation.md)
@@ -174,12 +192,20 @@
   : Fetch OncoKB annotation for SNV/InDel via genomic change
 - [`fetch_oncokb_hgvsp_annotation()`](https://sigven.github.io/pcgr/reference/fetch_oncokb_hgvsp_annotation.md)
   : Fetch OncoKB annotation for SNV/InDel via protein change
+- [`fetch_oncokb_msi_annotation()`](https://sigven.github.io/pcgr/reference/fetch_oncokb_msi_annotation.md)
+  : Fetch OncoKB annotation for MSI-H (microsatellite instability-high)
+- [`fetch_oncokb_tmb_annotation()`](https://sigven.github.io/pcgr/reference/fetch_oncokb_tmb_annotation.md)
+  : Fetch OncoKB annotation for TMB-H (tumor mutational burden-high)
 - [`filter_maf_file()`](https://sigven.github.io/pcgr/reference/filter_maf_file.md)
   : Function that takes a MAF file generated with vcf2maf and filters
   out variants that are presumably germline (tumor-only run)
 - [`filter_read_support()`](https://sigven.github.io/pcgr/reference/filter_read_support.md)
   : Function that filters variant set on depth and allelic fraction
   according to settings provided by user (tumor and control)
+- [`format_sample_type()`](https://sigven.github.io/pcgr/reference/format_sample_type.md)
+  : Readable sample type labels of external (reference) samples, e.g.
+  'cell_line' - 'Cell line', 'primary_solid_tumor' - 'Primary solid
+  tumor'
 - [`fusion_doc_note()`](https://sigven.github.io/pcgr/reference/fusion_doc_note.md)
   : Get documentation string for RNA fusion analysis
 - [`generate_annotation_link()`](https://sigven.github.io/pcgr/reference/generate_annotation_link.md)
@@ -188,14 +214,24 @@
 - [`generate_report()`](https://sigven.github.io/pcgr/reference/generate_report.md)
   : Function that generates all contents of the cancer genome report
   (PCGR)
+- [`generate_report_data_complex_biomarker()`](https://sigven.github.io/pcgr/reference/generate_report_data_complex_biomarker.md)
+  : Function that generates biomarker data for a complex biomarker
+  (MSI-H or TMB-H) for the PCGR report
 - [`generate_report_data_expression()`](https://sigven.github.io/pcgr/reference/generate_report_data_expression.md)
   : Function that generates expression data for PCGR report
+- [`generate_report_data_external()`](https://sigven.github.io/pcgr/reference/generate_report_data_external.md)
+  : Function that generates report data for the result of an external
+  assay/tool (MSI or HRD)
 - [`generate_report_data_fusion()`](https://sigven.github.io/pcgr/reference/generate_report_data_fusion.md)
   : Function that generates fusion data for PCGR report
+- [`generate_report_data_hrd_external()`](https://sigven.github.io/pcgr/reference/generate_report_data_hrd_external.md)
+  : Function that generates report data for an external HRD result
 - [`generate_report_data_kataegis()`](https://sigven.github.io/pcgr/reference/generate_report_data_kataegis.md)
   : Function that generates data frame with potential kataegis events
 - [`generate_report_data_msi()`](https://sigven.github.io/pcgr/reference/generate_report_data_msi.md)
   : Function that generates MSI prediction data for PCGR report
+- [`generate_report_data_msi_external()`](https://sigven.github.io/pcgr/reference/generate_report_data_msi_external.md)
+  : Function that generates report data for an external MSI result
 - [`generate_report_data_rainfall()`](https://sigven.github.io/pcgr/reference/generate_report_data_rainfall.md)
   : Function that generates data for rainfall plot (mutation density
   along genome, considering SNVs only)
@@ -232,6 +268,11 @@
   : Function that assigns a maximum value to a variable
   (gnomAD_NC_FAF_GRPMAX) reflecting the filter allele frequency (GrpMAX)
   for a given variant in the non-cancer gnomAD subset (v3.1)
+- [`has_progn_diagn_evidence()`](https://sigven.github.io/pcgr/reference/has_progn_diagn_evidence.md)
+  : Whether there is prognostic or diagnostic biomarker evidence to show
+  for a variant category (tiers as given by progn_diagn_tiers()) - based
+  on the evidence items, as the tier classification also holds variants
+  with a Tier 3 by gene role only (no evidence of this type)
 - [`het_af_germline_status()`](https://sigven.github.io/pcgr/reference/het_af_germline_status.md)
   : Function that assigns a logical
   (STATUS_LIKELY_GERMLINE_HETEROZYGOUS) reflecting whether a variant is
@@ -244,6 +285,17 @@
   : Function that assigns a logical (STATUS_LIKELY_GERMLINE_HOMOZYGOUS)
   reflecting whether a variant is likely homozygous (germline) - based
   on allelic fraction (VAF_TUMOR)
+- [`hrd_doc_note()`](https://sigven.github.io/pcgr/reference/hrd_doc_note.md)
+  : Get documentation string for HRD status (external assay/tool, PCGR
+  genomic scar score)
+- [`hrd_external_display()`](https://sigven.github.io/pcgr/reference/hrd_external_display.md)
+  : Function that prepares display strings for an external HRD result
+- [`hrd_score_type_label()`](https://sigven.github.io/pcgr/reference/hrd_score_type_label.md)
+  : Broad categories of HRD scores (HRD_SCORE_TYPE of an external HRD
+  result)
+- [`hrd_status_is_deficient()`](https://sigven.github.io/pcgr/reference/hrd_status_is_deficient.md)
+  : Function that checks whether the tumor is HR-deficient according to
+  an external HRD result
 - [`immune_celltypes`](https://sigven.github.io/pcgr/reference/immune_celltypes.md)
   : Data frame with immune cell types
 - [`init_biomarker_content()`](https://sigven.github.io/pcgr/reference/init_biomarker_content.md)
@@ -251,11 +303,15 @@
   information
 - [`init_expression_content()`](https://sigven.github.io/pcgr/reference/init_expression_content.md)
   : Function that initiates report element with expression information
+- [`init_external_result()`](https://sigven.github.io/pcgr/reference/init_external_result.md)
+  : Function that initiates the report element of an external result
 - [`init_fusion_content()`](https://sigven.github.io/pcgr/reference/init_fusion_content.md)
   : Function that initiates report element with fusion information
 - [`init_germline_content()`](https://sigven.github.io/pcgr/reference/init_germline_content.md)
   : Function that initiates report element with germline variant
   information (CPSR)
+- [`init_hrd_content()`](https://sigven.github.io/pcgr/reference/init_hrd_content.md)
+  : Function that initiates report element with HRD results
 - [`init_kataegis_content()`](https://sigven.github.io/pcgr/reference/init_kataegis_content.md)
   : Function that initiates report element with kataegis information
 - [`init_msi_content()`](https://sigven.github.io/pcgr/reference/init_msi_content.md)
@@ -289,6 +345,8 @@
 - [`kataegis_input()`](https://sigven.github.io/pcgr/reference/kataegis_input.md)
   : Function that detects kataegis events from a data frame with genomic
   cooordinates of mutations
+- [`key_findings_doc_note()`](https://sigven.github.io/pcgr/reference/key_findings_doc_note.md)
+  : Get documentation string for the key findings summary
 - [`list_of_list_to_df()`](https://sigven.github.io/pcgr/reference/list_of_list_to_df.md)
   : Helper function to convert list of lists to data.frame
 - [`load_cpsr_classified_variants()`](https://sigven.github.io/pcgr/reference/load_cpsr_classified_variants.md)
@@ -302,6 +360,13 @@
   : Load expression outlier results
 - [`load_expression_similarity()`](https://sigven.github.io/pcgr/reference/load_expression_similarity.md)
   : Load expression similarity results
+- [`load_external_hrd()`](https://sigven.github.io/pcgr/reference/load_external_hrd.md)
+  : Function that loads the normalised result of an external HRD
+  assay/tool
+- [`load_external_msi()`](https://sigven.github.io/pcgr/reference/load_external_msi.md)
+  : Function that loads the normalised result of an external MSI caller
+- [`load_external_result()`](https://sigven.github.io/pcgr/reference/load_external_result.md)
+  : Function that loads the normalised result of an external assay/tool
 - [`load_reference_data()`](https://sigven.github.io/pcgr/reference/load_reference_data.md)
   : Function that parses and loads reference data from files in the
   assembly-specific PCGR bundle directory
@@ -333,22 +398,37 @@
   : Function that assigns a maximum value to a variable (MAX_AF_GNOMAD)
   reflecting the maximum allele frequency for a given variant across
   gnomAD populations
+- [`medical_disclaimer_note()`](https://sigven.github.io/pcgr/reference/medical_disclaimer_note.md)
+  : Get the medical disclaimer shown in PCGR and CPSR reports
+- [`merge_oncokb_evidence_all_tumor_types()`](https://sigven.github.io/pcgr/reference/merge_oncokb_evidence_all_tumor_types.md)
+  : Add OncoKB evidence items for other tumor types
 - [`mkdir()`](https://sigven.github.io/pcgr/reference/mkdir.md) : Create
   directory
+- [`moi_display_text()`](https://sigven.github.io/pcgr/reference/moi_display_text.md)
+  : CPG_MOI (mode of inheritance) code(s) with their full names, for
+  display in the row details of the germline findings table (e.g.
+  'AD/AR' -\> 'AD/AR (autosomal dominant / autosomal recessive)')
+- [`msi_concordance()`](https://sigven.github.io/pcgr/reference/msi_concordance.md)
+  : Function that compares the external MSI result with the PCGR MSI
+  classifier
 - [`msi_doc_note()`](https://sigven.github.io/pcgr/reference/msi_doc_note.md)
-  : Get documentation string for MSI status prediction
+  : Get documentation string for MSI status (external caller, PCGR
+  classifier)
+- [`msi_external_display()`](https://sigven.github.io/pcgr/reference/msi_external_display.md)
+  : Function that prepares display strings for an external MSI result
 - [`msi_indel_fraction_plot()`](https://sigven.github.io/pcgr/reference/msi_indel_fraction_plot.md)
   : Function that plots the indel fraction for a given sample and
   contrasts this with the distribution for MSI-H/MSS samples from TCGA
-- [`msi_indel_load_plot()`](https://sigven.github.io/pcgr/reference/msi_indel_load_plot.md)
-  : Function that plots the indel load for a given sample and contrasts
-  this with the distribution for MSI-H/MSS samples from TCGA
+- [`msi_status_is_high()`](https://sigven.github.io/pcgr/reference/msi_status_is_high.md)
+  : Function that tells if the MSI status of the sample is MSI-high
 - [`mutational_signatures_doc_note()`](https://sigven.github.io/pcgr/reference/mutational_signatures_doc_note.md)
   : Get documentation string for mutational signatures analysis
 - [`oncogenicity_criteria`](https://sigven.github.io/pcgr/reference/oncogenicity_criteria.md)
   : Oncogenicity criteria (ClinGen/CGC/VICC)
 - [`oncogenicity_doc_note()`](https://sigven.github.io/pcgr/reference/oncogenicity_doc_note.md)
   : Get documentation string for oncogenicity annotation
+- [`oncogenicity_sort_value()`](https://sigven.github.io/pcgr/reference/oncogenicity_sort_value.md)
+  : Oncogenicity classification as a sortable table value
 - [`oncokb_annotations`](https://sigven.github.io/pcgr/reference/oncokb_annotations.md)
   : Character vector with OncoKB annotations coming from the
   MafAnnotator / FusionAnnotator / CnaAnnnotator tools in the PCGR
@@ -356,9 +436,42 @@
   and reporting in PCGR.
 - [`oncokb_base_api_url`](https://sigven.github.io/pcgr/reference/oncokb_base_api_url.md)
   : OncoKB base API URL
+- [`oncokb_query_all_tumor_types()`](https://sigven.github.io/pcgr/reference/oncokb_query_all_tumor_types.md)
+  : Whether OncoKB should also be queried without a tumor type
+- [`oncokb_resolve_catchall_sites()`](https://sigven.github.io/pcgr/reference/oncokb_resolve_catchall_sites.md)
+  : Primary site of OncoKB catch-all cancer types, relative to the query
+  tumor
+- [`oncokb_resolve_lineage_sites()`](https://sigven.github.io/pcgr/reference/oncokb_resolve_lineage_sites.md)
+  : Primary site of OncoKB evidence for the queried OncoTree code
+- [`order_oncogenicity_table()`](https://sigven.github.io/pcgr/reference/order_oncogenicity_table.md)
+  : Order the variants of an oncogenicity table (SNVs/InDels)
 - [`order_variants()`](https://sigven.github.io/pcgr/reference/order_variants.md)
   : Function that orders genomic aberrations according to order of
   chromosomes and chromosomal position
+- [`pdf_gene_link()`](https://sigven.github.io/pcgr/reference/pdf_gene_link.md)
+  : Gene symbols as links to the Open Targets Platform target page (by
+  Ensembl gene id) in a PDF report table cell (raw Typst markup; the
+  column must not be escaped by format_tt()). Symbols without a valid
+  Ensembl gene id are shown as plain (escaped) text.
+- [`pdf_legend()`](https://sigven.github.io/pcgr/reference/pdf_legend.md)
+  : Legend line printed below a PDF report table (raw Typst block): the
+  cancer hotspot symbol ('hotspot' - only when at least one of the
+  variants is located in a hotspot), or the biomarker evidence source
+  logos ('bm_sources')
+- [`pdf_link()`](https://sigven.github.io/pcgr/reference/pdf_link.md) :
+  Text as a link in a PDF report table cell (raw Typst markup; the
+  column must not be escaped by format_tt())
+- [`pdf_logo()`](https://sigven.github.io/pcgr/reference/pdf_logo.md) :
+  Logo of an annotation source (CIViC, CGI, OncoKB, cancerhotspots.org)
+  as inline Typst markup - images copied with the templates to the
+  rendering directory (typst/logo\_\*.png); other sources as plain text
+- [`pdf_note()`](https://sigven.github.io/pcgr/reference/pdf_note.md) :
+  Note box in a PDF report section (raw Typst block)
+- [`pdf_pill()`](https://sigven.github.io/pcgr/reference/pdf_pill.md) :
+  Colored pill (rounded box with bold text) in a PDF report table cell -
+  raw Typst markup; the column must not be escaped by format_tt()
+- [`pdf_style_table()`](https://sigven.github.io/pcgr/reference/pdf_style_table.md)
+  : Style the header row of a PDF report table
 - [`pkg_exists()`](https://sigven.github.io/pcgr/reference/pkg_exists.md)
   : Does R Package Exist
 - [`plot_cna_segments_absolute()`](https://sigven.github.io/pcgr/reference/plot_cna_segments_absolute.md)
@@ -378,9 +491,6 @@
   : Function that makes a plot with TMB boxplots for reference cohorts,
   highlighting the TMB estimate for a given sample and the
   cohort/primary site of interest
-- [`plot_value_boxes()`](https://sigven.github.io/pcgr/reference/plot_value_boxes.md)
-  : Function that plots four value boxes with the most important
-  findings in the cancer genome
 - [`plotly_pie_chart()`](https://sigven.github.io/pcgr/reference/plotly_pie_chart.md)
   : Plotly Pie Chart - variant statistics
 - [`pon_status()`](https://sigven.github.io/pcgr/reference/pon_status.md)
@@ -397,6 +507,9 @@
 - [`prep_actble_display_tbl()`](https://sigven.github.io/pcgr/reference/prep_actble_display_tbl.md)
   : Function that gathers data tables on actionable variants for display
   in report (tier 1 + tier 2)
+- [`prep_bm_display_tbl()`](https://sigven.github.io/pcgr/reference/prep_bm_display_tbl.md)
+  : Function that gathers data tables on biomarker variants (predictive,
+  prognostic or diagnostic) for display in report
 - [`prep_diagn_display_tbl()`](https://sigven.github.io/pcgr/reference/prep_diagn_display_tbl.md)
   : Function that gathers data tables on diagnostic variants
 - [`prep_progn_display_tbl()`](https://sigven.github.io/pcgr/reference/prep_progn_display_tbl.md)
@@ -409,25 +522,43 @@
 - [`process_oncokb_maf()`](https://sigven.github.io/pcgr/reference/process_oncokb_maf.md)
   : Process OncoKB MAF output files (both HGVSp and HGVSg) and fetch
   complete annotations
+- [`progn_diagn_tier_note()`](https://sigven.github.io/pcgr/reference/progn_diagn_tier_note.md)
+  : Note on the tiers of prognostic/diagnostic biomarker evidence shown,
+  for reports without a primary site (see progn_diagn_tiers())
+- [`progn_diagn_tiers()`](https://sigven.github.io/pcgr/reference/progn_diagn_tiers.md)
+  : Internal evidence tiers of prognostic and diagnostic biomarker
+  evidence shown in the reports (HTML/PDF sections, key findings)
 - [`remove_cols_from_df()`](https://sigven.github.io/pcgr/reference/remove_cols_from_df.md)
   : Function that removes column(s) from data frame
+- [`render_acmg_pills_cell()`](https://sigven.github.io/pcgr/reference/render_acmg_pills_cell.md)
+  : Render ACMG criteria as individual colored pills (Generated by
+  Claude Sonnet 5)
 - [`render_actble_bm_table()`](https://sigven.github.io/pcgr/reference/render_actble_bm_table.md)
-  : Build biomarker reactable with category-aware styling Combines tier
-  1 and tier 2 records in one table. Header uses tier 1 color;
-  THERAPY_MATCH cell background reflects the row's tier (1 or 2).
+  : Build actionable (predictive) biomarker reactable
 - [`render_alteration_cell()`](https://sigven.github.io/pcgr/reference/render_alteration_cell.md)
   : Render sample alteration with confidence icon Uses filled circle +
   bold for high confidence, hollow circle + muted for medium confidence
+- [`render_alteration_classification_style()`](https://sigven.github.io/pcgr/reference/render_alteration_classification_style.md)
+  : Style germline alteration cell background based on the
+  CPSR/ClinVar-derived clinical significance of the variant (Generated
+  by Claude Sonnet 5)
 - [`render_alteration_clinvar_style()`](https://sigven.github.io/pcgr/reference/render_alteration_clinvar_style.md)
   : Style alteration cell background based on ClinVar classification
   (Generated by Claude Opus 4.6 with some manual tweaks)
 - [`render_bar_cell()`](https://sigven.github.io/pcgr/reference/render_bar_cell.md)
   : Render a value between 0 and 1 as a horizontal bar (Generated by
   Claude Opus 4.6 with some manual tweaks)
-- [`render_diagn_bm_table()`](https://sigven.github.io/pcgr/reference/render_diagn_bm_table.md)
+- [`render_bm_table()`](https://sigven.github.io/pcgr/reference/render_bm_table.md)
   : Build biomarker reactable with category-aware styling Combines tier
-  1 and tier 2 records in one table. Header uses tier 1 color;
-  THERAPY_MATCH cell background reflects the row's tier (1 or 2).
+  1 and tier 2 (and for predictive biomarkers, tier 3) records in one
+  table. Header uses tier 1 color; the summary cell (THERAPY_MATCH,
+  PROGNOSTIC_OUTCOME or DIAGNOSTIC_EVIDENCE) background reflects the
+  row's tier.
+- [`render_classification_cell()`](https://sigven.github.io/pcgr/reference/render_classification_cell.md)
+  : Render germline clinical significance as a colored badge (Generated
+  by Claude Sonnet 5)
+- [`render_diagn_bm_table()`](https://sigven.github.io/pcgr/reference/render_diagn_bm_table.md)
+  : Build diagnostic biomarker reactable
 - [`render_diagnosis()`](https://sigven.github.io/pcgr/reference/render_diagnosis.md)
   : Render diagnosis cell with background color based on actionability
   tier (Generated by Claude Opus 4.6 with some manual tweaks)
@@ -437,17 +568,22 @@
 - [`render_evidence_level_cell()`](https://sigven.github.io/pcgr/reference/render_evidence_level_cell.md)
   : Render evidence level badge (Generated by Claude Opus 4.6 with some
   manual tweaks)
+- [`render_genotype_style()`](https://sigven.github.io/pcgr/reference/render_genotype_style.md)
+  : Flag germline GENOTYPE cell when backed by a low-depth control
+  sample (Generated by Claude Sonnet 5)
+- [`render_moi_cell()`](https://sigven.github.io/pcgr/reference/render_moi_cell.md)
+  : Render CPG_MOI (cancer predisposition gene - mode of inheritance)
+  with a tooltip spelling out the abbreviated code(s) (Generated by
+  Claude Sonnet 5)
 - [`render_oncogenicity_cell()`](https://sigven.github.io/pcgr/reference/render_oncogenicity_cell.md)
   : Style oncogenicity cell background based on value (Generated by
   Claude Opus 4.6 with some manual tweaks)
 - [`render_progn_bm_table()`](https://sigven.github.io/pcgr/reference/render_progn_bm_table.md)
-  : Build biomarker reactable with category-aware styling Combines tier
-  1 and tier 2 records in one table. Header uses tier 1 color;
-  THERAPY_MATCH cell background reflects the row's tier (1 or 2).
+  : Build prognostic biomarker reactable
 - [`render_prognostic_outcome()`](https://sigven.github.io/pcgr/reference/render_prognostic_outcome.md)
-  : Render prognostic outcome cell with background color based on
-  actionability tier (Generated by Claude Opus 4.6 with some manual
-  tweaks)
+  : Render prognostic outcome (or diagnostic evidence) cell with
+  background color based on actionability tier (Generated by Claude Opus
+  4.6 with some manual tweaks)
 - [`render_source_logos()`](https://sigven.github.io/pcgr/reference/render_source_logos.md)
   : Render one or more source logos from a pipe-separated string
   (Generated by Claude Opus 4.6 with some manual tweaks)
@@ -461,12 +597,16 @@
 - [`render_tier_cell()`](https://sigven.github.io/pcgr/reference/render_tier_cell.md)
   : Render actionability tier as a styled badge with tier-specific
   colors
+- [`report_highlights()`](https://sigven.github.io/pcgr/reference/report_highlights.md)
+  : Key findings of a PCGR report (highlights) as markdown
 - [`rna_fusion_recurrence_mitdb()`](https://sigven.github.io/pcgr/reference/rna_fusion_recurrence_mitdb.md)
   : Function that checks for recurrence of RNA fusions in Mitelman
   database and annotates with clinical and cytogenetic features
 - [`rt_theme()`](https://sigven.github.io/pcgr/reference/rt_theme.md) :
   Predefined reactable theme for PCGR/CPSR tables (Generated by Claude
   Opus 4.6 with some manual tweaks)
+- [`set_bm_support_sources_not_tiered()`](https://sigven.github.io/pcgr/reference/set_bm_support_sources_not_tiered.md)
+  : Evidence items from sources that are not used for tier assignment
 - [`sort_chromosomal_segments()`](https://sigven.github.io/pcgr/reference/sort_chromosomal_segments.md)
   : Function that sorts chromosomal segments according to chromosome and
   chromosomal start/end position
@@ -511,6 +651,11 @@
 - [`twohit_doc_note()`](https://sigven.github.io/pcgr/reference/twohit_doc_note.md)
   : Get documentation string for two-hit detection & VAF consistency
   assessment
+- [`typst_escape()`](https://sigven.github.io/pcgr/reference/typst_escape.md)
+  : Escape Typst markup characters in plain text
+- [`typst_str()`](https://sigven.github.io/pcgr/reference/typst_str.md)
+  : Character vector as Typst string literal content (escapes
+  backslashes and double quotes), for values passed to Typst functions
 - [`update_report()`](https://sigven.github.io/pcgr/reference/update_report.md)
   : Function that updates a PCGR/CPSR report object structure
 - [`vaf_plot()`](https://sigven.github.io/pcgr/reference/vaf_plot.md) :
@@ -528,6 +673,9 @@
 - [`write_report_html()`](https://sigven.github.io/pcgr/reference/write_report_html.md)
   : Function that writes contents of PCGR object to an HTML report
   (quarto-based)
+- [`write_report_pdf()`](https://sigven.github.io/pcgr/reference/write_report_pdf.md)
+  : Function that writes contents of PCGR object to a PDF report
+  (Quarto/Typst-based), focused on key findings
 - [`write_report_tsv()`](https://sigven.github.io/pcgr/reference/write_report_tsv.md)
   : Function that writes contents of PCGR object to various output
   formats (Rmarkdown/flexdashboard HTML reports, JSON, tab-separated
